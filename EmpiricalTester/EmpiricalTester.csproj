@@ -48,11 +48,22 @@
     <Compile Include="HKMST\Graph.cs" />
     <Compile Include="HKMST\HKMST_SPARSE.cs" />
     <Compile Include="HKMST\Node.cs" />
+    <Compile Include="StaticGraph\IStaticGraph.cs" />
+    <Compile Include="StaticGraph\Kahn.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StaticGraph\KahnNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Inputs\tiny.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Inputs\tiny_cycle.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
