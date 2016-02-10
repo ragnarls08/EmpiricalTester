@@ -31,18 +31,22 @@ namespace EmpiricalTester
             graph.RemoveAt(0);
 
             StaticGraph.IStaticGraph kahn = new StaticGraph.Kahn();
+            StaticGraph.IStaticGraph tarjan = new StaticGraph.Tarjan();
 
             for(int i = 0; i < vertexCount; i++)
             {
                 kahn.addVertex();
+                tarjan.addVertex();
             }
 
             foreach (Tuple<int, int> edge in graph)
             {
                 kahn.addEdge(edge.Item1, edge.Item2);
+                tarjan.addEdge(edge.Item1, edge.Item2);
             }
 
             int[] result = kahn.topoSort();
+            int[] result2 = tarjan.topoSort();
 
         }
 

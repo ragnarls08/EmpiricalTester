@@ -53,6 +53,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaticGraph\KahnNode.cs" />
+    <Compile Include="StaticGraph\Tarjan.cs" />
+    <Compile Include="StaticGraph\TarjanNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
