@@ -10,6 +10,7 @@ namespace EmpiricalTester.StaticGraph
     {
         void addVertex();
         void addEdge(int v, int w);
-        int[] topoSort();
+        void removeEdge(int v, int w);
+        int[] topoSort();        
     }
 }

@@ -23,9 +23,17 @@ namespace EmpiricalTester.StaticGraph
             graph[w].incoming.Add(v);
         }
 
+        public void removeEdge(int v, int w)
+        {
+            graph[v].outgoing.Remove(w);
+            graph[w].incoming.Remove(v);
+        }
+
         public int[] topoSort()
         {
             L.Clear();
+            clearVisited();
+            cycle = false;
 
             for(int i = graph.FindIndex(item => item.visited == false); i >= 0; i = graph.FindIndex(item => item.visited == false))
             {
@@ -62,6 +70,15 @@ namespace EmpiricalTester.StaticGraph
                 L.Insert(0, n);                
             }
 
+        }
+
+        private void clearVisited()
+        {
+            foreach(TarjanNode node in graph)
+            {
+                node.visited = false;
+                node.temporaryVisit = false;
+            }
         }
     }
 }

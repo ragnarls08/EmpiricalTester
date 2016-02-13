@@ -9,7 +9,9 @@ namespace EmpiricalTester.StaticGraph
     class Kahn : IStaticGraph
     {
         private List<KahnNode> graph = new List<KahnNode>();
+        private List<KahnNode> graph_temp = new List<KahnNode>();
         private int edgeCount = 0;
+        private int edgeCount_temp = 0;
 
         public void addVertex()
         {
@@ -24,7 +26,7 @@ namespace EmpiricalTester.StaticGraph
             edgeCount++;
         }
 
-        private void removeEdge(int v, int w)
+        public void removeEdge(int v, int w)
         {
             graph[v].outgoing.Remove(w);
             graph[w].incoming.Remove(v);
@@ -34,6 +36,9 @@ namespace EmpiricalTester.StaticGraph
 
         public int[] topoSort()
         {
+            graph_temp = deepCopy(graph);
+            edgeCount_temp = edgeCount;
+
             List<int> L = new List<int>(); // sorted output
             List<int> S = new List<int>(); // all nodes with no incoming
 
@@ -69,9 +74,23 @@ namespace EmpiricalTester.StaticGraph
             }
 
             if (edgeCount > 0)
+            {
+                graph = deepCopy(graph_temp);
+                edgeCount = edgeCount_temp;
                 return null;
+            }
             else
-                return L.ToArray();            
+            {
+                graph = deepCopy(graph_temp);
+                edgeCount = edgeCount_temp;
+                return L.ToArray();
+            }
+                
+        }
+
+        private List<KahnNode> deepCopy(List<KahnNode> toCopy)
+        {
+            return toCopy.ConvertAll(item => new KahnNode(item));
         }
     }
 }

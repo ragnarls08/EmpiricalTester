@@ -16,5 +16,12 @@ namespace EmpiricalTester.StaticGraph
             incoming = new List<int>();
             outgoing = new List<int>();
         }
+
+        // copy constructor
+        public KahnNode(KahnNode node)
+        {
+            this.incoming = new List<int>(node.incoming);
+            this.outgoing = new List<int>(node.outgoing);
+        }
     }
 }

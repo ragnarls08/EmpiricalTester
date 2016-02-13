@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="BFGT\BFGT_SPARSE.cs" />
     <Compile Include="BFGT\Node.cs" />
+    <Compile Include="GraphGeneration\GraphGenerator.cs" />
     <Compile Include="HKMST\Graph.cs" />
     <Compile Include="HKMST\HKMST_SPARSE.cs" />
     <Compile Include="HKMST\Node.cs" />

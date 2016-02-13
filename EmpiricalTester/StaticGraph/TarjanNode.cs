@@ -18,6 +18,7 @@ namespace EmpiricalTester.StaticGraph
             incoming = new List<int>();
             outgoing = new List<int>();
             visited = false;
+            temporaryVisit = false;
         }
     }
 }
