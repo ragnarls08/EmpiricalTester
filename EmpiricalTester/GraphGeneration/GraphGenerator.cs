@@ -17,6 +17,7 @@ namespace EmpiricalTester.GraphGeneration
 
             StaticGraph.IStaticGraph kahn = new StaticGraph.Kahn();
             StaticGraph.IStaticGraph tarjan = new StaticGraph.Tarjan();
+            DynamicGraph.SimpleIncremental simple = new DynamicGraph.SimpleIncremental();
 
             Random random = new Random(DateTime.Now.Millisecond);
 
@@ -24,6 +25,7 @@ namespace EmpiricalTester.GraphGeneration
             {
                 kahn.addVertex();
                 tarjan.addVertex();
+                simple.addVertex();
             }
 
             for(int i = 0; i < n; i++)
@@ -36,17 +38,18 @@ namespace EmpiricalTester.GraphGeneration
 
                     kahn.addEdge(v, w);
                     tarjan.addEdge(v, w);
+                    bool simpleCycle = simple.addEdge(v, w);
 
                     int[] k = kahn.topoSort();
                     int[] t = tarjan.topoSort();
 
-                    if((k != null && t == null) || (k == null && t != null))
+                    if((k != null && t == null) || (k == null && t != null) || !simpleCycle)
                     {
                         throw new Exception("Tarjan and Kahn to not agree");
                     }
                     
                     // cycle, remove this edge
-                    if(k == null && t == null)
+                    if(k == null && t == null && simpleCycle)
                     {
                         kahn.removeEdge(v, w);
                         tarjan.removeEdge(v, w);
