@@ -12,8 +12,23 @@ namespace EmpiricalTester
     {
         static void Main(string[] args)
         {
+            List<StaticGraph.IStaticGraph> staticGraphs = new List<StaticGraph.IStaticGraph>();
+
+            StaticGraph.IStaticGraph kahn = new StaticGraph.Kahn();
+            staticGraphs.Add(kahn);
+            StaticGraph.IStaticGraph tarjan = new StaticGraph.Tarjan();
+            staticGraphs.Add(tarjan);
+
+            List<DynamicGraph.IDynamicGraph> dynamicGraphs = new List<DynamicGraph.IDynamicGraph>();
+
+            DynamicGraph.IDynamicGraph simple = new DynamicGraph.SimpleIncremental();
+            dynamicGraphs.Add(simple);
+
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
-            generator.generateGraph(1000, 0.5);
+            generator.generateGraph(10, 0.9, false, staticGraphs, dynamicGraphs);
+            
+
+          
 
             /*
             //string tiny = Path.Combine(Environment.CurrentDirectory, @"Inputs\tiny.txt");

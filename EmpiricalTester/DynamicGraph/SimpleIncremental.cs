@@ -64,5 +64,11 @@ namespace EmpiricalTester.DynamicGraph
 
             return true;
         }
+
+        public List<int> topology()
+        {
+            // use select to get (index, level) pair, order the result, convert to list of indexes ordered by topo (level)
+            return graph.Select((Value, Index) => new { Index, Value.level }).OrderBy(item => item.level).ToList().ConvertAll(item => item.Index);
+        }
     }
 }

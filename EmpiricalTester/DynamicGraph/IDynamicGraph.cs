@@ -10,6 +10,7 @@ namespace EmpiricalTester.DynamicGraph
     {
         void addVertex();
         bool addEdge(int v, int w);
-        void removeEdge(int v, int w);        
+        void removeEdge(int v, int w);
+        List<int> topology();
     }
 }
