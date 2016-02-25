@@ -25,7 +25,7 @@ namespace EmpiricalTester
             dynamicGraphs.Add(simple);
 
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
-            generator.generateGraph(10, 0.9, false, staticGraphs, dynamicGraphs);
+            generator.generateGraph(100, 0.9, false, staticGraphs, dynamicGraphs);
             
 
           

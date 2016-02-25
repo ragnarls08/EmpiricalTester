@@ -80,7 +80,7 @@ namespace EmpiricalTester.GraphGeneration
                                 staticResults[x] = false; // cycle detected
                             else
                                 staticResults[x] = true; // all is good
-                        }                      
+                        }
                     }
 
                     for(int x = 0; x < dynamicGraphs.Count; x++)
@@ -204,36 +204,47 @@ namespace EmpiricalTester.GraphGeneration
             {
                 topologies.Add(algorithm.topology());
             }
-            /*
-            foreach (Tuple<int, List<int>> node in matrix)
+            
+
+            List<Tuple<int, List<List<bool>>>> resultMatrix = new List<Tuple<int, List<List<bool>>>>();
+            // create result matrix, each row is a index + list of comparison results index >= nodeInPath
+            // inner most list represents the comparison for each topology
+            for (int iFromNode = 0; iFromNode < matrix.Count; iFromNode++)
             {
-                foreach(int w in node.Item2)
+                resultMatrix.Add(new Tuple<int, List<List<bool>>>(iFromNode, new List<List<bool>>()));
+
+                for (int iToNode = 0; iToNode < matrix[iFromNode].Item2.Count; iToNode++)
                 {
-                    for(int i = 1; i < topologies.Count; i++)
+                    resultMatrix[iFromNode].Item2.Add(new List<bool>());
+                }
+            }
+            
+            // Fill in the resultMatrix
+            for(int iFromNode = 0; iFromNode < matrix.Count; iFromNode++)
+            {
+                for(int iToNode = 0; iToNode < matrix[iFromNode].Item2.Count; iToNode++)
+                {
+                    for(int iTopology = 0; iTopology < topologies.Count; iTopology++)
                     {
-                        //node.Item1
-                        topologies[i-1].FindIndex(item => item == node.Item1) >= topologies[i].FindIndex(item => item == node.Item1)
+                        resultMatrix[iFromNode].Item2[iToNode].Add(
+                            topologies[iTopology].FindIndex(item => item == matrix[iFromNode].Item1) 
+                            >= topologies[iTopology].FindIndex(item => item == matrix[iFromNode].Item2[iToNode]));
                     }
                 }
             }
-            */
 
-            /*
-            if (a.Length != b.Length)
-                return false;
 
-            List<int> aList = a.ToList<int>();
-            List<int> bList = b.ToList<int>();
-            
-            foreach(Tuple<int, int> edge in edges)
+            // fold result matrix into a bool stating if all agree
+            // negate the result since Any returns false if all were the same and distinct only returns 1 value which was skipped over
+            bool allAgree = !resultMatrix.ConvertAll<bool>(i => i.Item2.ConvertAll<bool>(item => item.Distinct().Skip(1).Any()).Distinct().Skip(1).Any()).Distinct().Skip(1).Any();
+
+            if(!allAgree)
             {
-                bool aCompare = aList.FindIndex(item => item == edge.Item1) >= aList.FindIndex(item => item == edge.Item2);
-                bool bCompare = bList.FindIndex(item => item == edge.Item1) >= bList.FindIndex(item => item == edge.Item2);
-
-                if (aCompare != bCompare)
-                    return false;
+                writeFile("TopoCompFail");
+                throw new Exception("Topological comparison failed");
             }
-            */
+
+
             return true;
         }
 
