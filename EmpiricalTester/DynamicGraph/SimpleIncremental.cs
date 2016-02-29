@@ -45,20 +45,26 @@ namespace EmpiricalTester.DynamicGraph
 
         private bool visit(SimpleNode v, int childLevel)
         {
-            if(v.level <= childLevel)
-            {
-                v.level = childLevel + 1;
-            }
+            int oldLevel = v.level;
 
             if(v.blackHole)
             {
                 return false;
             }
 
-            foreach(int parent in v.incoming)
+            if (v.level <= childLevel)
+            {
+                v.level = childLevel + 1;
+            }
+
+            foreach (int parent in v.incoming)
             {
                 if (!visit(graph[parent], v.level))
+                {
+                    v.level = oldLevel;
                     return false;
+                }
+                    
             }
 
             return true;
@@ -67,7 +73,7 @@ namespace EmpiricalTester.DynamicGraph
         public List<int> topology()
         {
             // use select to get (index, level) pair, order the result, convert to list of indexes ordered by topo (level)
-            return graph.Select((Value, Index) => new { Index, Value.level }).OrderBy(item => item.level).ToList().ConvertAll(item => item.Index);
+            return graph.Select((Value, Index) => new { Index, Value.level }).OrderByDescending(item => item.level).ToList().ConvertAll(item => item.Index);
         }
     }
 }

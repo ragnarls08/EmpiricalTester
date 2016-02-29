@@ -31,7 +31,7 @@ namespace EmpiricalTester.GraphGeneration
             this.staticCheck = staticCheck;
             this.writeToFile = writeToFile;
             DateTime datenow = DateTime.Now;
-            filename = datenow.ToString("yyyyMMdd-HH-MM") + string.Format("({0}, {1})", n.ToString(), p.ToString());
+            filename = datenow.ToString("yyyyMMdd-HH-mm") + string.Format("({0}, {1})", n.ToString(), p.ToString());
 
             edges = new List<Tuple<int, int>>();
             this.n = n;
@@ -58,9 +58,7 @@ namespace EmpiricalTester.GraphGeneration
             {
                 System.Diagnostics.Debug.WriteLine("Progress Generation: " + (double)i/(double)n*100 +"%");
                 if(random.Next(0,100)/100.0 < p)
-                {
-                    e++; //increase edge count;
-                    
+                {                                      
                     int v = random.Next(0, n - 1);
                     int w = random.Next(0, n - 1);
 
@@ -123,6 +121,7 @@ namespace EmpiricalTester.GraphGeneration
                     }
                     else
                     {
+                        e++; //increase edge count;
                         edges.Add(new Tuple<int, int>(v, w));
                     }
                 }
@@ -248,12 +247,20 @@ namespace EmpiricalTester.GraphGeneration
                 }
             }
 
+            
+            // item => item.Distinct().Skip(1).Any() is applied on the innermost list, Any() returns true if not all algorithms agree
+            // Any(item => item == true) is applied twice for the remaining layers, checking if the statement above ever returned a true
+            // the result is then negated to answer the question.
+            bool allAgree = 
+                !resultMatrix.ConvertAll<bool>
+                (
+                    i => i.Item2.ConvertAll<bool>
+                    (
+                        item => item.Distinct().Skip(1).Any()
+                    ).Any(item => item == true)
+                ).Any(item => item == true);
 
-            // fold result matrix into a bool stating if all agree
-            // negate the result since Any returns false if all were the same and distinct only returns 1 value which was skipped over
-            bool allAgree = !resultMatrix.ConvertAll<bool>(i => i.Item2.ConvertAll<bool>(item => item.Distinct().Skip(1).Any()).Distinct().Skip(1).Any()).Distinct().Skip(1).Any();
-
-            if(!allAgree)
+            if (!allAgree)
             {
                 writeFile("TopoCompFail");
                 throw new Exception("Topological comparison failed");
