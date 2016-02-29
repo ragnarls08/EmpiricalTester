@@ -24,10 +24,14 @@ namespace EmpiricalTester
             DynamicGraph.IDynamicGraph simple = new DynamicGraph.SimpleIncremental();
             dynamicGraphs.Add(simple);
 
-            GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
-            generator.generateGraph(100, 0.9, false, staticGraphs, dynamicGraphs);
-            
+            //GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
+            //generator.generateGraph(100000, 0.9, true, false, staticGraphs, dynamicGraphs);
 
+            
+            GraphRunner.GraphRunner runner = new GraphRunner.GraphRunner();
+            string tiny = Path.Combine(Environment.CurrentDirectory, @"Output\20160228-13-02(10000, 0.9).txt");
+            runner.runGraph(tiny, staticGraphs, dynamicGraphs);
+            
           
 
             /*

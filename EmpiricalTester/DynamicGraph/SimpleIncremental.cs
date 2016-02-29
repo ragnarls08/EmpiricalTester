@@ -41,8 +41,7 @@ namespace EmpiricalTester.DynamicGraph
         {
             graph[w].incoming.Remove(v);
         }
-
-   
+           
 
         private bool visit(SimpleNode v, int childLevel)
         {

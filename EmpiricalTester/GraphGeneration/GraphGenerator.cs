@@ -15,6 +15,7 @@ namespace EmpiricalTester.GraphGeneration
         private int n;
         private int e;
         private bool staticCheck;
+        private bool writeToFile;
 
         /// <summary>
         /// 
@@ -25,9 +26,10 @@ namespace EmpiricalTester.GraphGeneration
         /// <param name="staticGraphs"></param>
         /// <param name="dynamicGraphs"></param>
         /// <returns></returns>
-        public string generateGraph(int n, double p, bool staticCheck, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        public string generateGraph(int n, double p, bool writeToFile, bool staticCheck, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
             this.staticCheck = staticCheck;
+            this.writeToFile = writeToFile;
             DateTime datenow = DateTime.Now;
             filename = datenow.ToString("yyyyMMdd-HH-MM") + string.Format("({0}, {1})", n.ToString(), p.ToString());
 
@@ -54,7 +56,7 @@ namespace EmpiricalTester.GraphGeneration
 
             for(int i = 0; i < n; i++)
             {
-                Console.WriteLine("Progress " + (double)i/(double)n*100 +"%");
+                System.Diagnostics.Debug.WriteLine("Progress Generation: " + (double)i/(double)n*100 +"%");
                 if(random.Next(0,100)/100.0 < p)
                 {
                     e++; //increase edge count;
@@ -158,24 +160,35 @@ namespace EmpiricalTester.GraphGeneration
                 throw new Exception("Topological order comparison failed");
             }
 
-            return filename;
+            if(writeToFile)
+            {
+                return writeFile("");
+            }
+            else
+            {
+                return "";
+            }                        
         }
 
-        private void writeFile(string comment)
+        private string writeFile(string comment)
         {
             bool exists = Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Output"));
 
             if (!exists)
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Output"));
 
+            string filenameComplete = Path.Combine(Environment.CurrentDirectory, @"Output\" + filename + comment + ".txt");
+
             edges.Insert(0, new Tuple<int, int>(n, e)); // insert the vertex and edge counters in the start of the file
-            File.WriteAllLines(Path.Combine(Environment.CurrentDirectory, @"Output\" + filename + comment + ".txt")
-                , edges.ConvertAll(item => item.Item1.ToString() + " " + item.Item2.ToString()).ToArray());
+            File.WriteAllLines(filenameComplete, edges.ConvertAll(item => item.Item1.ToString() + " " + item.Item2.ToString()).ToArray());
+
+            return filenameComplete;
         }
 
         // Compares the edges topological order
         private bool topologyCompare(int n, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
+            System.Diagnostics.Debug.WriteLine("Starting topology comparer");
             // Find connected pairs to compare
             ConnectivityGraph connectivity = new ConnectivityGraph();
             
@@ -205,7 +218,7 @@ namespace EmpiricalTester.GraphGeneration
                 topologies.Add(algorithm.topology());
             }
             
-
+            
             List<Tuple<int, List<List<bool>>>> resultMatrix = new List<Tuple<int, List<List<bool>>>>();
             // create result matrix, each row is a index + list of comparison results index >= nodeInPath
             // inner most list represents the comparison for each topology
@@ -220,9 +233,11 @@ namespace EmpiricalTester.GraphGeneration
             }
             
             // Fill in the resultMatrix
+            // TODO this is extremely slow, most likely due to FindIndex. Perhaps use dictionary key = nodeIndex, value = nodeTopology(FindIndex)
             for(int iFromNode = 0; iFromNode < matrix.Count; iFromNode++)
             {
-                for(int iToNode = 0; iToNode < matrix[iFromNode].Item2.Count; iToNode++)
+                System.Diagnostics.Debug.WriteLine("Progress comparer: " + (double)iFromNode / (double)matrix.Count * 100 + "%");
+                for (int iToNode = 0; iToNode < matrix[iFromNode].Item2.Count; iToNode++)
                 {
                     for(int iTopology = 0; iTopology < topologies.Count; iTopology++)
                     {

@@ -51,6 +51,7 @@
     <Compile Include="DynamicGraph\SimpleNode.cs" />
     <Compile Include="GraphGeneration\ConnectivityGraph.cs" />
     <Compile Include="GraphGeneration\GraphGenerator.cs" />
+    <Compile Include="GraphRunner\GraphRunner.cs" />
     <Compile Include="HKMST\Graph.cs" />
     <Compile Include="HKMST\HKMST_SPARSE.cs" />
     <Compile Include="HKMST\Node.cs" />
