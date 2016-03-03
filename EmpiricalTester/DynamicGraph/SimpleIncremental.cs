@@ -20,6 +20,16 @@ namespace EmpiricalTester.DynamicGraph
             graph.Add(new SimpleNode());
         }
 
+        public void removeEdge(int v, int w)
+        {
+            graph[w].incoming.Remove(v);
+        }
+
+        public void resetAll()
+        {
+            this.graph.Clear();
+        }
+
         public bool addEdge(int v, int w)
         {            
             graph[w].incoming.Add(v);
@@ -32,16 +42,15 @@ namespace EmpiricalTester.DynamicGraph
                 return false;
             }
 
-
             graph[w].blackHole = false;
             return true;
         }
-
-        public void removeEdge(int v, int w)
+               
+        public List<int> topology()
         {
-            graph[w].incoming.Remove(v);
+            // use select to get (index, level) pair, order the result, convert to list of indexes ordered by topo (level)
+            return graph.Select((Value, Index) => new { Index, Value.level }).OrderByDescending(item => item.level).ToList().ConvertAll(item => item.Index);
         }
-           
 
         private bool visit(SimpleNode v, int childLevel)
         {
@@ -68,12 +77,6 @@ namespace EmpiricalTester.DynamicGraph
             }
 
             return true;
-        }
-
-        public List<int> topology()
-        {
-            // use select to get (index, level) pair, order the result, convert to list of indexes ordered by topo (level)
-            return graph.Select((Value, Index) => new { Index, Value.level }).OrderByDescending(item => item.level).ToList().ConvertAll(item => item.Index);
         }
     }
 }

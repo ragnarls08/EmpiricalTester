@@ -23,6 +23,13 @@ namespace EmpiricalTester.StaticGraph
             graph[w].incoming.Add(v);
         }
 
+        public void resetAll()
+        {
+            graph.Clear();
+            L.Clear();
+            cycle = false;
+        }
+
         public void removeEdge(int v, int w)
         {
             graph[v].outgoing.Remove(w);

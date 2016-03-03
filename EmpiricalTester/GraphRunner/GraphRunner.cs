@@ -10,74 +10,92 @@ namespace EmpiricalTester.GraphRunner
 {
     class GraphRunner
     {
-        public void runGraph(string fileName, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        public void runGraph(string[] fileNames, int repeateCount, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
-            InputFile graph = readFile(fileName);
-            Stopwatch sw = new Stopwatch();
-            List<Measurements> measurements = new List<Measurements>();
-
-
-            // Add all the nodes to the graphs
-            // TODO is this ok or should adding nodes be a part of the measurements
-            addNodes(graph.n, staticGraphs, dynamicGraphs);
-
-
-            // TODO simpleincremental is quite fast already, maybe edges need to be added in "batches" for the measurments to be more accurate
-            foreach (StaticGraph.IStaticGraph algorithm in staticGraphs)
+            for(int x = 0; x < fileNames.Length; x++)
             {
-                measurements.Add(new Measurements(algorithm.GetType().ToString()));
-                Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
+                string fileName = fileNames[x];
+                InputFile graph = readFile(fileName);
+                Stopwatch sw = new Stopwatch();
+                List<Measurements> measurements = new List<Measurements>();
 
-                foreach (Pair pair in graph.edges)
+                Console.WriteLine("File " + (x+1) + "/ " + fileNames.Length);
+
+                // TODO simpleincremental is quite fast already, maybe edges need to be added in "batches" for the measurments to be more accurate
+                foreach (StaticGraph.IStaticGraph algorithm in staticGraphs)
                 {
-                    sw.Start();
-                    algorithm.addEdge(pair.from, pair.to);
-                    algorithm.topoSort();
-                    sw.Stop();
-                    current.timeElapsed.Add(sw.Elapsed);                    
-                    sw.Reset();
+                    measurements.Add(new Measurements(algorithm.GetType().ToString()));
+                    Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
+                    
+                    for (int i = 0; i < repeateCount; i++)
+                    {
+                        Console.WriteLine("Run: " + i + ", " + current.Name);
+                        algorithm.resetAll();
+                        // add nodes
+                        for (int y = 0; y < graph.n; y++)
+                        {
+                            algorithm.addVertex();
+                        }
+
+                        current.timeElapsed.Add(new List<TimeSpan>());
+                        foreach (Pair pair in graph.edges)
+                        {
+                            sw.Start();
+                            algorithm.addEdge(pair.from, pair.to);
+                            algorithm.topoSort();
+                            sw.Stop();
+                            current.timeElapsed[i].Add(sw.Elapsed);
+                            sw.Reset();
+                        }
+                    }
+
                 }
-            }
 
-            foreach (DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
-            {
-                measurements.Add(new Measurements(algorithm.GetType().ToString()));
-                Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
-
-                foreach (Pair pair in graph.edges)
+                foreach (DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
                 {
-                    sw.Start();
-                    algorithm.addEdge(pair.from, pair.to);
-                    sw.Stop();
-                    current.timeElapsed.Add(sw.Elapsed);
-                    sw.Reset();
-                }
-            }
+                    measurements.Add(new Measurements(algorithm.GetType().ToString()));
+                    Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
+                    
+                    for (int i = 0; i < repeateCount; i++)
+                    {
+                        Console.WriteLine("Run: " + i + ", " + current.Name);
+                        algorithm.resetAll();
+                        // add nodes
+                        for (int y = 0; y < graph.n; y++)
+                        {
+                            algorithm.addVertex();
+                        }
 
-            measurements.ForEach(item => item.updateStatistics());
+                        current.timeElapsed.Add(new List<TimeSpan>());
+                        foreach (Pair pair in graph.edges)
+                        {
+                            sw.Start();
+                            algorithm.addEdge(pair.from, pair.to);
+                            sw.Stop();
+                            current.timeElapsed[i].Add(sw.Elapsed);
+                            sw.Reset();
+                        }
+                    }
+                }
+
+                measurements.ForEach(item => item.updateStatistics());
+
+                writeMeasurements(fileName, measurements);
+            }            
         }
         
-
-        /// <summary>
-        /// Initializes the graphs with nodes. 
-        /// </summary>
-        /// <param name="n">Number of nodes</param>
-        /// <param name="staticGraphs"></param>
-        /// <param name="dynamicGraphs"></param>
-        private void addNodes(int n, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        private void writeMeasurements(string fileName, List<Measurements> measurements)
         {
-            for(int i = 0; i < n; i++)
-            {
-                foreach(StaticGraph.IStaticGraph algorithm in staticGraphs)
-                {
-                    algorithm.addVertex();
-                }
+            fileName = fileName + ".measurements";
 
-                foreach(DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
-                {
-                    algorithm.addVertex();
-                }
+            List<string> lines = new List<string>();
+            
+            foreach(var algorithm in measurements)
+            {   
+                lines.Add(algorithm.Name + ";" + algorithm.averages.ConvertAll<string>(item => item.ToString()).Aggregate((a, b) => a + ";" + b));
             }
+
+            File.WriteAllLines(fileName, lines);
         }
 
         private InputFile readFile(string fileName)
@@ -101,7 +119,8 @@ namespace EmpiricalTester.GraphRunner
         private class Measurements
         {
             public string Name { get; set; }
-            public List<TimeSpan> timeElapsed { get; set; }
+            public List<List<TimeSpan>> timeElapsed { get; set; }
+            public List<long> averages { get; set; } // long is the datatype of tick
 
             public double averageTick { get; set; }
             public double maxTick { get; set; }
@@ -110,14 +129,26 @@ namespace EmpiricalTester.GraphRunner
             public Measurements(string name)
             {
                 this.Name = name;
-                timeElapsed = new List<TimeSpan>();
+                timeElapsed = new List<List<TimeSpan>>();
+                averages = new List<long>();
             }
 
             public void updateStatistics()
             {
-                averageTick = timeElapsed.Average(item => item.Ticks);
-                maxTick = timeElapsed.Max(item => item.Ticks);
-                minTick = timeElapsed.Min(item => item.Ticks);
+                for(int edge = 0; edge < timeElapsed[0].Count; edge++)
+                {
+                    long sum = 0;
+                    for(int runNumber = 0; runNumber < timeElapsed.Count; runNumber++)
+                    {
+                        sum += timeElapsed[runNumber][edge].Ticks;
+                    }
+
+                    averages.Add(sum / timeElapsed.Count);
+                }
+
+                averageTick = averages.Average();
+                maxTick = averages.Max();
+                minTick = averages.Min();
             }
         }
 

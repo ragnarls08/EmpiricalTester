@@ -45,7 +45,8 @@
   <ItemGroup>
     <Compile Include="BFGT\BFGT_SPARSE.cs" />
     <Compile Include="BFGT\Node.cs" />
-    <Compile Include="DataStructures\DMPList.cs" />
+    <Compile Include="DataStructures\OMPList.cs" />
+    <Compile Include="DataStructures\OMPNode.cs" />
     <Compile Include="DynamicGraph\IDynamicGraph.cs" />
     <Compile Include="DynamicGraph\SimpleIncremental.cs" />
     <Compile Include="DynamicGraph\SimpleNode.cs" />

@@ -11,6 +11,7 @@ namespace EmpiricalTester.StaticGraph
         void addVertex();
         void addEdge(int v, int w);
         void removeEdge(int v, int w);
-        int[] topoSort();        
+        int[] topoSort();
+        void resetAll(); // resets the algorithm to receive a new graph
     }
 }

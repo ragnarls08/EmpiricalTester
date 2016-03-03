@@ -18,6 +18,14 @@ namespace EmpiricalTester.StaticGraph
             graph.Add(new KahnNode());
         }
 
+        public void resetAll()
+        {
+            graph.Clear();
+            graph_temp.Clear();
+            edgeCount = 0;
+            edgeCount_temp = 0;
+        }
+
         public void addEdge(int v, int w)
         {
             graph[v].outgoing.Add(w);
