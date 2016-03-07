@@ -10,6 +10,7 @@ namespace EmpiricalTester.DynamicGraph
     {
         public int level { get; set; }
         public bool blackHole { get; set; }
+        public bool visited { get; set; }
 
         public List<int> incoming;
 
@@ -17,6 +18,7 @@ namespace EmpiricalTester.DynamicGraph
         {
             incoming = new List<int>();
             blackHole = false;
+            visited = false;
         }
     }
 }

@@ -70,6 +70,7 @@ namespace EmpiricalTester.GraphRunner
                         current.timeElapsed.Add(new List<TimeSpan>());
                         foreach (Pair pair in graph.edges)
                         {
+                            System.Diagnostics.Debug.WriteLine(pair.from + " - " + pair.to);
                             sw.Start();
                             algorithm.addEdge(pair.from, pair.to);
                             sw.Stop();
@@ -94,7 +95,7 @@ namespace EmpiricalTester.GraphRunner
             chart.ChartAreas.Add("area");
             chart.ChartAreas["area"].AxisX.Name = "Nr of edge";
             chart.ChartAreas["area"].AxisY.Name = "Ticks";
-
+            chart.ChartAreas["area"].AxisY.Maximum = 15000; // TODO this needs to be in relation to the data
             // controls the resolution of the output file            
             chart.Width = 1920;
             chart.Height = 1080;
@@ -115,11 +116,10 @@ namespace EmpiricalTester.GraphRunner
                 foreach (long tick in algorithm.averages)
                 {
                     chart.Series[algorithmName].Points.AddY(tick);
-
                 }                              
             }
             
-            chart.SaveImage(fileName + ".png", System.Windows.Forms.DataVisualization.Charting.ChartImageFormat.Png);
+            chart.SaveImage(fileName + ".png", ChartImageFormat.Png);
         }
 
         private void writeMeasurements(string fileName, List<Measurements> measurements)

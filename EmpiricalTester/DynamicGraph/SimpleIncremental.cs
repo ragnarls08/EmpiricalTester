@@ -39,10 +39,13 @@ namespace EmpiricalTester.DynamicGraph
             {
                 removeEdge(v, w);
                 graph[w].blackHole = false;
+                graph.ForEach(item => item.visited = false);
                 return false;
             }
 
+            
             graph[w].blackHole = false;
+            graph.ForEach(item => item.visited = false);
             return true;
         }
                
@@ -55,6 +58,7 @@ namespace EmpiricalTester.DynamicGraph
         private bool visit(SimpleNode v, int childLevel)
         {
             int oldLevel = v.level;
+            v.visited = true;
 
             if(v.blackHole)
             {
@@ -65,17 +69,19 @@ namespace EmpiricalTester.DynamicGraph
             {
                 v.level = childLevel + 1;
             }
-
-            foreach (int parent in v.incoming)
+            
+            for(int i = 0; i < v.incoming.Count; i++)
             {
-                if (!visit(graph[parent], v.level))
+                if(!graph[v.incoming[i]].visited)
                 {
-                    v.level = oldLevel;
-                    return false;
-                }
-                    
+                    if (!visit(graph[v.incoming[i]], v.level))
+                    {
+                        v.level = oldLevel;
+                        return false;
+                    }
+                }                
             }
-
+            
             return true;
         }
     }
