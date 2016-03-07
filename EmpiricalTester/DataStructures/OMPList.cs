@@ -84,7 +84,7 @@ namespace EmpiricalTester.DataStructures
         public OMPList(double threshold)
         {
             this.threshold = threshold;
-            createTree(1024);
+            createTree(32);
         }
 
         public OMPNode InsertFirst(int newNodeValue)

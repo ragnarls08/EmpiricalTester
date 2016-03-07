@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace EmpiricalTester.GraphRunner
 {
     class GraphRunner
     {
-        public void runGraph(string[] fileNames, int repeateCount, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        public void runGraph(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
             for(int x = 0; x < fileNames.Length; x++)
             {
@@ -80,10 +81,47 @@ namespace EmpiricalTester.GraphRunner
 
                 measurements.ForEach(item => item.updateStatistics());
 
-                writeMeasurements(fileName, measurements);
+                if(writeToFile)
+                    writeMeasurements(fileName, measurements);
+                if (makeGraphImage)
+                    createGraph(fileName, measurements, graph.n, graph.edges.Count, repeateCount);
             }            
         }
-        
+
+        private void createGraph(string fileName, List<Measurements> measurements, int n, int m, int repeateCount)
+        {
+            Chart chart = new Chart();
+            chart.ChartAreas.Add("area");
+            chart.ChartAreas["area"].AxisX.Name = "Nr of edge";
+            chart.ChartAreas["area"].AxisY.Name = "Ticks";
+
+            // controls the resolution of the output file            
+            chart.Width = 1920;
+            chart.Height = 1080;
+
+            chart.Titles.Add(string.Format("{0} nodes, {1} edges. Average of {2} runs", n, m, repeateCount));
+            
+            chart.Palette = ChartColorPalette.SeaGreen;
+
+            
+            foreach (var algorithm in measurements)
+            {
+                string algorithmName = algorithm.Name.Substring(algorithm.Name.LastIndexOf('.') + 1);
+
+                chart.Series.Add(algorithmName);
+                chart.Series[algorithmName].ChartType = SeriesChartType.Line;
+                chart.Legends.Add(algorithmName);
+
+                foreach (long tick in algorithm.averages)
+                {
+                    chart.Series[algorithmName].Points.AddY(tick);
+
+                }                              
+            }
+            
+            chart.SaveImage(fileName + ".png", System.Windows.Forms.DataVisualization.Charting.ChartImageFormat.Png);
+        }
+
         private void writeMeasurements(string fileName, List<Measurements> measurements)
         {
             fileName = fileName + ".measurements";

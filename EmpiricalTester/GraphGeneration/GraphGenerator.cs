@@ -12,6 +12,7 @@ namespace EmpiricalTester.GraphGeneration
     {
         private string filename;
         private List<Tuple<int, int>> edges;
+        private List<Tuple<int, int>> allEdges;
         private int n;
         private int e;
         private bool staticCheck;
@@ -26,12 +27,26 @@ namespace EmpiricalTester.GraphGeneration
         /// <param name="staticGraphs"></param>
         /// <param name="dynamicGraphs"></param>
         /// <returns></returns>
-        public string generateGraph(int n, double p, bool writeToFile, bool staticCheck, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        public string generateGraph(int n, double p, bool writeToFile, bool staticCheck, bool compareTopologies, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
             this.staticCheck = staticCheck;
             this.writeToFile = writeToFile;
             DateTime datenow = DateTime.Now;
-            filename = datenow.ToString("yyyyMMdd-HH-mm") + string.Format("({0}, {1})", n.ToString(), p.ToString());
+            filename = datenow.ToString("yyyyMMdd-HH-mm-ss") + string.Format("({0}, {1})", n.ToString(), p.ToString());
+            allEdges = new List<Tuple<int, int>>();
+
+            // create all possible edges
+            for(int i = 0; i < n; i++)
+            {
+                for(int x = 0; x < n; x++)
+                {
+                    // Don't add self connecting nodes
+                    if(i != x)
+                    {
+                        allEdges.Add(new Tuple<int, int>(i, x));
+                    }
+                }
+            }
 
             edges = new List<Tuple<int, int>>();
             this.n = n;
@@ -54,20 +69,15 @@ namespace EmpiricalTester.GraphGeneration
             bool[] staticResults = new bool[staticGraphs.Count];
             bool[] dynamicResults = new bool[dynamicGraphs.Count];
 
-            for(int i = 0; i < n; i++)
+            foreach(Tuple<int, int> currentEdge in allEdges)
             {
-                System.Diagnostics.Debug.WriteLine("Progress Generation: " + (double)i/(double)n*100 +"%");
-                if(random.Next(0,100)/100.0 < p)
-                {                                      
-                    int v = random.Next(0, n - 1);
-                    int w = random.Next(0, n - 1);
-
-                    // edge cannot already exist in the graph
-                    while(null != edges.Find(item => item.Item1 == v && item.Item2 == w))
-                    {
-                        v = random.Next(0, n - 1);
-                        w = random.Next(0, n - 1);
-                    }
+                //System.Diagnostics.Debug.WriteLine("Progress Generation: " + (double)i/(double)n*100 +"%");
+                System.Diagnostics.Debug.WriteLine(currentEdge.Item1);
+                if (random.Next(0,100)/100.0 < p)
+                {
+                    int v = currentEdge.Item1;
+                    int w = currentEdge.Item2;
+                                      
 
                     for(int x = 0; x < staticGraphs.Count; x++)
                     {
@@ -150,14 +160,18 @@ namespace EmpiricalTester.GraphGeneration
             }
 
 
-            //compare topologies
-            bool compare = topologyCompare(n, staticGraphs, dynamicGraphs);
-            
-            if(!compare)
+            if(compareTopologies)
             {
-                writeFile("Crash-TopoOrder");
-                throw new Exception("Topological order comparison failed");
+                //compare topologies
+                bool compare = topologyCompare(n, staticGraphs, dynamicGraphs);
+
+                if (!compare)
+                {
+                    writeFile("Crash-TopoOrder");
+                    throw new Exception("Topological order comparison failed");
+                }
             }
+            
 
             if(writeToFile)
             {

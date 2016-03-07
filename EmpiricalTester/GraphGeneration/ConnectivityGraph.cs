@@ -35,6 +35,7 @@ namespace EmpiricalTester.GraphGeneration
                 visit(i);
             }
 
+            // TODO bad idea, duplicates cannot happen. fix
             for (int i = 0; i < graph.Count; i++)
             {
                 graph[i].pathTo = graph[i].pathTo.Distinct().ToList();
