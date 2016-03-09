@@ -70,7 +70,6 @@ namespace EmpiricalTester.GraphRunner
                         current.timeElapsed.Add(new List<TimeSpan>());
                         foreach (Pair pair in graph.edges)
                         {
-                            System.Diagnostics.Debug.WriteLine(pair.from + " - " + pair.to);
                             sw.Start();
                             algorithm.addEdge(pair.from, pair.to);
                             sw.Stop();
@@ -150,6 +149,7 @@ namespace EmpiricalTester.GraphRunner
                 string[] s = text[i].Split();
                 retValue.edges.Add(new Pair(int.Parse(s.First()), int.Parse(s.Skip(1).First())));
             }
+
             return retValue;
         }
 

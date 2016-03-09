@@ -9,6 +9,7 @@ namespace EmpiricalTester.DataStructures
     class SGTNode<T> : Node<T>, IComparable, IComparable<SGTNode<T>> where T : IComparable<T>
     {
         public SGTNode<T> parent { get; set; }
+        public long label { get; set; }
 
         public SGTNode() : base() { }
         public SGTNode(T data) : base(data, null) { }

@@ -17,7 +17,7 @@ namespace EmpiricalTester
             List<StaticGraph.IStaticGraph> staticGraphs = new List<StaticGraph.IStaticGraph>();
 
             StaticGraph.IStaticGraph kahn = new StaticGraph.Kahn();
-            staticGraphs.Add(kahn);
+            //staticGraphs.Add(kahn);
             StaticGraph.IStaticGraph tarjan = new StaticGraph.Tarjan();
             staticGraphs.Add(tarjan);
 
@@ -29,8 +29,8 @@ namespace EmpiricalTester
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
             /*
             generator.generateGraph(
-                30, // nodes
-                1.0, // Probability of an edge being added from a complete graph
+                300, // nodes
+                0.85, // Probability of an edge being added from a complete graph
                 true, // writeToFile
                 true, // staticCheck
                 false, // topology compare
@@ -40,7 +40,7 @@ namespace EmpiricalTester
             string[] fileNames = new string[] {
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-38-36(100, 0.025).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-39-20(100, 0.05).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-33-51(100, 0.5).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-34-22(100, 0.8).txt"),
                
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-04-07(20, 0.5).txt"),
 
@@ -54,13 +54,23 @@ namespace EmpiricalTester
 
             GraphRunner.GraphRunner runner = new GraphRunner.GraphRunner();
 
-            runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
+            //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
             Stopwatch sw = new Stopwatch();
 
 
-     
 
 
-        }        
+            DataStructures.SGTree<string> omp = new DataStructures.SGTree<string>();
+
+            var root = omp.insertFirst("R");
+            var a = omp.insert(root, "A");
+            var b = omp.insert(root, "B");
+            var c = omp.insert(a, "C");
+            var d = omp.insert(root, "D");
+            var e = omp.insert(root, "E");
+            var f = omp.insert(root, "F");
+
+
+        }
     }
 }

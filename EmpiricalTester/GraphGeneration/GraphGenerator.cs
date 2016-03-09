@@ -53,6 +53,9 @@ namespace EmpiricalTester.GraphGeneration
 
             Random random = new Random(DateTime.Now.Millisecond);
 
+            allEdges = allEdges.OrderBy(item => random.Next()).ToList();
+            
+
             for (int i = 0; i < n; i++)
             {
                 foreach(StaticGraph.IStaticGraph graph in staticGraphs)

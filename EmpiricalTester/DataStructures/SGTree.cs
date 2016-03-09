@@ -10,56 +10,107 @@ namespace EmpiricalTester.DataStructures
     {
         private SGTNode<T> root;
         private int n, q;
+        private double alpha = 0.5;
 
         public SGTree()
         {
             // q/2 <= n <= q
             root = null;
             n = 0;
-            q = 0;
+            q = 0;            
         }
 
-        public bool Add(T data)
-        {
-            SGTNode<T> newNode = new SGTNode<T>(data);
-            int d = addWithDepth(newNode);
 
-            if (d > Log32(q))
+        public virtual void Clear()
+        {
+            root = null;
+        }
+        public bool query(SGTNode<T> a, SGTNode<T> b)
+        {
+            return a.label > b.label;
+        }
+        public SGTNode<T> Root
+        {
+            get
+            {
+                return root;
+            }
+            set
+            {
+                root = value;
+            }
+        }
+        public SGTNode<T> insertFirst(T newData)
+        {
+            root = new SGTNode<T>(newData);
+            root.label = (long.MaxValue / 2) + 1;
+
+            n++;
+            q++;
+
+            return root;
+        }
+        public SGTNode<T> insert(SGTNode<T> existing, T newData)
+        {
+            SGTNode<T> newNode;
+
+            if(existing.Right == null)
+            {
+                existing.Right = new SGTNode<T>(newData);
+                existing.Right.label = pathRight(existing.label);
+
+                newNode = existing.Right;
+                newNode.parent = existing;
+            }
+            else
+            {
+                SGTNode<T> curr = existing.Right;
+
+                while(curr.Left != null)
+                {
+                    // TODO special case if bottom is reached. probably wont happens ince tree balances
+                    curr = curr.Left;
+                }
+
+                // found a place for the new element
+                curr.Left = new SGTNode<T>(newData);
+                curr.Left.label = pathLeft(curr.label);
+
+                newNode = curr.Left;
+                newNode.parent = curr;
+            }
+
+            n++;
+            q++;
+
+            // find depth of newNode
+            int d = depth(newNode.label);
+                        
+            if(d > alphaLog(q))
             {
                 // depth exceeded, find scapegoat
                 SGTNode<T> w = newNode.parent;
-                while (3 * size(w) <= 2 * size(w.parent))
+
+                // TODO fix the size, optimize
+                while(size(w.Left) <= alpha * size(w) &&
+                      size(w.Right) <= alpha * size(w))
                 {
                     w = w.parent;
                 }
+                SGTNode<T> wParent = w.parent.parent; // TODO can this be null? probably
+                // note: will root.left always be null?
 
                 rebuild(w.parent);
+                reLabel(wParent);
             }
 
-            return d >= 0;
+            return newNode;
         }
-
-        public void InOrder()
+        
+        private int alphaLog(int q)
         {
-            InOrder(root);
+            return (int)Math.Ceiling(Math.Log(q, (1/alpha))) + 1;
         }
-
-        private static int Log32(int q)
-        {
-            double log32 = 2.4663034623764317;
-            return (int)Math.Ceiling(log32 * Math.Log(q));
-        }
-
-        private void InOrder(SGTNode<T> node)
-        {
-            if(node != null)
-            {
-                InOrder(node.Left);
-                Console.WriteLine(node.Value);
-                InOrder(node.Right);
-            }
-        }
-
         private int size(SGTNode<T> node)
         {
             if (node == null)
@@ -72,8 +123,23 @@ namespace EmpiricalTester.DataStructures
 
                 return c;
             }
+        }        
+        private int depth(long label)
+        {
+            long lastBit = (label & -label);
+            return 62 - (int)Math.Log(lastBit, 2);
         }
+        private int packIntoArray(SGTNode<T> u, SGTNode<T>[] a, int i)
+        {
+            if (u == null)
+            {
+                return i;
+            }
 
+            i = packIntoArray(u.Left, a, i);
+            a[i++] = u;
+            return packIntoArray(u.Right, a, i);
+        }
         private void rebuild(SGTNode<T> u)
         {
             int ns = size(u);
@@ -96,21 +162,8 @@ namespace EmpiricalTester.DataStructures
                 p.Left = buildBalanced(a, 0, ns);
                 p.Left.parent = p;
             }
-        }
-
-        int packIntoArray(SGTNode<T> u, SGTNode<T>[] a, int i)
-        {
-            if(u == null)
-            {
-                return i;
-            }
-
-            i = packIntoArray(u.Left, a, i);
-            a[i++] = u;
-            return packIntoArray(u.Right, a, i);
-        }
-
-        SGTNode<T> buildBalanced(SGTNode<T>[] a, int i, int ns)
+        }        
+        private SGTNode<T> buildBalanced(SGTNode<T>[] a, int i, int ns)
         {
             if (ns == 0)
                 return null;
@@ -127,76 +180,36 @@ namespace EmpiricalTester.DataStructures
         }
 
 
-        private int addWithDepth(SGTNode<T> node)
+        #region Labeling
+        // least significant bit moved "right"
+        private long pathLeft(long label)
         {
-            SGTNode<T> w = root;
-
-            if(w == null)
-            {
-                root = node;
-                n++;
-                q++;
-
-                return 0;
-            }
-
-            bool done = false;
-            int d = 0;
-
-            do
-            {
-                if(node.CompareTo(w) < 0)
-                {
-                    if(w.Left == null)
-                    {
-                        w.Left = node;
-                        node.parent = w;
-                        done = true;
-                    }
-                    else
-                    {
-                        w = w.Left;
-                    }
-                }
-                else if(node.Value.CompareTo(w.Value) > 0)
-                {
-                    if(w.Right == null)
-                    {
-                        w.Right = node;
-                        node.parent = w;
-                        done = true;
-                    }
-                    w = w.Right;
-                }
-                else
-                {
-                    return -1;
-                }
-
-                d++;
-            } while (!done);
-
-            n++;
-            q++;
-
-            return d;
+            long lastBit = (label & -label);
+            return (label ^ lastBit) | (lastBit >> 1);
         }
-
-        public virtual void Clear()
+        // least significant bit copied "right"
+        private long pathRight(long label)
         {
-            root = null;
+            long lastBit = (label & -label);
+            return label | (lastBit >> 1);
         }
-
-        public SGTNode<T> Root
+        private void reLabel(SGTNode<T> node)
         {
-            get
-            {
-                return root;
-            }
-            set
-            {
-                root = value;
-            }
+            if (node.Left != null)
+                recursiveRelabel(node.Left, pathLeft(node.label));
+            if (node.Right != null)
+                recursiveRelabel(node.Right, pathRight(node.label));
         }
+        private void recursiveRelabel(SGTNode<T> node, long newLabel)
+        {
+            node.label = newLabel;
+            if (node.Left != null)
+                recursiveRelabel(node.Left, pathLeft(node.label));
+            if (node.Right != null)
+                recursiveRelabel(node.Right, pathRight(node.label));
+        }
+        #endregion Labeling
+
+
     }
 }
