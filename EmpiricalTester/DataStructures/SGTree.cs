@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace EmpiricalTester.DataStructures
 {
-    class SGTree<T> where T : IComparable<T>
+    public class SGTree<T> where T : IComparable<T>
     {
         private SGTNode<T> root;
         private int n, q;
-        private double alpha = 0.5;
+        private double alpha = 0.15;
 
         public SGTree()
         {
@@ -24,6 +24,10 @@ namespace EmpiricalTester.DataStructures
         public virtual void Clear()
         {
             root = null;
+        }
+        public int count()
+        {
+            return n;
         }
         public bool query(SGTNode<T> a, SGTNode<T> b)
         {
@@ -81,7 +85,7 @@ namespace EmpiricalTester.DataStructures
             }
 
             n++;
-            q++;
+            q = Math.Max(q, n); // after insertion is set to max(MaxNodeCount, NodeCount)
 
             // find depth of newNode
             int d = depth(newNode.label);
@@ -106,7 +110,127 @@ namespace EmpiricalTester.DataStructures
 
             return newNode;
         }
-        
+        public void remove(SGTNode<T> node)
+        {
+            bool isRoot = node.parent == null ? true : false;
+            node.label = -1; // to indiciate this node has been removed, in case: remove(x), insert(x, newData)
+
+            if(node.Left == null && node.Right == null)
+            {
+                if (isRoot)
+                    root = null;
+                if (node.parent.Left == node)
+                    node.parent.Left = null;
+                if (node.parent.Right == node)
+                    node.parent.Right = null;
+            }
+            else if(node.Left == null || node.Right == null)
+            {
+                SGTNode<T> child = node.Left != null ? node.Left : node.Right;
+
+                if (!isRoot)
+                {
+                    if (node.parent.Left == node)
+                        node.parent.Left = child;
+                    if (node.parent.Right == node)
+                        node.parent.Right = child;
+                }
+                else
+                    root = child;
+            }
+            else
+            {
+                SGTNode<T> rightMost = node.Left;
+
+                // find the rightmost node of the left child of node
+                while(rightMost.Right != null)
+                {
+                    rightMost = rightMost.Right;
+                }
+
+                //special case
+                if(rightMost == node.Left)
+                {
+                    if(isRoot)
+                    {
+                        root = rightMost;
+                        root.Right = node.Right;                        
+                    }
+                    else
+                    {
+                        rightMost.parent = node.parent;
+                        rightMost.Right = node.Right;
+                        if (node == node.parent.Right)
+                            node.parent.Right = rightMost;
+                        else
+                            node.parent.Left = rightMost;
+                    }
+                }
+                else
+                {
+                    // if the rightmost node has a left subtree place it under rightmost's parent
+                    if (rightMost.Left != null)
+                    {
+                        rightMost.parent.Right = rightMost.Left;
+                    }
+
+                    // replace node with rightMost
+                    if (!isRoot)
+                        rightMost.parent = node.parent;
+                    else
+                        root = rightMost;
+
+                    rightMost.Left = node.Left;
+                    rightMost.Right = node.Right;
+                }                                
+            }
+
+            n--;
+
+            //NodeCount <= α*MaxNodeCount
+            if(n <= alpha*q)
+            {
+                rebuild(root);
+                reLabel(root); // todo this will crash, fix
+            }
+            else
+            {
+                if (isRoot)
+                    reLabel(root);
+                else
+                    reLabel(node.parent); // is still pointing at rightMost's current parent
+            }            
+        }
+        public List<string> inOrderLabels()
+        {
+            return inOrderLabels(root, new List<string>());
+        }
+        private List<string> inOrderLabels(SGTNode<T> node, List<string> list)
+        {
+            if (node == null)
+                return list;
+
+            inOrderLabels(node.Left, list);
+            list.Add(Convert.ToString(node.label, 2).PadLeft(63, '0'));
+            inOrderLabels(node.Right, list);
+
+            return list;
+        }
+        public List<T> inOrder()
+        {
+            return inOrder(root, new List<T>());
+        }
+        private List<T> inOrder(SGTNode<T> node, List<T> list)
+        {
+            if (node == null)
+                return list;
+
+            inOrder(node.Left, list);
+            list.Add(node.Value);
+            inOrder(node.Right, list);
+
+            return list;
+        }
         private int alphaLog(int q)
         {
             return (int)Math.Ceiling(Math.Log(q, (1/alpha))) + 1;
@@ -195,6 +319,9 @@ namespace EmpiricalTester.DataStructures
         }
         private void reLabel(SGTNode<T> node)
         {
+            if(node == root)
+                node.label = (long.MaxValue / 2) + 1;
+
             if (node.Left != null)
                 recursiveRelabel(node.Left, pathLeft(node.label));
             if (node.Right != null)

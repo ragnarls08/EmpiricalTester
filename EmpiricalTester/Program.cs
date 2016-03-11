@@ -57,19 +57,27 @@ namespace EmpiricalTester
             //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
             Stopwatch sw = new Stopwatch();
 
+       
 
 
+            DataStructures.SGTree<int> omp = new DataStructures.SGTree<int>();
 
-            DataStructures.SGTree<string> omp = new DataStructures.SGTree<string>();
+            var root = omp.insertFirst(1);
+            /*for(int i = 1; i < 10; i++)
+            {
+                omp.insert(root, i);
+            }*/
 
-            var root = omp.insertFirst("R");
-            var a = omp.insert(root, "A");
-            var b = omp.insert(root, "B");
-            var c = omp.insert(a, "C");
-            var d = omp.insert(root, "D");
-            var e = omp.insert(root, "E");
-            var f = omp.insert(root, "F");
+            var two = omp.insert(root, 2);
+            var three = omp.insert(root, 3);
+            var four = omp.insert(two, 4);
+            var five = omp.insert(root, 5);
+            var six = omp.insert(three, 6);
+            var seven = omp.insert(two, 7);
+            var eight = omp.insert(four, 8);
 
+
+            //var x = omp.inOrderLabels();
 
         }
     }
