@@ -40,7 +40,7 @@ namespace EmpiricalTester
             string[] fileNames = new string[] {
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-38-36(100, 0.025).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-39-20(100, 0.05).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-34-22(100, 0.8).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160308-19-48-12(300, 0.85).txt"),
                
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-04-07(20, 0.5).txt"),
 
@@ -60,14 +60,16 @@ namespace EmpiricalTester
        
 
 
-            DataStructures.SGTree<int> omp = new DataStructures.SGTree<int>();
+            DataStructures.SGTree<int> omp = new DataStructures.SGTree<int>(0.75);
 
             var root = omp.insertFirst(1);
-            /*for(int i = 1; i < 10; i++)
+
+            for (int i = 1; i < 10000; i++)
             {
                 omp.insert(root, i);
-            }*/
-
+            }
+            
+            
             var two = omp.insert(root, 2);
             var three = omp.insert(root, 3);
             var four = omp.insert(two, 4);
@@ -75,7 +77,7 @@ namespace EmpiricalTester
             var six = omp.insert(three, 6);
             var seven = omp.insert(two, 7);
             var eight = omp.insert(four, 8);
-
+            //*/
 
             //var x = omp.inOrderLabels();
 

@@ -12,51 +12,19 @@ namespace EmpiricalTester.DataStructures
         public long label { get; set; }
 
         public SGTNode() : base() { }
-        public SGTNode(T data) : base(data, null) { }
-        public SGTNode(T data, SGTNode<T> left, SGTNode<T> right)
+        public SGTNode(T data) : base(data, null, null) { }
+        public SGTNode(T data, SGTNode<T> left, SGTNode<T> right) : base(data, left, right) { }
+        
+        public new SGTNode<T> Left
         {
-            base.Value = data;
-            NodeList<T> children = new NodeList<T>(2);
-            children[0] = left;
-            children[1] = right;
-
-            base.Neighbors = children;
+            get { return (SGTNode<T>)base.Left; }
+            set { base.Left = value; }
         }
 
-        public SGTNode<T> Left
+        public new SGTNode<T> Right
         {
-            get
-            {
-                if (base.Neighbors == null)
-                    return null;
-                else
-                    return (SGTNode<T>)base.Neighbors[0];
-            }
-            set
-            {
-                if (base.Neighbors == null)
-                    base.Neighbors = new NodeList<T>(2);
-
-                base.Neighbors[0] = value;
-            }
-        }
-
-        public SGTNode<T> Right
-        {
-            get
-            {
-                if (base.Neighbors == null)
-                    return null;
-                else
-                    return (SGTNode<T>)base.Neighbors[1];
-            }
-            set
-            {
-                if (base.Neighbors == null)
-                    base.Neighbors = new NodeList<T>(2);
-
-                base.Neighbors[1] = value;
-            }
+            get { return (SGTNode<T>)base.Right; }
+            set { base.Right = value; }
         }
 
         public int CompareTo(object obj)

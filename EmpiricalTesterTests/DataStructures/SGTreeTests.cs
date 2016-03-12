@@ -14,7 +14,7 @@ namespace EmpiricalTester.DataStructures.Tests
         [TestMethod()]
         public void insertTestBasic()
         {
-            SGTree<int> sgt = new SGTree<int>();
+            SGTree<int> sgt = new SGTree<int>(0.75);
             SGTNode<int> root = sgt.insertFirst(1);
             SGTNode<int> two = sgt.insert(root, 2);
 
@@ -28,7 +28,7 @@ namespace EmpiricalTester.DataStructures.Tests
             // a > c
             // d > a && d > b
 
-            SGTree<int> sgt = new SGTree<int>();
+            SGTree<int> sgt = new SGTree<int>(0.75);
             SGTNode<int> root = sgt.insertFirst(1);
             SGTNode<int> a = sgt.insert(root, 2);
             SGTNode<int> b = sgt.insert(a, 3);
@@ -47,7 +47,7 @@ namespace EmpiricalTester.DataStructures.Tests
         [TestMethod()]
         public void removeTestRightmostIsLeft()
         {
-            SGTree<int> sgt = new SGTree<int>();
+            SGTree<int> sgt = new SGTree<int>(0.15);
             SGTNode<int> root = sgt.insertFirst(1);
             SGTNode<int> two = sgt.insert(root, 2);
             SGTNode<int> three = sgt.insert(root, 3);

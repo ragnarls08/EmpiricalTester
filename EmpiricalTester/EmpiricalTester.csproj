@@ -65,7 +65,6 @@
     <Compile Include="BFGT\BFGT_SPARSE.cs" />
     <Compile Include="BFGT\Node.cs" />
     <Compile Include="DataStructures\Node.cs" />
-    <Compile Include="DataStructures\NodeList.cs" />
     <Compile Include="DataStructures\OMPList.cs" />
     <Compile Include="DataStructures\OMPNode.cs" />
     <Compile Include="DataStructures\SGTNode.cs" />
@@ -89,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Inputs\tiny.txt">

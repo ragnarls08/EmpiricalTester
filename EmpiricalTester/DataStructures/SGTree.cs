@@ -10,12 +10,13 @@ namespace EmpiricalTester.DataStructures
     {
         private SGTNode<T> root;
         private int n, q;
-        private double alpha = 0.15;
+        private double alpha;
 
-        public SGTree()
+        public SGTree(double alpha)
         {
             // q/2 <= n <= q
             root = null;
+            this.alpha = alpha;
             n = 0;
             q = 0;            
         }
@@ -50,7 +51,7 @@ namespace EmpiricalTester.DataStructures
             root.label = (long.MaxValue / 2) + 1;
 
             n++;
-            q++;
+            q = n;
 
             return root;
         }
@@ -93,17 +94,30 @@ namespace EmpiricalTester.DataStructures
             if(d > alphaLog(q))
             {
                 // depth exceeded, find scapegoat
+                SGTNode<T> wChildKnown = newNode;
                 SGTNode<T> w = newNode.parent;
 
-                // TODO fix the size, optimize
-                while(size(w.Left) <= alpha * size(w) &&
-                      size(w.Right) <= alpha * size(w))
-                {
-                    w = w.parent;
-                }
-                SGTNode<T> wParent = w.parent.parent; // TODO can this be null? probably
-                // note: will root.left always be null?
+                // start from bottom, size(w) = 1, add 1 every loop and only do size(the other side)
+                int sizeW = 2; //newNode + parent (w)
+                int sizeLeft = wChildKnown == w.Left ? 1 : size(w.Left);
+                int sizeRight = wChildKnown == w.Right ? 1 : size(w.Right);
+                
 
+                while (sizeLeft <= alpha * sizeW &&
+                      sizeRight <= alpha * sizeW)
+                {
+                    wChildKnown = w;
+                    w = w.parent;
+
+                    sizeLeft = wChildKnown == w.Left ? sizeW : size(w.Left);
+                    sizeRight = wChildKnown == w.Right ? sizeW : size(w.Right);
+                    sizeW = sizeLeft + sizeRight + 1;
+
+                }
+                
+
+                SGTNode<T> wParent = w.parent.parent; // TODO can this be null? probably
+                
                 rebuild(w.parent);
                 reLabel(wParent);
             }
@@ -191,7 +205,7 @@ namespace EmpiricalTester.DataStructures
             if(n <= alpha*q)
             {
                 rebuild(root);
-                reLabel(root); // todo this will crash, fix
+                reLabel(root); 
             }
             else
             {

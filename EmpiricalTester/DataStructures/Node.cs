@@ -6,14 +6,16 @@ namespace EmpiricalTester.DataStructures
     {
         // Private member-variables
         private T data;
-        private NodeList<T> neighbors = null;
+        public virtual Node<T> Left { get; set; }
+        public virtual Node<T> Right { get; set; }
 
         public Node() { }
-        public Node(T data) : this(data, null) { }
-        public Node(T data, NodeList<T> neighbors)
+        public Node(T data) : this(data, null, null) { }
+        public Node(T data, Node<T> left, Node<T> right)
         {
             this.data = data;
-            this.neighbors = neighbors;
+            this.Right = right;
+            this.Left = left;
         }
 
         public T Value
@@ -28,16 +30,6 @@ namespace EmpiricalTester.DataStructures
             }
         }
 
-        protected NodeList<T> Neighbors
-        {
-            get
-            {
-                return neighbors;
-            }
-            set
-            {
-                neighbors = value;
-            }
-        }
+       
     }
 }

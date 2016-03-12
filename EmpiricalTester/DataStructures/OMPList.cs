@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EmpiricalTester.DataStructures
 {
-    class OMPList
+    class OMPList_OLD
     {
         private double threshold = 1.3; // determines when the tree is rebuilt
         private OMPNode root;
@@ -81,7 +81,7 @@ namespace EmpiricalTester.DataStructures
             return new Tuple<int, int, int, int>(i1, i2, i3, i4);
         }
 
-        public OMPList(double threshold)
+        public OMPList_OLD(double threshold)
         {
             this.threshold = threshold;
             createTree(32);
