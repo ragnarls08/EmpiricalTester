@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EmpiricalTester.DataStructures
 {
-    public class SGTNode<T> : Node<T>, IComparable, IComparable<SGTNode<T>> where T : IComparable<T>
+    public class SGTNode<T> : Node<T>//, IComparable, IComparable<SGTNode<T>> where T : IComparable<T>
     {
         public SGTNode<T> parent { get; set; }
         public long label { get; set; }
@@ -26,7 +26,7 @@ namespace EmpiricalTester.DataStructures
             get { return (SGTNode<T>)base.Right; }
             set { base.Right = value; }
         }
-
+        /*
         public int CompareTo(object obj)
         {
             if (obj.GetType() != GetType())
@@ -39,7 +39,7 @@ namespace EmpiricalTester.DataStructures
             if (other == null)
                 return -1;
             return this.Value.CompareTo(other.Value);
-        }
+        }*/
     }
 }
 

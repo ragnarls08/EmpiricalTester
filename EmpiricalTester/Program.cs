@@ -57,7 +57,7 @@ namespace EmpiricalTester
             //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
             Stopwatch sw = new Stopwatch();
 
-       
+            
 
 
             DataStructures.SGTree<int> omp = new DataStructures.SGTree<int>(0.75);

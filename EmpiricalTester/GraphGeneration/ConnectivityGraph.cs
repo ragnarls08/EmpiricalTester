@@ -9,7 +9,7 @@ namespace EmpiricalTester.GraphGeneration
     /// <summary>
     /// Uses dfs to create a connectivity matrix between nodes
     /// </summary>
-    class ConnectivityGraph
+    public class ConnectivityGraph
     {
         List<Node> graph;
 
@@ -32,7 +32,8 @@ namespace EmpiricalTester.GraphGeneration
         {
             for(int i = 0; i < graph.Count; i++)
             {
-                visit(i);
+                if(!graph[i].visited)
+                    visit(i);
             }
 
             // TODO bad idea, duplicates cannot happen. fix
@@ -61,7 +62,8 @@ namespace EmpiricalTester.GraphGeneration
             for(int i = 0; i < graph[v].outgoing.Count; i++)
             {
                 graph[v].pathTo.Add(graph[v].outgoing[i]);
-                graph[v].addConnection(visit(graph[v].outgoing[i]));                
+                List<int> childPath = visit(graph[v].outgoing[i]);
+                graph[v].addConnection(childPath);
             }
 
             return graph[v].pathTo;

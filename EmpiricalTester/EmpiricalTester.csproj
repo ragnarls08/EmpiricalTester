@@ -69,6 +69,8 @@
     <Compile Include="DataStructures\OMPNode.cs" />
     <Compile Include="DataStructures\SGTNode.cs" />
     <Compile Include="DataStructures\SGTree.cs" />
+    <Compile Include="DynamicGraph\HKMSTNode.cs" />
+    <Compile Include="DynamicGraph\HKMST_V1.cs" />
     <Compile Include="DynamicGraph\IDynamicGraph.cs" />
     <Compile Include="DynamicGraph\SimpleIncremental.cs" />
     <Compile Include="DynamicGraph\SimpleNode.cs" />

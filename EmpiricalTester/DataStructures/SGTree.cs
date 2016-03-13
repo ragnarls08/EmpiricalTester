@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EmpiricalTester.DataStructures
 {
-    public class SGTree<T> where T : IComparable<T>
+    public class SGTree<T> //where T : IComparable<T>
     {
         private SGTNode<T> root;
         private int n, q;

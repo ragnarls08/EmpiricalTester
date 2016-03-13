@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace EmpiricalTester.DynamicGraph
 {
-    class SimpleNode
+    internal class SimpleNode
     {
         public int level { get; set; }
         public bool blackHole { get; set; }
