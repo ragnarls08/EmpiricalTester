@@ -52,10 +52,8 @@ namespace EmpiricalTester.GraphGeneration
             this.n = n;
 
             Random random = new Random(DateTime.Now.Millisecond);
-
             allEdges = allEdges.OrderBy(item => random.Next()).ToList();
             
-
             for (int i = 0; i < n; i++)
             {
                 foreach(StaticGraph.IStaticGraph graph in staticGraphs)
@@ -72,16 +70,17 @@ namespace EmpiricalTester.GraphGeneration
             bool[] staticResults = new bool[staticGraphs.Count];
             bool[] dynamicResults = new bool[dynamicGraphs.Count];
 
-            foreach(Tuple<int, int> currentEdge in allEdges)
+            for(int i = 0; i < allEdges.Count; i++)
             {
-                //System.Diagnostics.Debug.WriteLine("Progress Generation: " + (double)i/(double)n*100 +"%");
-                System.Diagnostics.Debug.WriteLine(currentEdge.Item1);
+                //System.Diagnostics.Debug.WriteLine("Progress Generation: " + (double)i/(double)n*100 +"%");                
+                if(i % (allEdges.Count / 20) == 0)
+                    Console.WriteLine("Adding edges: " + Math.Ceiling((double)i / (double)allEdges.Count * 100) + "%");
+                var currentEdge = allEdges[i];                
                 if (random.Next(0,100)/100.0 < p)
                 {
                     int v = currentEdge.Item1;
                     int w = currentEdge.Item2;
-                                      
-
+                                    
                     for(int x = 0; x < staticGraphs.Count; x++)
                     {
                         staticGraphs[x].addEdge(v, w);
@@ -161,21 +160,10 @@ namespace EmpiricalTester.GraphGeneration
                 }
 
             }
-
-
-            if(compareTopologies)
-            {
-                //compare topologies
-                bool compare = topologyCompare(n, staticGraphs, dynamicGraphs);
-
-                if (!compare)
-                {
-                    writeFile("Crash-TopoOrder");
-                    throw new Exception("Topological order comparison failed");
-                }
-            }
             
-
+            if(compareTopologies)
+                topologyCompare(n, staticGraphs, dynamicGraphs);
+                       
             if(writeToFile)
             {
                 return writeFile("");
@@ -202,9 +190,9 @@ namespace EmpiricalTester.GraphGeneration
         }
 
         // Compares the edges topological order
-        private bool topologyCompare(int n, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        private void topologyCompare(int n, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
-            System.Diagnostics.Debug.WriteLine("Starting topology comparer");
+            Console.WriteLine("Starting topology comparer");
             // Find connected pairs to compare
             ConnectivityGraph connectivity = new ConnectivityGraph();
             
@@ -219,73 +207,66 @@ namespace EmpiricalTester.GraphGeneration
             }
 
             // matrix of node connectivity
-            List<Tuple<int, List<int>>> matrix = connectivity.generateConnectivityMatrix();
+            Console.WriteLine("Generating connectivity matrix");
+            var matrix = connectivity.generateConnectivityMatrix();
+            var topologies = new List<Tuple<string, DataStructures.SGTree<int>, List<DataStructures.SGTNode<int>>>>();
+            Console.WriteLine("Connectivity matrix completed");
 
-            // list of all algorithm topologies
-            List<List<int>> topologies = new List<List<int>>();
-
-            foreach(StaticGraph.IStaticGraph algorithm in staticGraphs)
+            foreach (StaticGraph.IStaticGraph algorithm in staticGraphs)
             {
-                topologies.Add(algorithm.topoSort().ToList<int>());
+                var sgt = new DataStructures.SGTree<int>(0.75);
+                var top = algorithm.topoSort();
+                var items = new List<DataStructures.SGTNode<int>>();
+
+                var prev = sgt.insertFirst(top[0]);
+                items.Add(prev);
+                for (int i = 1; i < top.Count(); i++)
+                {
+                    prev = sgt.insert(prev, top[i]);
+                    items.Add(prev);
+                }
+
+                items.Sort(Comparer<DataStructures.SGTNode<int>>.Create((i, j) => i.Value.CompareTo(j.Value)));
+                topologies.Add(new Tuple<string, DataStructures.SGTree<int>, List<DataStructures.SGTNode<int>>>
+                                         (algorithm.GetType().ToString(), sgt, items));
             }
 
             foreach (DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
             {
-                topologies.Add(algorithm.topology());
-            }
-            
-            
-            List<Tuple<int, List<List<bool>>>> resultMatrix = new List<Tuple<int, List<List<bool>>>>();
-            // create result matrix, each row is a index + list of comparison results index >= nodeInPath
-            // inner most list represents the comparison for each topology
-            for (int iFromNode = 0; iFromNode < matrix.Count; iFromNode++)
-            {
-                resultMatrix.Add(new Tuple<int, List<List<bool>>>(iFromNode, new List<List<bool>>()));
+                var sgt = new DataStructures.SGTree<int>(0.75);
+                var top = algorithm.topology();
+                var items = new List<DataStructures.SGTNode<int>>();
 
-                for (int iToNode = 0; iToNode < matrix[iFromNode].Item2.Count; iToNode++)
+                var prev = sgt.insertFirst(top[0]);
+                items.Add(prev);
+                for (int i = 1; i < top.Count(); i++)
                 {
-                    resultMatrix[iFromNode].Item2.Add(new List<bool>());
+                    prev = sgt.insert(prev, top[i]);
+                    items.Add(prev);
                 }
+
+                items.Sort(Comparer<DataStructures.SGTNode<int>>.Create((i, j) => i.Value.CompareTo(j.Value)));
+                topologies.Add(new Tuple<string, DataStructures.SGTree<int>, List<DataStructures.SGTNode<int>>>(algorithm.GetType().ToString(), sgt, items));
             }
-            
-            // Fill in the resultMatrix
-            // TODO this is extremely slow, most likely due to FindIndex. Perhaps use dictionary key = nodeIndex, value = nodeTopology(FindIndex)
-            for(int iFromNode = 0; iFromNode < matrix.Count; iFromNode++)
+
+            Console.Write("Performing topology compare");
+            for(int i = 0; i < matrix.Count; i++)
             {
-                System.Diagnostics.Debug.WriteLine("Progress comparer: " + (double)iFromNode / (double)matrix.Count * 100 + "%");
-                for (int iToNode = 0; iToNode < matrix[iFromNode].Item2.Count; iToNode++)
+                for(int j = 0; j < matrix.Count; j++)
                 {
-                    for(int iTopology = 0; iTopology < topologies.Count; iTopology++)
-                    {
-                        resultMatrix[iFromNode].Item2[iToNode].Add(
-                            topologies[iTopology].FindIndex(item => item == matrix[iFromNode].Item1) 
-                            >= topologies[iTopology].FindIndex(item => item == matrix[iFromNode].Item2[iToNode]));
+                    if (matrix[i][j])
+                    { 
+                        foreach (var algorithm in topologies)
+                        {
+                            if(!algorithm.Item2.query(algorithm.Item3[i], algorithm.Item3[j]))
+                            {
+                                writeFile("TopoCompFail");
+                                throw new Exception("Topological comparison failed for: " + algorithm.Item1);
+                            }
+                        }                    
                     }
                 }
             }
-
-            
-            // item => item.Distinct().Skip(1).Any() is applied on the innermost list, Any() returns true if not all algorithms agree
-            // Any(item => item == true) is applied twice for the remaining layers, checking if the statement above ever returned a true
-            // the result is then negated to answer the question.
-            bool allAgree = 
-                !resultMatrix.ConvertAll<bool>
-                (
-                    i => i.Item2.ConvertAll<bool>
-                    (
-                        item => item.Distinct().Skip(1).Any()
-                    ).Any(item => item == true)
-                ).Any(item => item == true);
-
-            if (!allAgree)
-            {
-                writeFile("TopoCompFail");
-                throw new Exception("Topological comparison failed");
-            }
-
-
-            return true;
         }
-
     }
 }

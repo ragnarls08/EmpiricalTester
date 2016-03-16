@@ -17,7 +17,7 @@ namespace EmpiricalTester
             List<StaticGraph.IStaticGraph> staticGraphs = new List<StaticGraph.IStaticGraph>();
 
             StaticGraph.IStaticGraph kahn = new StaticGraph.Kahn();
-            //staticGraphs.Add(kahn);
+            staticGraphs.Add(kahn);
             StaticGraph.IStaticGraph tarjan = new StaticGraph.Tarjan();
             staticGraphs.Add(tarjan);
 
@@ -27,13 +27,13 @@ namespace EmpiricalTester
             dynamicGraphs.Add(simple);
 
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
-            /*
+            
             generator.generateGraph(
-                300, // nodes
+                2500, // nodes
                 0.85, // Probability of an edge being added from a complete graph
                 true, // writeToFile
-                true, // staticCheck
-                false, // topology compare
+                false, // staticCheck
+                true, // topology compare
                 staticGraphs, dynamicGraphs);
             //*/
 
@@ -55,31 +55,7 @@ namespace EmpiricalTester
             GraphRunner.GraphRunner runner = new GraphRunner.GraphRunner();
 
             //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
-            Stopwatch sw = new Stopwatch();
-
-            
-
-
-            DataStructures.SGTree<int> omp = new DataStructures.SGTree<int>(0.75);
-
-            var root = omp.insertFirst(1);
-
-            for (int i = 1; i < 10000; i++)
-            {
-                omp.insert(root, i);
-            }
-            
-            
-            var two = omp.insert(root, 2);
-            var three = omp.insert(root, 3);
-            var four = omp.insert(two, 4);
-            var five = omp.insert(root, 5);
-            var six = omp.insert(three, 6);
-            var seven = omp.insert(two, 7);
-            var eight = omp.insert(four, 8);
-            //*/
-
-            //var x = omp.inOrderLabels();
+         
 
         }
     }

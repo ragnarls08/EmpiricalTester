@@ -17,22 +17,16 @@ namespace EmpiricalTester.DynamicGraph
 
         public bool addEdge(int v, int w)
         {
-            throw new NotImplementedException();
+            // When a new arc (v, w) has v>w, do the search by calling VERTEX-GUIDEDSEARCH(v,w)
+            if (nodeOrder.query(nodes[v], nodes[w]))
+                return (vertexGuidedSearch(v, w) == null ? false : true);
+
+            return false; // TODO not correct
         }
 
         public void addVertex()
         {
-            // TODO this is not ok since all vertexes will be < root wich will cause a problem if for
-            // example the first edge added is (x, root)
-            // Possible solution: add all vertexes to a list of objects with the attribute sgtRef = null
-            // if the reference is null  x (<|>) root is false since they are not ordered 
-            // alternatively add an insert function to SGT insert(sgtnode, sgtnode), probably the best way
-
-
-            if(nodeOrder.Root == null)
-                nodes.Add(nodeOrder.insertFirst(new HKMSTNode()));
-            else
-                nodes.Add(nodeOrder.insert(nodeOrder.Root, new HKMSTNode()));
+            nodes.Add(new DataStructures.SGTNode<HKMSTNode>(new HKMSTNode()));            
         }
 
         public void removeEdge(int v, int w)
@@ -52,42 +46,82 @@ namespace EmpiricalTester.DynamicGraph
         }
 
 
-        private void vertexGuidedSearch(int iv, int iw)
+        private bool? vertexGuidedSearch(int iv, int iw)
         {
-            DataStructures.SGTNode<HKMSTNode> v = nodes[iv];
-            DataStructures.SGTNode<HKMSTNode> w = nodes[iv];
+            var v = nodes[iv];
+            var w = nodes[iv];
 
             // Article states double linked list for F,B and normal list for FL BL
-            LinkedList<DataStructures.SGTNode<HKMSTNode>> F = new LinkedList<DataStructures.SGTNode<HKMSTNode>>();
-            LinkedList<DataStructures.SGTNode<HKMSTNode>> B = new LinkedList<DataStructures.SGTNode<HKMSTNode>>();
-            F.AddFirst(w);
-            B.AddFirst(v);
+            var F = new List<DataStructures.SGTNode<HKMSTNode>>();
+            var B = new List<DataStructures.SGTNode<HKMSTNode>>();
+            F.Add(w);
+            B.Add(v);
 
-            List<DataStructures.SGTNode<HKMSTNode>> FL = new List<DataStructures.SGTNode<HKMSTNode>>();
-            List<DataStructures.SGTNode<HKMSTNode>> BL = new List<DataStructures.SGTNode<HKMSTNode>>();
+            var FL = new LinkedList<DataStructures.SGTNode<HKMSTNode>>();
+            var BL = new LinkedList<DataStructures.SGTNode<HKMSTNode>>();
+
             if (w.Value.outgoing.Count > 0)
-                FL.Add(w);
+                FL.AddFirst(w);
             if (v.Value.incoming.Count > 0)
-                BL.Add(v);
-
+                BL.AddFirst(v);
+            /*
             while(minLessThanMax(FL, BL))
             {                
                 var uz = findUZ(FL, BL);
-                var u = uz.Item1;
-                var z = uz.Item2;
                 // SEARCH-STEP(vertex u, vertex z)
 
-                // End of SEARCH-STEP(vertex u, vertex z)
-            }
+                // We denote by first-out(x) and first-in(x) the first arc on the outgoing 
+                // list and the first arc on the incoming list of vertex x, respectively.
+                // We denote by next-out((x, y)) and next-in((x, y)) the arcs after (x, y) 
+                // on the outgoing list of x and the incoming list of y, respectively. 
+                // In each case, if there is no such arc, the value is null.
 
-            //return null;
+                // For each vertex x in F, we maintain a forward pointer out(x)to the first 
+                // untraversed arc on its outgoing list
+                // (u,x) = out(u) = next-out((u,x))
+                var x = uz.from.Value.outgoing.GetEnumerator();// probably has to be outside the while loop
+                x.MoveNext();                                   // not too sure
+                var y = uz.to.Value.incoming.GetEnumerator();
+                y.MoveNext();
+
+                if (x.Current == null)
+                    FL.Remove(uz.from); // TODO should this be FL.RemoveAt(0) ?
+                if (y.Current == null)
+                    BL.Remove(uz.to); // check the same
+
+                if (B.Contains(x.Current))
+                    return false; // Pair(uz.from, x.Current);
+                else if (F.Contains(y.Current))
+                    return false; // Pair(y.Current, uz.to);
+                
+
+                if(!F.Contains(x.Current))
+                {
+
+                }
+
+                
+
+                // End of SEARCH-STEP(vertex u, vertex z)
+            }*/
+
+            return null;
         }
 
-        private Tuple<DataStructures.SGTNode<HKMSTNode>, DataStructures.SGTNode<HKMSTNode>> findUZ(
-                                    List<DataStructures.SGTNode<HKMSTNode>> FL,
-                                    List<DataStructures.SGTNode<HKMSTNode>> BL)
+
+
+        private Pair findUZ(List<DataStructures.SGTNode<HKMSTNode>> FL, List<DataStructures.SGTNode<HKMSTNode>> BL)
         {
             // find (u, z) with u < z
+            for(int i = 0; i < FL.Count; i++)
+            {
+                for(int x = 0; x < BL.Count; x++)
+                {
+                    if (nodeOrder.query(BL[x], FL[i]))
+                        return new Pair(FL[i], BL[x]);
+                }
+            }
+
             return null;
         }
 
@@ -105,5 +139,18 @@ namespace EmpiricalTester.DynamicGraph
             // TODO double check if this is correct
             return FL.Min(item => item.label) < BL.Max(item => item.label); 
         }
+
+        private class Pair
+        {
+            public DataStructures.SGTNode<HKMSTNode> from { get; set; }
+            public DataStructures.SGTNode<HKMSTNode> to { get; set; }
+
+            public Pair(DataStructures.SGTNode<HKMSTNode> from, DataStructures.SGTNode<HKMSTNode> to)
+            {
+                this.from = from;
+                this.to = to;
+            }
+        }
+
     }
 }

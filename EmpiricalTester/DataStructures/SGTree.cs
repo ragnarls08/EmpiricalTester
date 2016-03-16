@@ -32,7 +32,7 @@ namespace EmpiricalTester.DataStructures
         }
         public bool query(SGTNode<T> a, SGTNode<T> b)
         {
-            return a.label > b.label;
+            return a.label < b.label;
         }
         public SGTNode<T> Root
         {
@@ -45,9 +45,15 @@ namespace EmpiricalTester.DataStructures
                 root = value;
             }
         }
+
         public SGTNode<T> insertFirst(T newData)
         {
-            root = new SGTNode<T>(newData);
+            return insertFirst(new SGTNode<T>(newData));
+        }
+
+        public SGTNode<T> insertFirst(SGTNode<T> root)
+        {
+            this.root = root;
             root.label = (long.MaxValue / 2) + 1;
 
             n++;
@@ -55,13 +61,17 @@ namespace EmpiricalTester.DataStructures
 
             return root;
         }
+
         public SGTNode<T> insert(SGTNode<T> existing, T newData)
         {
-            SGTNode<T> newNode;
+            return insert(existing, new SGTNode<T>(newData));
+        }
 
+        public SGTNode<T> insert(SGTNode<T> existing, SGTNode<T> newNode)
+        {
             if(existing.Right == null)
             {
-                existing.Right = new SGTNode<T>(newData);
+                existing.Right = newNode;
                 existing.Right.label = pathRight(existing.label);
 
                 newNode = existing.Right;
@@ -78,7 +88,7 @@ namespace EmpiricalTester.DataStructures
                 }
 
                 // found a place for the new element
-                curr.Left = new SGTNode<T>(newData);
+                curr.Left = newNode;
                 curr.Left.label = pathLeft(curr.label);
 
                 newNode = curr.Left;
