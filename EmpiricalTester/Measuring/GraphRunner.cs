@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms.DataVisualization.Charting;
 
-namespace EmpiricalTester.GraphRunner
+namespace EmpiricalTester.Measuring
 {
     class GraphRunner
     {
         public void runGraph(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
-        {
+        {          
             for(int x = 0; x < fileNames.Length; x++)
             {
                 string fileName = fileNames[x];
@@ -86,6 +84,86 @@ namespace EmpiricalTester.GraphRunner
                 if (makeGraphImage)
                     createGraph(fileName, measurements, graph.n, graph.edges.Count, repeateCount);
             }            
+        }
+
+        public void runStaticVsDynamic(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        {
+            for (int x = 0; x < fileNames.Length; x++)
+            {
+                string fileName = fileNames[x];
+                InputFile graph = readFile(fileName);
+                Stopwatch sw = new Stopwatch();
+                List<Measurements> measurements = new List<Measurements>();
+
+                Console.WriteLine("File " + (x + 1) + "/ " + fileNames.Length);
+
+                foreach (StaticGraph.IStaticGraph algorithm in staticGraphs)
+                {
+                    measurements.Add(new Measurements(algorithm.GetType().ToString()));
+                    Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
+
+                    for (int i = 0; i < repeateCount; i++)
+                    {
+                        Console.WriteLine("Run: " + i + ", " + current.Name);
+                        algorithm.resetAll();
+                        // add nodes
+                        for (int y = 0; y < graph.n; y++)
+                        {
+                            algorithm.addVertex();
+                        }
+
+                        current.timeElapsed.Add(new List<TimeSpan>());
+                        sw.Start();
+                        foreach (Pair pair in graph.edges)
+                        {                            
+                            algorithm.addEdge(pair.from, pair.to);
+                                                    
+                        }
+
+                        algorithm.topoSort();
+                        sw.Stop();
+                        current.timeElapsed[i].Add(sw.Elapsed);
+                        sw.Reset();
+                    }
+
+                }
+
+                foreach (DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
+                {
+                    measurements.Add(new Measurements(algorithm.GetType().ToString()));
+                    Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
+
+                    for (int i = 0; i < repeateCount; i++)
+                    {
+                        Console.WriteLine("Run: " + i + ", " + current.Name);
+                        algorithm.resetAll();
+                        // add nodes
+                        for (int y = 0; y < graph.n; y++)
+                        {
+                            algorithm.addVertex();
+                        }
+
+                        current.timeElapsed.Add(new List<TimeSpan>());
+                        sw.Start();
+                        foreach (Pair pair in graph.edges)
+                        {                            
+                            algorithm.addEdge(pair.from, pair.to);                            
+                        }
+                        sw.Stop();
+                        current.timeElapsed[i].Add(sw.Elapsed);
+                        sw.Reset();
+                    }
+                }
+
+
+                measurements.ForEach(item => item.updateStatistics());
+
+                if (writeToFile)
+                    writeMeasurements(fileName, measurements);
+                if (makeGraphImage)
+                    createGraph(fileName, measurements, graph.n, graph.edges.Count, repeateCount);
+
+            }
         }
 
         private void createGraph(string fileName, List<Measurements> measurements, int n, int m, int repeateCount)

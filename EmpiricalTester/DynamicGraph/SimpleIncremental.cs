@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace EmpiricalTester.DynamicGraph
 {
-    class SimpleIncremental : IDynamicGraph
+    public class SimpleIncremental : IDynamicGraph
     {
         private List<SimpleNode> graph;
 

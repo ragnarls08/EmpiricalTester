@@ -45,6 +45,19 @@ namespace EmpiricalTester.DataStructures
                 root = value;
             }
         }
+        
+        // only used for debugging
+        public int depth()
+        {
+            return depth(root) + 1;
+        }
+        private int depth(SGTNode<T> node)
+        {
+            if (node == null)
+                return 1;
+
+            return Math.Max(depth(node.Left), depth(node.Right)) + 1;
+        }
 
         public SGTNode<T> insertFirst(T newData)
         {

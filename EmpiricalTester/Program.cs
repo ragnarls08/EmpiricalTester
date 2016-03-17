@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Diagnostics;
-
-using System.Windows.Forms.DataVisualization;
 
 namespace EmpiricalTester
 {
@@ -27,35 +23,64 @@ namespace EmpiricalTester
             dynamicGraphs.Add(simple);
 
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
-            
-            generator.generateGraph(
-                2500, // nodes
-                0.85, // Probability of an edge being added from a complete graph
+            var ps = new List<double>() { 0.55, 0.65, 0.75, 0.85, 0.95 };
+
+            foreach(var p in ps)
+            {/*
+                generator.generateGraph(
+                2000, // nodes
+                p, // Probability of an edge being added from a complete graph
                 true, // writeToFile
                 false, // staticCheck
-                true, // topology compare
+                false, // topology compare
                 staticGraphs, dynamicGraphs);
-            //*/
+                //*/
+            }
+
 
             string[] fileNames = new string[] {
-                //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-38-36(100, 0.025).txt"),
-                //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-05-39-20(100, 0.05).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160308-19-48-12(300, 0.85).txt"),
-               
-                //Path.Combine(Environment.CurrentDirectory, @"Output\20160307-04-07(20, 0.5).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-40(250, 0.55).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-36(250, 0.65).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-25(250, 0.75).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-15(250, 0.85).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-44(250, 0.95).txt"),
 
 
-                //Path.Combine(Environment.CurrentDirectory, @"Output\20160303-03-59(1000, 0.5).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-26-18(1000, 0.55).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-48(1000, 0.65).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-18(1000, 0.75).txt"),
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-24-33(1000, 0.85).txt"),                              
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-23-52(1000, 0.95).txt"),
+
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-09-03-38(2000, 0.55).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-09-04-09(2000, 0.65).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-09-04-46(2000, 0.75).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-09-05-24(2000, 0.85).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-09-06-06(2000, 0.95).txt"),
+                
+
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160303-04-00(1000, 0.9).txt"),
 
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160303-03-59(10000, 0.5).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160303-04-00(10000, 0.9).txt"),
                 };
 
-            GraphRunner.GraphRunner runner = new GraphRunner.GraphRunner();
-
+            var runner = new Measuring.GraphRunner();
             //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
-         
+            runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
+
+
+            /*
+            var measure = new Measuring.OrderMaintenance();
+
+            for(int i = 0; i < 5; i++)
+            {
+                var alphas = new List<double>() { 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85 };
+                measure.run(10000, 0.5, alphas);
+
+                Console.WriteLine("");
+            }
+            */
 
         }
     }

@@ -18,7 +18,7 @@ namespace EmpiricalTester.DataStructures.Tests
             SGTNode<int> root = sgt.insertFirst(1);
             SGTNode<int> two = sgt.insert(root, 2);
 
-            Assert.IsTrue(sgt.query(two, root));
+            Assert.IsTrue(sgt.query(root, two));
         }
         [TestMethod()]
         public void insertTestNotSequential()
@@ -35,11 +35,11 @@ namespace EmpiricalTester.DataStructures.Tests
             SGTNode<int> c = sgt.insert(root, 4);
             SGTNode<int> d = sgt.insert(b, 5);
 
-            bool aGTroot = sgt.query(a, root);
-            bool bGTa = sgt.query(b, a);
-            bool aGTc = sgt.query(a, c);
-            bool dGTa = sgt.query(d, a);
-            bool dGTb = sgt.query(d, b);
+            bool aGTroot = sgt.query(root, a);
+            bool bGTa = sgt.query(a, b);
+            bool aGTc = sgt.query(c, a);
+            bool dGTa = sgt.query(a, d);
+            bool dGTb = sgt.query(b, d);
 
             Assert.IsTrue(aGTroot && bGTa && aGTc && dGTa && dGTb);
         }
