@@ -137,8 +137,12 @@ namespace EmpiricalTester.DataStructures
                 
 
                 SGTNode<T> wParent = w.parent.parent; // TODO can this be null? probably
-                
-                rebuild(w.parent);
+                w = w.parent;
+                sizeLeft = wChildKnown == w.Left ? sizeW : size(w.Left);
+                sizeRight = wChildKnown == w.Right ? sizeW : size(w.Right);
+                sizeW = sizeLeft + sizeRight + 1;
+
+                rebuild(w, sizeW);
                 reLabel(wParent);
             }
 
@@ -224,7 +228,7 @@ namespace EmpiricalTester.DataStructures
             //NodeCount <= α*MaxNodeCount
             if(n <= alpha*q)
             {
-                rebuild(root);
+                rebuild(root, n);
                 reLabel(root); 
             }
             else
@@ -298,9 +302,8 @@ namespace EmpiricalTester.DataStructures
             a[i++] = u;
             return packIntoArray(u.Right, a, i);
         }
-        private void rebuild(SGTNode<T> u)
+        private void rebuild(SGTNode<T> u, int ns)
         {
-            int ns = size(u);
             SGTNode<T> p = u.parent;
             SGTNode<T>[] a = new SGTNode<T>[ns];
             packIntoArray(u, a, 0);
