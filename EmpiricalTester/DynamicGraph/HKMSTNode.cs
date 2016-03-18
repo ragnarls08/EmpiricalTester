@@ -2,15 +2,19 @@
 
 namespace EmpiricalTester.DynamicGraph
 {
-    internal class HKMSTNode 
+    internal class HKMSTNode
     {
         public List<DataStructures.SGTNode<HKMSTNode>> incoming{ get; set; }
         public List<DataStructures.SGTNode<HKMSTNode>> outgoing { get; set; }
+
+        public List<DataStructures.SGTNode<HKMSTNode>>.Enumerator OutEnum { get; set; }
+        public List<DataStructures.SGTNode<HKMSTNode>>.Enumerator InEnum { get; set; }
+
 
         public HKMSTNode()
         {
             incoming = new List<DataStructures.SGTNode<HKMSTNode>> ();
             outgoing = new List<DataStructures.SGTNode<HKMSTNode>> ();
-        }
+        }       
     }
 }

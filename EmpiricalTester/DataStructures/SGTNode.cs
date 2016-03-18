@@ -1,7 +1,8 @@
-﻿
+﻿using System;
+
 namespace EmpiricalTester.DataStructures
 {
-    public class SGTNode<T> 
+    public class SGTNode<T> : IComparable
     {
         public T Value { get; set; }
         public SGTNode<T> parent { get; set; }
@@ -18,7 +19,14 @@ namespace EmpiricalTester.DataStructures
             this.label = -1;
             this.Left = left;
             this.Right = right;
-        }              
+        }
+
+
+
+        public int CompareTo(object obj)
+        {
+            return label.CompareTo(((SGTNode<T>)obj).label);
+        }
     }
 }
 

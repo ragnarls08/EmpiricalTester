@@ -42,7 +42,7 @@ namespace EmpiricalTester.StaticGraph
             clearVisited();
             cycle = false;
 
-            for(int i = graph.FindIndex(item => item.visited == false); i >= 0; i = graph.FindIndex(item => item.visited == false))
+            for(int i = 0; i < graph.Count; i++)
             {
                 visit(i);
             }

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpiricalTester.DataStructures
 {
@@ -113,7 +110,7 @@ namespace EmpiricalTester.DataStructures
 
             // find depth of newNode
             int d = depth(newNode.label);
-                        
+
             if(d > alphaLog(q))
             {
                 // depth exceeded, find scapegoat

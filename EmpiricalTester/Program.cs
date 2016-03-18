@@ -23,16 +23,16 @@ namespace EmpiricalTester
             dynamicGraphs.Add(simple);
 
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
-            var ps = new List<double>() { 0.55, 0.65, 0.75, 0.85, 0.95 };
+            var ps = new List<double>() { 0.85, 0.95 };
 
             foreach(var p in ps)
-            {/*
+            {
                 generator.generateGraph(
-                2000, // nodes
+                200, // nodes
                 p, // Probability of an edge being added from a complete graph
-                true, // writeToFile
-                false, // staticCheck
-                false, // topology compare
+                false, // writeToFile
+                true, // staticCheck
+                true, // topology compare
                 staticGraphs, dynamicGraphs);
                 //*/
             }
@@ -67,20 +67,22 @@ namespace EmpiricalTester
 
             var runner = new Measuring.GraphRunner();
             //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
-            runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
+            //runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
 
 
-            /*
+            
             var measure = new Measuring.OrderMaintenance();
+            string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure2.txt");
+            var ns = new List<int>() { 10000000 };
+            ps = new List<double>() { 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95 };
+            var alphas = new List<double>() { 0.6, 0.65, 0.7, 0.75 };
+            measure.run(outFile, ns, ps, alphas, 5);
 
-            for(int i = 0; i < 5; i++)
-            {
-                var alphas = new List<double>() { 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85 };
-                measure.run(10000, 0.5, alphas);
+           
 
-                Console.WriteLine("");
-            }
-            */
+
+         
+            
 
         }
     }

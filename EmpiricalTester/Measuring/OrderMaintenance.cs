@@ -1,77 +1,131 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpiricalTester.Measuring
 {
     class OrderMaintenance
     {
-        public void run(int n, double p, List<double> alphas)
+        public void run(string outFile, List<int> ns, List<double> ps, List<double> alphas, int repeatCount)
         {
-            double alphaMin = 0.75;
+            Measurements m = new Measurements();
             Random random = new Random(DateTime.Now.Millisecond);
             Stopwatch sw = new Stopwatch();
 
-            var sgt = new DataStructures.SGTree<int>(alphaMin);
-            var list = new List<int>(n);
-            var listNodes = new List<LinkedListNode<int>>(n);
-            var sgtNodes = new List<DataStructures.SGTNode<int>>(n);
-            
-            
-
-            sw.Start();
-            var prev = sgt.insertFirst(0);
-            sgtNodes.Add(prev);
-            for(int i = 1; i < n; i++)
+            foreach (double alpha in alphas)
             {
-                // sequential probability 
-                if(random.Next(0, 100) / 100.0 < p)
+                foreach(double p in ps)
                 {
-                    prev = sgt.insert(prev, i);
-                    sgtNodes.Add(prev);
-                }
-                else
-                {
-                    int at = random.Next(0, i);
-                    prev = sgt.insert(sgtNodes[at], i);
-                    sgtNodes.Add(prev);
+                    foreach (int n in ns) 
+                    {
+                        for(int x = 0; x < repeatCount; x++)
+                        {
+                            Console.WriteLine(alpha + "a      " + p + "p       " + n);
+                            // create or reset stuff
+                            var sgt = new DataStructures.SGTree<int>(alpha);
+                            var sgtNodes = new List<DataStructures.SGTNode<int>>(n);
+                            sw.Reset();
+                            sw.Start();
+                            var prev = sgt.insertFirst(0);
+                            sgtNodes.Add(prev);
+                            for (int i = 0; i < n; i++)
+                            {
+                                // sequential probability 
+                                if (random.Next(0, 100) / 100.0 < p)
+                                {
+                                    prev = sgt.insert(prev, i); 
+                                    sgtNodes.Add(prev);
+                                }
+                                else
+                                {
+                                    int at = random.Next(0, i);
+                                    prev = sgt.insert(sgtNodes[at], i);
+                                    sgtNodes.Add(prev);
+                                }
+                            }                            
+                            sw.Stop();
+                            m.add(n, p, alpha, sw.ElapsedTicks);                            
+                        }                        
+                    }
                 }
             }
-            sw.Stop();
 
-            var sgtElapsed = sw.Elapsed;
-            sw.Reset();
-            
+            m.writeToFile(outFile);
+        }
 
-            sw.Start();
-            //var lprev = list.AddFirst(0);
-            //listNodes.Add(lprev);
-            for (int i = 0; i < n; i++)
+        private class Measurements
+        {
+            private List<Measurement> items;
+
+            public Measurements()
             {
-                // sequential probability 
-                if (random.Next(0, 100) / 100.0 < p)
+                items = new List<Measurement>();
+            }
+
+            public void add(int n, double p, double a, long ticks)
+            {
+                var m = items.Find(item => item.A == a && item.P == p);
+                if (m == null)
                 {
-                    list.Add(i);
-                    //lprev = list.AddAfter(lprev, i);
-                    //listNodes.Add(lprev);
+                    items.Add(new Measurement(n, p, a, ticks));
                 }
                 else
-                {
-                    int at = random.Next(0, i);
-                    //lprev = list.AddAfter(listNodes[at], i);
-                    //listNodes.Add(lprev);
-                    list.Insert(at, i);
-                }
+                    m.addTicks(n, ticks);
             }
-            sw.Stop();
 
-            var listElapsed = sw.Elapsed;
+            public void writeToFile(string outFile)
+            {
+                var lines = new List<string>();
+                string xLabels = "\t" + items[0].N.ConvertAll(item => item.ToString()).Aggregate((a, b) => a + ("\t" + b));
+                lines.Add(xLabels);
 
-            Console.WriteLine(sgtElapsed.Ticks);
-            Console.WriteLine(listElapsed.Ticks);
+                foreach(var curr in items)
+                {
+                    lines.Add(
+                        curr.A.ToString() + "a / " + curr.P.ToString() + "p" +
+                        "\t" + curr.SumTicks.ConvertAll(item => (item / ((double)curr.SumCount[0])).ToString()).Aggregate((a,b) => a + "\t" + b)
+                        );
+                }
+
+                File.WriteAllLines(outFile, lines);
+            }
+
+            private class Measurement
+            {
+                public Measurement(int n, double p, double a, long ticks)
+                {
+                    N = new List<int>() { n };
+                    P = p;
+                    A = a;
+                    SumTicks = new List<long>() { ticks };
+                    SumCount = new List<int>() { 0 };
+                }
+
+                public void addTicks(int n, long ticks)
+                {
+                    var index = N.FindIndex(item => item == n);
+                    if (index == -1)
+                    {
+                        N.Add(n);                        
+                        SumTicks.Add(ticks);
+                        SumCount.Add(0);
+                    }
+                    else
+                    {
+                        SumTicks[index] += ticks;
+                        SumCount[index]++;
+                    }
+                              
+                }
+
+                public List<int> N { get; set; }
+                public double P { get; set; }
+                public double A { get; set; }
+                public List<long> SumTicks { get; set; }
+                public List<int> SumCount { get; set; }
+            }
         }
     }
 }

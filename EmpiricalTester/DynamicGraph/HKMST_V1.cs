@@ -19,14 +19,18 @@ namespace EmpiricalTester.DynamicGraph
         {
             // When a new arc (v, w) has v>w, do the search by calling VERTEX-GUIDEDSEARCH(v,w)
             if (nodeOrder.query(nodes[v], nodes[w]))
-                return (vertexGuidedSearch(v, w) == null ? false : true);
+                return vertexGuidedSearch(v, w);
 
-            return false; // TODO not correct
+            return true; // TODO not correct
         }
 
         public void addVertex()
         {
-            nodes.Add(new DataStructures.SGTNode<HKMSTNode>(new HKMSTNode()));            
+            //nodes.Add(new DataStructures.SGTNode<HKMSTNode>(new HKMSTNode()));
+            if (nodeOrder.Root == null)
+                nodes.Add(nodeOrder.insertFirst(new HKMSTNode()));
+            else
+                nodes.Add(nodeOrder.insert(nodeOrder.Root, new HKMSTNode()));
         }
 
         public void removeEdge(int v, int w)
@@ -46,7 +50,7 @@ namespace EmpiricalTester.DynamicGraph
         }
 
 
-        private bool? vertexGuidedSearch(int iv, int iw)
+        private bool vertexGuidedSearch(int iv, int iw)
         {
             var v = nodes[iv];
             var w = nodes[iv];
@@ -57,17 +61,23 @@ namespace EmpiricalTester.DynamicGraph
             F.Add(w);
             B.Add(v);
 
-            var FL = new LinkedList<DataStructures.SGTNode<HKMSTNode>>();
-            var BL = new LinkedList<DataStructures.SGTNode<HKMSTNode>>();
+            w.Value.OutEnum = w.Value.outgoing.GetEnumerator();
+            w.Value.OutEnum.MoveNext();
+            v.Value.InEnum = v.Value.incoming.GetEnumerator();
+            v.Value.InEnum.MoveNext();
 
-            if (w.Value.outgoing.Count > 0)
-                FL.AddFirst(w);
-            if (v.Value.incoming.Count > 0)
-                BL.AddFirst(v);
-            /*
+            var FL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();
+            var BL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();
+
+            if (w.Value.OutEnum.Current != null)
+                FL.Add(w);
+            if (v.Value.InEnum.Current != null)
+                BL.Add(v);
+            
             while(minLessThanMax(FL, BL))
-            {                
-                var uz = findUZ(FL, BL);
+            {
+                var u = FL.Min();
+                var z = BL.Max();
                 // SEARCH-STEP(vertex u, vertex z)
 
                 // We denote by first-out(x) and first-in(x) the first arc on the outgoing 
@@ -79,54 +89,47 @@ namespace EmpiricalTester.DynamicGraph
                 // For each vertex x in F, we maintain a forward pointer out(x)to the first 
                 // untraversed arc on its outgoing list
                 // (u,x) = out(u) = next-out((u,x))
-                var x = uz.from.Value.outgoing.GetEnumerator();// probably has to be outside the while loop
-                x.MoveNext();                                   // not too sure
-                var y = uz.to.Value.incoming.GetEnumerator();
-                y.MoveNext();
+                
+                var x = u.Value.OutEnum.Current;
+                var y = z.Value.InEnum.Current;
+                u.Value.OutEnum.MoveNext();
+                z.Value.InEnum.MoveNext();
 
-                if (x.Current == null)
-                    FL.Remove(uz.from); // TODO should this be FL.RemoveAt(0) ?
-                if (y.Current == null)
-                    BL.Remove(uz.to); // check the same
+                if (u.Value.OutEnum.Current == null)
+                    FL.Remove(u); 
+                if (z.Value.InEnum.Current == null)
+                    BL.Remove(z); 
 
-                if (B.Contains(x.Current))
+                if (B.Contains(x))
                     return false; // Pair(uz.from, x.Current);
-                else if (F.Contains(y.Current))
+                else if (F.Contains(y))
                     return false; // Pair(y.Current, uz.to);
                 
 
-                if(!F.Contains(x.Current))
+                if(!F.Contains(x))
                 {
-
+                    F.Add(x);
+                    x.Value.OutEnum = x.Value.outgoing.GetEnumerator();
+                    x.Value.OutEnum.MoveNext();
+                    if (x.Value.OutEnum.Current != null)
+                        FL.Add(x);
                 }
-
-                
-
+                if(!B.Contains(y))
+                {
+                    B.Add(y);
+                    y.Value.InEnum = y.Value.incoming.GetEnumerator();
+                    y.Value.InEnum.MoveNext();
+                    if (y.Value.InEnum.Current != null)
+                        BL.Add(y);
+                }              
                 // End of SEARCH-STEP(vertex u, vertex z)
-            }*/
-
-            return null;
-        }
-
-
-
-        private Pair findUZ(List<DataStructures.SGTNode<HKMSTNode>> FL, List<DataStructures.SGTNode<HKMSTNode>> BL)
-        {
-            // find (u, z) with u < z
-            for(int i = 0; i < FL.Count; i++)
-            {
-                for(int x = 0; x < BL.Count; x++)
-                {
-                    if (nodeOrder.query(BL[x], FL[i]))
-                        return new Pair(FL[i], BL[x]);
-                }
             }
-
-            return null;
+            
+            return true;
         }
 
-        private bool minLessThanMax(List<DataStructures.SGTNode<HKMSTNode>> FL, 
-                                    List<DataStructures.SGTNode<HKMSTNode>> BL)
+        private bool minLessThanMax(SortedSet<DataStructures.SGTNode<HKMSTNode>> FL,
+                                    SortedSet<DataStructures.SGTNode<HKMSTNode>> BL)
         {
             // For ease of notation, we adopt the convention that the
             // minimum of an empty set is bigger than any other value and the maximum of an empty
