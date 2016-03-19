@@ -16,24 +16,24 @@ namespace EmpiricalTester.DataStructures.Tests
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
             SGTNode<int> root = sgt.insertFirst(1);
-            SGTNode<int> two = sgt.insert(root, 2);
+            SGTNode<int> two = sgt.insertAfter(root, 2);
 
             Assert.IsTrue(sgt.query(root, two));
         }
         [TestMethod()]
         public void insertTestNotSequential()
         {
-            // a > root
-            // b > a
-            // a > c
-            // d > a && d > b
+            // root > a
+            // a > b
+            // c > a
+            // a > d && b > d
 
             SGTree<int> sgt = new SGTree<int>(0.75);
             SGTNode<int> root = sgt.insertFirst(1);
-            SGTNode<int> a = sgt.insert(root, 2);
-            SGTNode<int> b = sgt.insert(a, 3);
-            SGTNode<int> c = sgt.insert(root, 4);
-            SGTNode<int> d = sgt.insert(b, 5);
+            SGTNode<int> a = sgt.insertAfter(root, 2);
+            SGTNode<int> b = sgt.insertAfter(a, 3);
+            SGTNode<int> c = sgt.insertAfter(root, 4);
+            SGTNode<int> d = sgt.insertAfter(b, 5);
 
             bool aGTroot = sgt.query(root, a);
             bool bGTa = sgt.query(a, b);
@@ -49,13 +49,13 @@ namespace EmpiricalTester.DataStructures.Tests
         {
             SGTree<int> sgt = new SGTree<int>(0.15);
             SGTNode<int> root = sgt.insertFirst(1);
-            SGTNode<int> two = sgt.insert(root, 2);
-            SGTNode<int> three = sgt.insert(root, 3);
-            SGTNode<int> four = sgt.insert(two, 4);
-            SGTNode<int> five = sgt.insert(root, 5);
-            SGTNode<int> six = sgt.insert(three, 6);
-            SGTNode<int> seven = sgt.insert(two, 7);
-            SGTNode<int> eight = sgt.insert(four, 8);
+            SGTNode<int> two = sgt.insertAfter(root, 2);
+            SGTNode<int> three = sgt.insertAfter(root, 3);
+            SGTNode<int> four = sgt.insertAfter(two, 4);
+            SGTNode<int> five = sgt.insertAfter(root, 5);
+            SGTNode<int> six = sgt.insertAfter(three, 6);
+            SGTNode<int> seven = sgt.insertAfter(two, 7);
+            SGTNode<int> eight = sgt.insertAfter(four, 8);
 
             // Test when remove node has 2 children and the left child rightmost node is the left child
             //   1
@@ -86,6 +86,30 @@ namespace EmpiricalTester.DataStructures.Tests
 
 
             Assert.IsTrue(a && b && c && d);
+        }
+
+        [TestMethod()]
+        public void insertBeforeTest()
+        {
+            // a < root
+            // b < a
+            // a < c
+            // d < a && d < b
+
+            SGTree<int> sgt = new SGTree<int>(0.75);
+            SGTNode<int> root = sgt.insertFirst(1);
+            SGTNode<int> a = sgt.insertBefore(root, 2);
+            SGTNode<int> b = sgt.insertBefore(a, 3);
+            SGTNode<int> c = sgt.insertBefore(root, 4);
+            SGTNode<int> d = sgt.insertBefore(b, 5);
+
+            bool aGTroot = sgt.query(root, a);
+            bool bGTa = sgt.query(a, b);
+            bool aGTc = sgt.query(c, a);
+            bool dGTa = sgt.query(a, d);
+            bool dGTb = sgt.query(b, d);
+
+            Assert.IsTrue(!aGTroot && !bGTa && !aGTc && !dGTa && !dGTb);
         }
     }
 }

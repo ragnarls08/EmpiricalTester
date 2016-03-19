@@ -222,7 +222,7 @@ namespace EmpiricalTester.GraphGeneration
                 items.Add(prev);
                 for (int i = 1; i < top.Count(); i++)
                 {
-                    prev = sgt.insert(prev, top[i]);
+                    prev = sgt.insertAfter(prev, top[i]);
                     items.Add(prev);
                 }
 
@@ -241,7 +241,7 @@ namespace EmpiricalTester.GraphGeneration
                 items.Add(prev);
                 for (int i = 1; i < top.Count(); i++)
                 {
-                    prev = sgt.insert(prev, top[i]);
+                    prev = sgt.insertAfter(prev, top[i]);
                     items.Add(prev);
                 }
 

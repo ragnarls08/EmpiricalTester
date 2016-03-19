@@ -8,6 +8,44 @@ namespace EmpiricalTester.Measuring
 {
     class OrderMaintenance
     {
+        public void runSequence(string outFile, List<int> ns, List<double> ps, List<double> alphas, int repeatCount)
+        {
+            Measurements m = new Measurements();
+            Random random = new Random(DateTime.Now.Millisecond);
+            Stopwatch sw = new Stopwatch();
+
+            foreach (double alpha in alphas)
+            {
+                foreach (int n in ns)
+                {
+                    for (int x = 0; x < repeatCount; x++)
+                    {
+                        Console.WriteLine(alpha + "a      " + 0 + "p       " + n);
+                        // create or reset stuff
+                        var sgt = new DataStructures.SGTree<int>(alpha);
+                        var sgtNodes = new List<DataStructures.SGTNode<int>>(n);
+                        
+                        for(int i = 1; i < n; i++)
+                        {
+                            sgtNodes.Add(new DataStructures.SGTNode<int>(i));
+                        }
+                        sw.Reset();
+                        sw.Start();
+                        var prev = sgt.insertFirst(0);
+
+
+
+                        //sgt.insertAllAfter(prev, sgtNodes);
+
+                        sw.Stop();
+                        m.add(n, 0, alpha, sw.ElapsedTicks);
+                    }                    
+                }
+            }
+
+            m.writeToFile(outFile);
+        }
+
         public void run(string outFile, List<int> ns, List<double> ps, List<double> alphas, int repeatCount)
         {
             Measurements m = new Measurements();
@@ -35,13 +73,13 @@ namespace EmpiricalTester.Measuring
                                 // sequential probability 
                                 if (random.Next(0, 100) / 100.0 < p)
                                 {
-                                    prev = sgt.insert(prev, i); 
+                                    prev = sgt.insertAfter(prev, i); 
                                     sgtNodes.Add(prev);
                                 }
                                 else
                                 {
                                     int at = random.Next(0, i);
-                                    prev = sgt.insert(sgtNodes[at], i);
+                                    prev = sgt.insertAfter(sgtNodes[at], i);
                                     sgtNodes.Add(prev);
                                 }
                             }                            

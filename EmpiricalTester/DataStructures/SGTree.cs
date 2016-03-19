@@ -72,13 +72,52 @@ namespace EmpiricalTester.DataStructures
             return root;
         }
 
-        public SGTNode<T> insert(SGTNode<T> existing, T newData)
+        public SGTNode<T> insertBefore(SGTNode<T> existing, T newData)
         {
-            return insert(existing, new SGTNode<T>(newData));
+            return insertBefore(existing, new SGTNode<T>(newData));
         }
 
-        public SGTNode<T> insert(SGTNode<T> existing, SGTNode<T> newNode)
+        public SGTNode<T> insertBefore(SGTNode<T> existing, SGTNode<T> newNode)
         {
+            if (existing.Left == null)
+            {
+                existing.Left = newNode;
+                existing.Left.label = pathLeft(existing.label);
+
+                newNode = existing.Left;
+                newNode.parent = existing;
+            }
+            else
+            {
+                SGTNode<T> curr = existing.Left;
+
+                while (curr.Right != null)
+                {
+                    // TODO special case if bottom is reached. probably wont happens ince tree balances
+                    curr = curr.Right;
+                }
+
+                // found a place for the new element
+                curr.Right = newNode;
+                curr.Right.label = pathRight(curr.label);
+
+                newNode = curr.Right;
+                newNode.parent = curr;
+            }
+
+            return insertHelper(newNode);
+        }
+
+        public SGTNode<T> insertAfter(SGTNode<T> existing, T newData)
+        {
+            return insertAfter(existing, new SGTNode<T>(newData));
+        }
+            
+        public SGTNode<T> insertAfter(SGTNode<T> existing, SGTNode<T> newNode)
+        {
+            if (existing.label == -1)
+                throw new InvalidOperationException("The node to insert after is not in the tree");
+
             if(existing.Right == null)
             {
                 existing.Right = newNode;
@@ -104,14 +143,19 @@ namespace EmpiricalTester.DataStructures
                 newNode = curr.Left;
                 newNode.parent = curr;
             }
+            
+            return insertHelper(newNode);
+        }
 
+        private SGTNode<T> insertHelper(SGTNode<T> newNode)
+        {
             n++;
             q = Math.Max(q, n); // after insertion is set to max(MaxNodeCount, NodeCount)
 
             // find depth of newNode
             int d = depth(newNode.label);
 
-            if(d > alphaLog(q))
+            if (d > alphaLog(q))
             {
                 // depth exceeded, find scapegoat
                 SGTNode<T> wChildKnown = newNode;
@@ -121,7 +165,7 @@ namespace EmpiricalTester.DataStructures
                 int sizeW = 2; //newNode + parent (w)
                 int sizeLeft = wChildKnown == w.Left ? 1 : size(w.Left);
                 int sizeRight = wChildKnown == w.Right ? 1 : size(w.Right);
-                
+
 
                 while (sizeLeft <= alpha * sizeW &&
                       sizeRight <= alpha * sizeW)
@@ -134,7 +178,7 @@ namespace EmpiricalTester.DataStructures
                     sizeW = sizeLeft + sizeRight + 1;
 
                 }
-                
+
 
                 SGTNode<T> wParent = w.parent.parent; // TODO can this be null? probably
                 w = w.parent;
@@ -148,6 +192,7 @@ namespace EmpiricalTester.DataStructures
 
             return newNode;
         }
+
         public void remove(SGTNode<T> node)
         {
             bool isRoot = node.parent == null ? true : false;
@@ -228,6 +273,7 @@ namespace EmpiricalTester.DataStructures
             //NodeCount <= α*MaxNodeCount
             if(n <= alpha*q)
             {
+                q = n;
                 rebuild(root, n);
                 reLabel(root); 
             }
@@ -237,7 +283,11 @@ namespace EmpiricalTester.DataStructures
                     reLabel(root);
                 else
                     reLabel(node.parent); // is still pointing at rightMost's current parent
-            }            
+            }
+
+            node.parent = null;
+            node.Right = null;
+            node.Left = null;        
         }
         public List<string> inOrderLabels()
         {

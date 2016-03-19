@@ -6,10 +6,10 @@ namespace EmpiricalTester.DynamicGraph
     {
         public List<DataStructures.SGTNode<HKMSTNode>> incoming{ get; set; }
         public List<DataStructures.SGTNode<HKMSTNode>> outgoing { get; set; }
-
-        public List<DataStructures.SGTNode<HKMSTNode>>.Enumerator OutEnum { get; set; }
-        public List<DataStructures.SGTNode<HKMSTNode>>.Enumerator InEnum { get; set; }
-
+                
+        public IEnumerator<DataStructures.SGTNode<HKMSTNode>> OutEnum { get; set; }
+        public IEnumerator<DataStructures.SGTNode<HKMSTNode>> InEnum { get; set; }
+        
 
         public HKMSTNode()
         {

@@ -4,10 +4,12 @@ using System.Linq;
 
 namespace EmpiricalTester.DynamicGraph
 {
-    class HKMST_V1 : IDynamicGraph
+    public class HKMST_V1 : IDynamicGraph
     {        
         private DataStructures.SGTree<HKMSTNode> nodeOrder;
         private List<DataStructures.SGTNode<HKMSTNode>> nodes;
+
+        private enum insertDirection { Before, After };
 
         public HKMST_V1(double alpha)
         {
@@ -20,6 +22,11 @@ namespace EmpiricalTester.DynamicGraph
             // When a new arc (v, w) has v>w, do the search by calling VERTEX-GUIDEDSEARCH(v,w)
             if (nodeOrder.query(nodes[v], nodes[w]))
                 return vertexGuidedSearch(v, w);
+            else
+            {
+                nodes[v].Value.outgoing.Add(nodes[w]);
+                nodes[w].Value.incoming.Add(nodes[v]);
+            }
 
             return true; // TODO not correct
         }
@@ -30,7 +37,7 @@ namespace EmpiricalTester.DynamicGraph
             if (nodeOrder.Root == null)
                 nodes.Add(nodeOrder.insertFirst(new HKMSTNode()));
             else
-                nodes.Add(nodeOrder.insert(nodeOrder.Root, new HKMSTNode()));
+                nodes.Add(nodeOrder.insertAfter(nodeOrder.Root, new HKMSTNode()));
         }
 
         public void removeEdge(int v, int w)
@@ -53,14 +60,14 @@ namespace EmpiricalTester.DynamicGraph
         private bool vertexGuidedSearch(int iv, int iw)
         {
             var v = nodes[iv];
-            var w = nodes[iv];
+            var w = nodes[iw];
 
             // Article states double linked list for F,B and normal list for FL BL
             var F = new List<DataStructures.SGTNode<HKMSTNode>>();
             var B = new List<DataStructures.SGTNode<HKMSTNode>>();
             F.Add(w);
             B.Add(v);
-
+         
             w.Value.OutEnum = w.Value.outgoing.GetEnumerator();
             w.Value.OutEnum.MoveNext();
             v.Value.InEnum = v.Value.incoming.GetEnumerator();
@@ -74,7 +81,8 @@ namespace EmpiricalTester.DynamicGraph
             if (v.Value.InEnum.Current != null)
                 BL.Add(v);
             
-            while(minLessThanMax(FL, BL))
+            //while(minLessThanMax(FL, BL))
+            while(FL.Count > 0 || BL.Count > 0)
             {
                 var u = FL.Min();
                 var z = BL.Max();
@@ -124,8 +132,81 @@ namespace EmpiricalTester.DynamicGraph
                 }              
                 // End of SEARCH-STEP(vertex u, vertex z)
             }
+
             
-            return true;
+            // let t = min({v}∪{x ∈ F|out(x) = null} and reorder the vertices in F< and B> as discussed previously.
+            var vAndf = F.FindAll(item => item.Value.OutEnum.Current != null);
+            vAndf.Add(v);
+            var t = vAndf.Min();
+            // Let F< = { x ∈ F | x < t} and 
+            var fb = F.FindAll(item => item.label < t.label);
+            // B > = { y ∈ B | y > t}. 
+            var bf = B.FindAll(item => item.label > t.label);
+
+            if(t == v)
+            {
+                DataStructures.SGTNode<HKMSTNode> prev;
+                var link = findLink(t);
+                // move all vertices in fb just after t ... bf is empty
+                nodeOrder.remove(t);
+                foreach (var node in fb)
+                    nodeOrder.remove(node);
+
+
+                if(link.Item2 == insertDirection.After)
+                    prev = nodeOrder.insertAfter(link.Item1, t);
+                else
+                    prev = nodeOrder.insertBefore(link.Item1, t);
+
+                foreach (var node in fb)
+                    prev = nodeOrder.insertAfter(prev, node);
+                
+            }
+            if (t.label < v.label)
+            {
+                DataStructures.SGTNode<HKMSTNode> prev;
+                var link = findLink(t);
+
+                // move all vertices in fb just before t and all vertices in bf just before all vertices in fb
+                // bf + fb + t
+                nodeOrder.remove(t);
+                foreach (var node in bf)
+                    nodeOrder.remove(node);
+                foreach (var node in fb)
+                    nodeOrder.remove(node);
+
+                foreach (var node in fb)
+                    bf.Add(node);
+                bf.Add(t);
+
+
+                if (link.Item2 == insertDirection.After)
+                    prev = nodeOrder.insertAfter(link.Item1, bf[0]);
+                else
+                    prev = nodeOrder.insertBefore(link.Item1, bf[0]);
+
+                for (int i = 1; i < bf.Count; i++)
+                {             
+                    prev = nodeOrder.insertAfter(prev, bf[i]);
+                }                
+            }
+
+            // all done add to outgoing and incoming
+            nodes[iv].Value.outgoing.Add(nodes[iw]);
+            nodes[iw].Value.incoming.Add(nodes[iv]);
+
+            return true; // null
+        }
+
+        private Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection> findLink(DataStructures.SGTNode<HKMSTNode> v)
+        {
+            if (v.parent != null)
+                return new Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection>
+                    (v.parent, (v == v.parent.Left ? insertDirection.Before : insertDirection.After));
+            if (v.Left != null)
+                return new Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection>(v.Left, insertDirection.After);
+
+            return new Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection> (v.Right, insertDirection.Before);
         }
 
         private bool minLessThanMax(SortedSet<DataStructures.SGTNode<HKMSTNode>> FL,
@@ -140,7 +221,7 @@ namespace EmpiricalTester.DynamicGraph
                 return false;
 
             // TODO double check if this is correct
-            return FL.Min(item => item.label) < BL.Max(item => item.label); 
+            return FL.Min(item => item.label) > BL.Max(item => item.label); 
         }
 
         private class Pair

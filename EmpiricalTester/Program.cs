@@ -26,7 +26,7 @@ namespace EmpiricalTester
             var ps = new List<double>() { 0.85, 0.95 };
 
             foreach(var p in ps)
-            {
+            {/*
                 generator.generateGraph(
                 200, // nodes
                 p, // Probability of an edge being added from a complete graph
@@ -72,17 +72,18 @@ namespace EmpiricalTester
 
             
             var measure = new Measuring.OrderMaintenance();
-            string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure2.txt");
-            var ns = new List<int>() { 10000000 };
+            string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure3.txt");
+            var ns = new List<int>() { 10 };
             ps = new List<double>() { 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95 };
             var alphas = new List<double>() { 0.6, 0.65, 0.7, 0.75 };
-            measure.run(outFile, ns, ps, alphas, 5);
+            //measure.run(outFile, ns, ps, alphas, 5);
+            measure.runSequence(outFile, ns, ps, alphas, 5);
 
-           
 
 
-         
-            
+
+
+
 
         }
     }
