@@ -117,8 +117,10 @@ namespace EmpiricalTester.DataStructures
         {
             if (existing.label == -1)
                 throw new InvalidOperationException("The node to insert after is not in the tree");
+            if (newNode.label != -1)
+                throw new InvalidOperationException("newNode is already in the tree");
 
-            if(existing.Right == null)
+            if (existing.Right == null)
             {
                 existing.Right = newNode;
                 existing.Right.label = pathRight(existing.label);
@@ -196,33 +198,37 @@ namespace EmpiricalTester.DataStructures
         public void remove(SGTNode<T> node)
         {
             bool isRoot = node.parent == null ? true : false;
+            SGTNode<T> relabelNode = null;
             node.label = -1; // to indiciate this node has been removed, in case: remove(x), insert(x, newData)
 
             if(node.Left == null && node.Right == null)
             {
-                if (isRoot)
+                Console.WriteLine("both null, is root = " + isRoot);
+                if (isRoot) 
                     root = null;
-                if (node.parent.Left == node)
-                    node.parent.Left = null;
-                if (node.parent.Right == node)
-                    node.parent.Right = null;
+                
+                relabelNode = node.parent;
+                removeParentsLinkTo(node);
             }
             else if(node.Left == null || node.Right == null)
             {
+                Console.WriteLine("one child, is root = " + isRoot);
                 SGTNode<T> child = node.Left != null ? node.Left : node.Right;
 
                 if (!isRoot)
                 {
-                    if (node.parent.Left == node)
-                        node.parent.Left = child;
-                    if (node.parent.Right == node)
-                        node.parent.Right = child;
+                    replaceParentLink(node, child);
+                    relabelNode = child.parent;
                 }
                 else
+                {
                     root = child;
+                    root.parent = null;
+                }                    
             }
             else
             {
+                Console.WriteLine("two children, is root = " + isRoot);
                 SGTNode<T> rightMost = node.Left;
 
                 // find the rightmost node of the left child of node
@@ -234,65 +240,143 @@ namespace EmpiricalTester.DataStructures
                 //special case
                 if(rightMost == node.Left)
                 {
-                    if(isRoot)
+                    Console.WriteLine("rm is left, is root = " + isRoot);
+                    if (isRoot)
                     {
                         root = rightMost;
-                        root.Right = node.Right;                        
+                        root.Right = node.Right;
+                        node.Right.parent = root;
+                        root.parent = null;                      
                     }
                     else
-                    {
+                    {                        
+                        // move rightMost in nodes place
                         rightMost.parent = node.parent;
-                        rightMost.Right = node.Right;
-                        if (node == node.parent.Right)
-                            node.parent.Right = rightMost;
-                        else
+                        if (node.parent.Left == node)
                             node.parent.Left = rightMost;
+                        else
+                            node.parent.Right = rightMost;
+
+                        // rightmost was left so it doesnt have any right child
+                        // put nodes right child on rightmost right
+                        rightMost.Right = node.Right;
+                        node.Right.parent = rightMost;                        
                     }
                 }
                 else
                 {
-                    // if the rightmost node has a left subtree place it under rightmost's parent
+                    Console.WriteLine("rm is not left, is root = " + isRoot);
+                    //node has 2 children, rightMost is not left
                     if (rightMost.Left != null)
                     {
+                        rightMost.Left.parent = rightMost.parent;
                         rightMost.parent.Right = rightMost.Left;
                     }
-
-                    // replace node with rightMost
-                    if (!isRoot)
-                        rightMost.parent = node.parent;
                     else
-                        root = rightMost;
+                    {
+                        rightMost.parent.Right = null;
+                    }
 
-                    rightMost.Left = node.Left;
-                    rightMost.Right = node.Right;
-                }                                
+                    if (isRoot)
+                    {
+                        root = rightMost;
+                        rightMost.parent = null;
+                        rightMost.Left = node.Left;
+                        node.Left.parent = root;
+                        rightMost.Right = node.Right;
+                        node.Right.parent = root;
+                    }
+                    else
+                    {
+                        rightMost.parent = node.parent;
+                        if (node.parent.Left == node)
+                            node.parent.Left = rightMost;
+                        else
+                            node.parent.Right = rightMost;
+
+                        rightMost.Left = node.Left;
+                        node.Left.parent = rightMost;
+                        rightMost.Right = node.Right;
+                        node.Right.parent = rightMost;
+                    }                    
+                }
+
+                relabelNode = rightMost.parent;                               
             }
 
             n--;
 
+            node.parent = null;
+            node.Right = null;
+            node.Left = null;
+
+            if(root != null)
+                checkIntegrityDebug();
+
             //NodeCount <= α*MaxNodeCount
-            if(n <= alpha*q)
+            if (n <= alpha*q && root != null)
             {
                 q = n;
                 rebuild(root, n);
                 reLabel(root); 
             }
-            else
+            else if (root != null)
             {
                 if (isRoot)
                     reLabel(root);
                 else
-                    reLabel(node.parent); // is still pointing at rightMost's current parent
-            }
-
-            node.parent = null;
-            node.Right = null;
-            node.Left = null;        
+                    reLabel(relabelNode); 
+            }                    
         }
         public List<string> inOrderLabels()
         {
             return inOrderLabels(root, new List<string>());
         }
+
+        private void checkIntegrityDebug()
+        {
+            if (root.parent != null)
+                throw new InvalidOperationException("root has parent");
+            checkIntegrityDebug(root.Left);
+            checkIntegrityDebug(root.Right);
+        }
+
+        private void checkIntegrityDebug(SGTNode<T> node)
+        {
+            if (node == null)
+                return;
+
+            if (node.parent.Left != node && node.parent.Right != node)
+                throw new InvalidOperationException("linking is wrong");
+
+            checkIntegrityDebug(node.Left);
+            checkIntegrityDebug(node.Right);
+        }
+
+        private void removeParentsLinkTo(SGTNode<T> child)
+        {
+            if (child == child.parent?.Left)
+                child.parent.Left = null;
+            if (child == child.parent?.Right)
+                child.parent.Right = null;
+        }
+
+        private void replaceParentLink(SGTNode<T> oldChild, SGTNode<T> newChild)
+        {
+            if(oldChild.parent?.Left == oldChild)
+            {
+                oldChild.parent.Left = newChild;
+                newChild.parent = oldChild.parent;
+                oldChild.parent = null;
+            }
+            if(oldChild.parent?.Right == oldChild)
+            {
+                oldChild.parent.Right = newChild;
+                newChild.parent = oldChild.parent;
+                oldChild.parent = null;
+            }
+        }
+
         private List<string> inOrderLabels(SGTNode<T> node, List<string> list)
         {
             if (node == null)
@@ -360,8 +444,8 @@ namespace EmpiricalTester.DataStructures
 
             if (p == null)
             {
-                SGTNode<T> r = buildBalanced(a, 0, ns);
-                r.parent = null;
+                root = buildBalanced(a, 0, ns);
+                root.parent = null;
             }
             else if (p.Right == u)
             {

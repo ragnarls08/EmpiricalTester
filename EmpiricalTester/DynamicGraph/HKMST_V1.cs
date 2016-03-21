@@ -9,6 +9,7 @@ namespace EmpiricalTester.DynamicGraph
         private DataStructures.SGTree<HKMSTNode> nodeOrder;
         private List<DataStructures.SGTNode<HKMSTNode>> nodes;
 
+        private int nCount = 0;//debug
         private enum insertDirection { Before, After };
 
         public HKMST_V1(double alpha)
@@ -21,6 +22,7 @@ namespace EmpiricalTester.DynamicGraph
         {
             // When a new arc (v, w) has v>w, do the search by calling VERTEX-GUIDEDSEARCH(v,w)
             if (nodeOrder.query(nodes[v], nodes[w]))
+            //if (nodeOrder.query(nodes[w], nodes[v]))
                 return vertexGuidedSearch(v, w);
             else
             {
@@ -35,9 +37,11 @@ namespace EmpiricalTester.DynamicGraph
         {
             //nodes.Add(new DataStructures.SGTNode<HKMSTNode>(new HKMSTNode()));
             if (nodeOrder.Root == null)
-                nodes.Add(nodeOrder.insertFirst(new HKMSTNode()));
+                nodes.Add(nodeOrder.insertFirst(new HKMSTNode(nCount)));
             else
-                nodes.Add(nodeOrder.insertAfter(nodeOrder.Root, new HKMSTNode()));
+                nodes.Add(nodeOrder.insertAfter(nodeOrder.Root, new HKMSTNode(nCount)));
+
+            nCount++;
         }
 
         public void removeEdge(int v, int w)
@@ -53,7 +57,7 @@ namespace EmpiricalTester.DynamicGraph
 
         public List<int> topology()
         {
-            throw new NotImplementedException();
+            return nodeOrder.inOrder().ConvertAll<int>(item => item.n);            
         }
 
 
@@ -82,7 +86,7 @@ namespace EmpiricalTester.DynamicGraph
                 BL.Add(v);
             
             //while(minLessThanMax(FL, BL))
-            while(FL.Count > 0 || BL.Count > 0)
+            while(FL.Count > 0 && BL.Count > 0)
             {
                 var u = FL.Min();
                 var z = BL.Max();
@@ -146,49 +150,39 @@ namespace EmpiricalTester.DynamicGraph
             if(t == v)
             {
                 DataStructures.SGTNode<HKMSTNode> prev;
-                var link = findLink(t);
-                // move all vertices in fb just after t ... bf is empty
-                nodeOrder.remove(t);
+                // move all vertices in fb just after t ... bf is empty            
                 foreach (var node in fb)
                     nodeOrder.remove(node);
 
-
-                if(link.Item2 == insertDirection.After)
-                    prev = nodeOrder.insertAfter(link.Item1, t);
-                else
-                    prev = nodeOrder.insertBefore(link.Item1, t);
-
-                foreach (var node in fb)
-                    prev = nodeOrder.insertAfter(prev, node);
-                
+                if (fb.Count > 0)
+                {
+                    prev = nodeOrder.insertAfter(t, fb[0]);
+                    for (int i = 1; i < fb.Count; i++)
+                        prev = nodeOrder.insertAfter(prev, fb[i]);
+                }                    
             }
             if (t.label < v.label)
             {
                 DataStructures.SGTNode<HKMSTNode> prev;
-                var link = findLink(t);
-
                 // move all vertices in fb just before t and all vertices in bf just before all vertices in fb
-                // bf + fb + t
-                nodeOrder.remove(t);
+
                 foreach (var node in bf)
                     nodeOrder.remove(node);
                 foreach (var node in fb)
                     nodeOrder.remove(node);
 
-                foreach (var node in fb)
-                    bf.Add(node);
-                bf.Add(t);
+                foreach (var item in fb)
+                    bf.Add(item);
 
-
-                if (link.Item2 == insertDirection.After)
-                    prev = nodeOrder.insertAfter(link.Item1, bf[0]);
-                else
-                    prev = nodeOrder.insertBefore(link.Item1, bf[0]);
-
-                for (int i = 1; i < bf.Count; i++)
-                {             
-                    prev = nodeOrder.insertAfter(prev, bf[i]);
-                }                
+                if (bf.Count > 0)
+                {
+                    prev = nodeOrder.insertBefore(t, bf[bf.Count-1]);
+                    if(bf.Count > 1)
+                    {
+                        for (int i = bf.Count - 2; i >= 0; i--)
+                            prev = nodeOrder.insertBefore(prev, bf[i]);
+                    }                    
+                }
             }
 
             // all done add to outgoing and incoming
@@ -198,16 +192,7 @@ namespace EmpiricalTester.DynamicGraph
             return true; // null
         }
 
-        private Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection> findLink(DataStructures.SGTNode<HKMSTNode> v)
-        {
-            if (v.parent != null)
-                return new Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection>
-                    (v.parent, (v == v.parent.Left ? insertDirection.Before : insertDirection.After));
-            if (v.Left != null)
-                return new Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection>(v.Left, insertDirection.After);
-
-            return new Tuple<DataStructures.SGTNode<HKMSTNode>, insertDirection> (v.Right, insertDirection.Before);
-        }
+ 
 
         private bool minLessThanMax(SortedSet<DataStructures.SGTNode<HKMSTNode>> FL,
                                     SortedSet<DataStructures.SGTNode<HKMSTNode>> BL)

@@ -80,7 +80,7 @@ namespace EmpiricalTester.GraphGeneration
                 {
                     int v = currentEdge.Item1;
                     int w = currentEdge.Item2;
-                                    
+                    Console.WriteLine(v + " -> " + w);                                    
                     for(int x = 0; x < staticGraphs.Count; x++)
                     {
                         staticGraphs[x].addEdge(v, w);
