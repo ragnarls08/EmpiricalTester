@@ -80,6 +80,8 @@
     <Compile Include="HKMST\HKMST_SPARSE.cs" />
     <Compile Include="HKMST\Node.cs" />
     <Compile Include="Measuring\OrderMaintenance.cs" />
+    <Compile Include="StaticGraph\GenericTarjan.cs" />
+    <Compile Include="StaticGraph\GenericTarjanNode.cs" />
     <Compile Include="StaticGraph\IStaticGraph.cs" />
     <Compile Include="StaticGraph\Kahn.cs" />
     <Compile Include="Program.cs" />

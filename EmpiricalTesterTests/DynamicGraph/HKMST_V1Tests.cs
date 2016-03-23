@@ -15,21 +15,28 @@ namespace EmpiricalTester.DynamicGraph.Tests
         public void addEdgeTestCycle()
         {
             var hkmst = new HKMST_V1(0.75);
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 8; i++)
                 hkmst.addVertex();
 
-            
-            
-
-            //var b3 = hkmst.addEdge(1, 4); 
-            //var b4 = hkmst.addEdge(2, 4);
-            //var b5 = hkmst.addEdge(0, 1);
-            //var b6 = hkmst.addEdge(0, 4);
-            //var b7 = hkmst.addEdge(1, 3);
-            //var b8 = hkmst.addEdge(2, 4);
-            //var b9 = hkmst.addEdge(2, 1);
-            var b10 = hkmst.addEdge(0, 2);
-            var b11 = hkmst.addEdge(2, 0); // cycle
+            hkmst.addEdge(0, 1);
+            hkmst.addEdge(4, 2);
+            hkmst.addEdge(5, 4);
+            hkmst.addEdge(7, 5);
+            hkmst.addEdge(0, 5);
+            hkmst.addEdge(6, 1);
+            hkmst.addEdge(0, 3);
+            hkmst.addEdge(6, 2);
+            hkmst.addEdge(6, 4);
+            hkmst.addEdge(1, 2);
+            hkmst.addEdge(3, 7);
+            hkmst.addEdge(3, 4);
+            hkmst.addEdge(0, 2);
+            hkmst.addEdge(1, 4);
+            hkmst.addEdge(7, 2);
+            hkmst.addEdge(5, 6);
+            hkmst.addEdge(0, 6);
+            hkmst.addEdge(0, 7);
+            hkmst.addEdge(7, 3);     
 
 
 

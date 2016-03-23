@@ -18,7 +18,7 @@ namespace EmpiricalTester.DataStructures.Tests
             SGTNode<int> root = sgt.insertFirst(1);
             SGTNode<int> two = sgt.insertAfter(root, 2);
 
-            Assert.IsTrue(sgt.query(root, two));
+            Assert.IsTrue(sgt.query(two, root));
         }
         [TestMethod()]
         public void insertTestNotSequential()
@@ -35,11 +35,11 @@ namespace EmpiricalTester.DataStructures.Tests
             SGTNode<int> c = sgt.insertAfter(root, 4);
             SGTNode<int> d = sgt.insertAfter(b, 5);
 
-            bool aGTroot = sgt.query(root, a);
-            bool bGTa = sgt.query(a, b);
-            bool aGTc = sgt.query(c, a);
-            bool dGTa = sgt.query(a, d);
-            bool dGTb = sgt.query(b, d);
+            bool aGTroot = sgt.query(a, root);
+            bool bGTa = sgt.query(b, a);
+            bool aGTc = sgt.query(a, c);
+            bool dGTa = sgt.query(d, a);
+            bool dGTb = sgt.query(d, b);
 
             Assert.IsTrue(aGTroot && bGTa && aGTc && dGTa && dGTb);
         }
@@ -109,7 +109,7 @@ namespace EmpiricalTester.DataStructures.Tests
             bool dGTa = sgt.query(a, d);
             bool dGTb = sgt.query(b, d);
 
-            Assert.IsTrue(!aGTroot && !bGTa && !aGTc && !dGTa && !dGTb);
+            Assert.IsTrue(aGTroot && bGTa && aGTc && dGTa && dGTb);
         }
 
         [TestMethod()]
@@ -127,7 +127,7 @@ namespace EmpiricalTester.DataStructures.Tests
             
             sgt.remove(c);
 
-            bool b1 = sgt.query(b, a);
+            bool b1 = sgt.query(a, b);
             
             Assert.IsTrue(b1);
         }
@@ -163,9 +163,9 @@ namespace EmpiricalTester.DataStructures.Tests
                         
             sgt.remove(c);
 
-            bool b1 = sgt.query(b, a);
-            bool b2 = sgt.query(d, b);
-            bool b3 = sgt.query(d, a);
+            bool b1 = sgt.query(a, b);
+            bool b2 = sgt.query(b, d);
+            bool b3 = sgt.query(a, d);
 
             Assert.IsTrue(b1 && b2 && b3);
         }
@@ -187,9 +187,9 @@ namespace EmpiricalTester.DataStructures.Tests
 
             sgt.remove(a);
 
-            bool b1 = sgt.query(d, c);
-            bool b2 = sgt.query(c, b);
-            bool b3 = sgt.query(d, b);
+            bool b1 = sgt.query(c, d);
+            bool b2 = sgt.query(b, c);
+            bool b3 = sgt.query(b, d);
 
             Assert.IsTrue(b1 && b2 && b3);
         }
@@ -211,9 +211,9 @@ namespace EmpiricalTester.DataStructures.Tests
 
             sgt.remove(b);
 
-            bool b1 = sgt.query(c, a);
-            bool b2 = sgt.query(d, a);
-            bool b3 = sgt.query(c, d);
+            bool b1 = sgt.query(a, c);
+            bool b2 = sgt.query(a, d);
+            bool b3 = sgt.query(d, c);
 
             Assert.IsTrue(b1 && b2 && b3);
         }
@@ -233,7 +233,7 @@ namespace EmpiricalTester.DataStructures.Tests
 
             sgt.remove(b);
 
-            bool b1 = sgt.query(c, d);            
+            bool b1 = sgt.query(d, c);            
 
             Assert.IsTrue(b1);
         }
@@ -257,8 +257,8 @@ namespace EmpiricalTester.DataStructures.Tests
 
             sgt.remove(a);
 
-            bool b1 = sgt.query(d, c);
-            bool b2 = sgt.query(b, c);
+            bool b1 = sgt.query(c, d);
+            bool b2 = sgt.query(c, b);
 
             Assert.IsTrue(b1 && b2);
         }
@@ -284,8 +284,8 @@ namespace EmpiricalTester.DataStructures.Tests
 
             sgt.remove(a);
 
-            bool b1 = sgt.query(d, c);
-            bool b2 = sgt.query(b, c);
+            bool b1 = sgt.query(c, d);
+            bool b2 = sgt.query(c, b);
 
             Assert.IsTrue(b1 && b2);
         }

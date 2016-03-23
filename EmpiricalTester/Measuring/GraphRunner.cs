@@ -9,6 +9,24 @@ namespace EmpiricalTester.Measuring
 {
     class GraphRunner
     {
+        public void runFolder(string folder, string outputFolder, int repeatCount, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        {
+            if (!Directory.Exists(folder))
+                throw new InvalidDataException("Input folder does not exist");
+
+            if (!Directory.Exists(outputFolder))
+                Directory.CreateDirectory(outputFolder);
+            /*
+            var directories = Directory.GetDirectories(folder);
+            directories.
+
+            foreach(var dir in directories)
+            {
+                if(dir.)
+            }*/
+        }
+
+
         public void runGraph(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {          
             for(int x = 0; x < fileNames.Length; x++)

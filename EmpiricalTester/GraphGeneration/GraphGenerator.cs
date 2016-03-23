@@ -27,12 +27,13 @@ namespace EmpiricalTester.GraphGeneration
         /// <param name="staticGraphs"></param>
         /// <param name="dynamicGraphs"></param>
         /// <returns></returns>
-        public string generateGraph(int n, double p, bool writeToFile, bool staticCheck, bool compareTopologies, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        public string generateGraph(int n, double p, string filename, bool writeToFile, bool staticCheck, bool compareTopologies, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
             this.staticCheck = staticCheck;
             this.writeToFile = writeToFile;
             DateTime datenow = DateTime.Now;
-            filename = datenow.ToString("yyyyMMdd-HH-mm-ss") + string.Format("({0}, {1})", n.ToString(), p.ToString());
+            //filename = datenow.ToString("yyyyMMdd-HH-mm-ss") + string.Format("({0}, {1})", n.ToString(), p.ToString());
+            this.filename = filename;
             allEdges = new List<Tuple<int, int>>();
 
             // create all possible edges
@@ -79,8 +80,7 @@ namespace EmpiricalTester.GraphGeneration
                 if (random.Next(0,100)/100.0 < p)
                 {
                     int v = currentEdge.Item1;
-                    int w = currentEdge.Item2;
-                    Console.WriteLine(v + " -> " + w);                                    
+                    int w = currentEdge.Item2;                              
                     for(int x = 0; x < staticGraphs.Count; x++)
                     {
                         staticGraphs[x].addEdge(v, w);
@@ -120,6 +120,7 @@ namespace EmpiricalTester.GraphGeneration
                     {
                         edges.Add(new Tuple<int, int>(v, w)); // add the error edge to the list
                         writeFile("Crash-NotAgree");
+
                         throw new Exception("The algorithms do not agree");
                     }
                     
@@ -258,7 +259,8 @@ namespace EmpiricalTester.GraphGeneration
                     { 
                         foreach (var algorithm in topologies)
                         {
-                            if(!algorithm.Item2.query(algorithm.Item3[i], algorithm.Item3[j]))
+                            //if(!algorithm.Item2.query(algorithm.Item3[i], algorithm.Item3[j]))
+                            if (!algorithm.Item2.query(algorithm.Item3[j], algorithm.Item3[i]))
                             {
                                 writeFile("TopoCompFail");
                                 throw new Exception("Topological comparison failed for: " + algorithm.Item1);

@@ -28,8 +28,8 @@ namespace EmpiricalTester.DataStructures
             return n;
         }
         public bool query(SGTNode<T> a, SGTNode<T> b)
-        {
-            return a.label < b.label;
+        {            
+            return a.label > b.label;
         }
         public SGTNode<T> Root
         {
@@ -64,7 +64,7 @@ namespace EmpiricalTester.DataStructures
         public SGTNode<T> insertFirst(SGTNode<T> root)
         {
             this.root = root;
-            root.label = (long.MaxValue / 2) + 1;
+            root.label = (long.MaxValue / 2) + 1; 
 
             n++;
             q = n;
@@ -203,7 +203,7 @@ namespace EmpiricalTester.DataStructures
 
             if(node.Left == null && node.Right == null)
             {
-                Console.WriteLine("both null, is root = " + isRoot);
+                //Console.WriteLine("both null, is root = " + isRoot);
                 if (isRoot) 
                     root = null;
                 
@@ -212,7 +212,7 @@ namespace EmpiricalTester.DataStructures
             }
             else if(node.Left == null || node.Right == null)
             {
-                Console.WriteLine("one child, is root = " + isRoot);
+                //Console.WriteLine("one child, is root = " + isRoot);
                 SGTNode<T> child = node.Left != null ? node.Left : node.Right;
 
                 if (!isRoot)
@@ -228,7 +228,7 @@ namespace EmpiricalTester.DataStructures
             }
             else
             {
-                Console.WriteLine("two children, is root = " + isRoot);
+                //Console.WriteLine("two children, is root = " + isRoot);
                 SGTNode<T> rightMost = node.Left;
 
                 // find the rightmost node of the left child of node
@@ -240,7 +240,7 @@ namespace EmpiricalTester.DataStructures
                 //special case
                 if(rightMost == node.Left)
                 {
-                    Console.WriteLine("rm is left, is root = " + isRoot);
+                    //Console.WriteLine("rm is left, is root = " + isRoot);
                     if (isRoot)
                     {
                         root = rightMost;
@@ -265,7 +265,7 @@ namespace EmpiricalTester.DataStructures
                 }
                 else
                 {
-                    Console.WriteLine("rm is not left, is root = " + isRoot);
+                    //Console.WriteLine("rm is not left, is root = " + isRoot);
                     //node has 2 children, rightMost is not left
                     if (rightMost.Left != null)
                     {
@@ -480,7 +480,7 @@ namespace EmpiricalTester.DataStructures
         private long pathLeft(long label)
         {
             long lastBit = (label & -label);
-            return (label ^ lastBit) | (lastBit >> 1);
+            return (label ^ lastBit) | (lastBit >> 1);             
         }
         // least significant bit copied "right"
         private long pathRight(long label)
