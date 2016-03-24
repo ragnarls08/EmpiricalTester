@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using C5;
 
 namespace EmpiricalTester.DynamicGraph
 {
@@ -78,8 +79,10 @@ namespace EmpiricalTester.DynamicGraph
             v.Value.InEnum = v.Value.incoming.GetEnumerator();
             v.Value.InEnum.MoveNext();
 
-            var FL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();
-            var BL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();
+            //var FL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();            
+            var FL = new C5.IntervalHeap<DataStructures.SGTNode<HKMSTNode>>();
+            //var BL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();
+            var BL = new C5.IntervalHeap<DataStructures.SGTNode<HKMSTNode>>();
 
             if (w.Value.OutEnum.Current != null)
                 FL.Add(w);
@@ -89,9 +92,13 @@ namespace EmpiricalTester.DynamicGraph
             // For ease of notation, we adopt the convention that the
             // minimum of an empty set is bigger than any other value and the maximum of an empty
             // set is smaller than any other value.
-            var u = FL.Min();
-            var z = BL.Max();
-
+            DataStructures.SGTNode<HKMSTNode> u = null;
+            DataStructures.SGTNode<HKMSTNode> z = null;
+            if(FL.Count > 0)
+                u = FL.FindMin();
+            if(BL.Count > 0)
+                z = BL.FindMax();
+            
             while (FL.Count > 0 && BL.Count > 0 && (u == z || nodeOrder.query(z, u)))
             {
                 // SEARCH-STEP(vertex u, vertex z)
@@ -112,9 +119,11 @@ namespace EmpiricalTester.DynamicGraph
                 z.Value.InEnum.MoveNext();
 
                 if (u.Value.OutEnum.Current == null)
-                    FL.Remove(u);
+                    FL.DeleteMin();
+                    //FL.Remove(u);
                 if (z.Value.InEnum.Current == null)
-                    BL.Remove(z);
+                    BL.DeleteMax();
+                    //BL.Remove(z);
 
                 if (B.Contains(x))
                     return false; // Pair(uz.from, x.Current);
@@ -140,8 +149,11 @@ namespace EmpiricalTester.DynamicGraph
                 }
 
                 // End of SEARCH-STEP(vertex u, vertex z)
-                u = FL.Min();
-                z = BL.Max();
+                if (FL.Count > 0)
+                    u = FL.FindMin();
+                if (BL.Count > 0)
+                    z = BL.FindMax();
+                
             }
             
 

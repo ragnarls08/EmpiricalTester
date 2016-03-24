@@ -8,6 +8,7 @@ namespace EmpiricalTester
 {
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
             List<StaticGraph.IStaticGraph> staticGraphs = new List<StaticGraph.IStaticGraph>();
@@ -30,14 +31,14 @@ namespace EmpiricalTester
             for(int i = 1; i < 11; i++)
             {
                 foreach (var p in ps)
-                {
+                {/*
                     generator.generateGraph(
-                    100, // nodes
+                    1000, // nodes
                     p, // Probability of an edge being added from a complete graph
-                    i + "-Graph(250, " + p + ")",
-                    false, // writeToFile
+                    i + "-Graph(1000, " + p + ")",
+                    true, // writeToFile
                     false, // staticCheck
-                    true, // topology compare
+                    false, // topology compare
                     staticGraphs, dynamicGraphs);
                     //*/
                 }
@@ -53,8 +54,8 @@ namespace EmpiricalTester
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-44(250, 0.95).txt"),
 
 
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-26-18(1000, 0.55).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-48(1000, 0.65).txt"),
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000\0.3\3-Graph(1000, 0.3).txt",
+                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-48(1000, 0.65).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-18(1000, 0.75).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-24-33(1000, 0.85).txt"),                              
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-23-52(1000, 0.95).txt"),
@@ -68,14 +69,14 @@ namespace EmpiricalTester
                 };
 
             var runner = new Measuring.GraphRunner();
-            //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
+            //runner.runGraph(fileNames, 10, false, false, staticGraphs, dynamicGraphs);
             //runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
-            /*
+            
             runner.runFolder(
-                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\250",
-                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\250\outPut",
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000",
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000\outPut",
                 5,
-                100,
+                1000,
                 dynamicGraphs
                 );
                 //*/
@@ -90,7 +91,7 @@ namespace EmpiricalTester
 
 
             Console.WriteLine("\n\ndone");
-            Console.ReadLine();
+            //Console.ReadLine();
 
         }
     }
