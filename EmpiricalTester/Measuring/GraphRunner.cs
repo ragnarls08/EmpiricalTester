@@ -4,28 +4,126 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms.DataVisualization.Charting;
+using EmpiricalTester.DynamicGraph;
 
 namespace EmpiricalTester.Measuring
 {
     class GraphRunner
     {
-        public void runFolder(string folder, string outputFolder, int repeatCount, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        private class Measurement
+        {
+            public string DirName { get; set; }
+            public List<Tuple<string, List<long>>> measurements { get; set; }
+
+            public Measurement(string name)
+            {
+                this.DirName = name;
+                measurements = new List<Tuple<string, List<long>>>();
+            }
+        }
+
+        public void runFolder(string folder, string outputFolder, int repeatCount, int resolution, List<IDynamicGraph> dynamicGraphs)
         {
             if (!Directory.Exists(folder))
                 throw new InvalidDataException("Input folder does not exist");
 
             if (!Directory.Exists(outputFolder))
                 Directory.CreateDirectory(outputFolder);
-            /*
-            var directories = Directory.GetDirectories(folder);
-            directories.
 
-            foreach(var dir in directories)
+            // List< (algName, (folderName, list<long))>
+            var measurements = new List<Measurement>();
+            var directories = Directory.GetDirectories(folder);
+
+            foreach (var dir in directories)
             {
-                if(dir.)
-            }*/
+                if (dir != outputFolder)
+                {
+                    measurements.Add(new Measurement(dir.Substring(dir.LastIndexOf('\\')+1)));
+                    foreach (var alg in dynamicGraphs)
+                    {
+                        var ms = new List<List<long>>();
+                    
+                        foreach (var file in Directory.EnumerateFiles(dir))
+                        {
+                            // average per resolution, 1 alg, 1 file
+                            ms.Add(runFile(file, alg, resolution, repeatCount));
+                        }
+                        // get the average of all the files (same p value)
+                        var avg = Transpose(ms).ConvertAll(item => ((long)item.Average()));
+                        var curr = measurements.Find(item => item.DirName == dir.Substring(dir.LastIndexOf('\\')+1));
+                        curr.measurements.Add(new Tuple<string, List<long>>(alg.GetType().ToString(), avg));
+                    }                                        
+                }
+            }
+
+            // writeToFile
+            var lines = new List<string>();
+            
+            foreach(var item in measurements)
+            {
+                lines.Add(item.DirName);
+                foreach (var alg in item.measurements)
+                {                    
+                    var s = alg.Item1.Substring(alg.Item1.LastIndexOf('.'));
+                    foreach(var number in alg.Item2)
+                    {
+                        s += "\t" + number.ToString();
+                    }
+                    lines.Add(s);
+                }
+            }
+
+            File.WriteAllLines(outputFolder + "\\" + DateTime.Now.ToString("yyyyMMdd-HH-mm-ss") + ".txt", lines);
         }
 
+        private List<long> runFile(string file, IDynamicGraph alg, int resolution, int repeatCount)
+        {
+            InputFile graph = readFile(file);
+            Stopwatch sw = new Stopwatch();
+            List<List<long>> times = new List<List<long>>();
+            List<List<long>> timesVector = new List<List<long>>();
+
+            for (int i = 0; i < repeatCount; i++)
+            {
+                alg.resetAll();
+                int skip = 0;
+                times.Add(new List<long>());
+
+                for (int n = 0; n < graph.n; n++)
+                    alg.addVertex();
+
+                do
+                {
+                    sw.Start();
+                    foreach(var edge in graph.edges.Skip(skip).Take(resolution))
+                    {
+                        alg.addEdge(edge.from, edge.to);
+                    }
+                    sw.Stop();
+                    times[i].Add(sw.ElapsedTicks);
+                    sw.Reset();
+
+                    skip += resolution;
+                } while (skip < graph.edges.Count);                
+            }
+
+            var ret = Transpose(times).ConvertAll(item => ((long)item.Average()));
+
+            return ret;
+        }
+
+        // @Rawling, stackoverflow
+        private static List<List<T>> Transpose<T>(List<List<T>> lists)
+        {
+            var longest = lists.Any() ? lists.Max(l => l.Count) : 0;
+            List<List<T>> outer = new List<List<T>>(longest);
+            for (int i = 0; i < longest; i++)
+                outer.Add(new List<T>(lists.Count));
+            for (int j = 0; j < lists.Count; j++)
+                for (int i = 0; i < longest; i++)
+                    outer[i].Add(lists[j].Count > i ? lists[j][i] : default(T));
+            return outer;
+        }
 
         public void runGraph(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {          

@@ -24,19 +24,20 @@ namespace EmpiricalTester
             DynamicGraph.HKMST_V1 hkmst_v1 = new DynamicGraph.HKMST_V1(0.65);
             dynamicGraphs.Add(hkmst_v1);
 
+
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
             var ps = new List<double>() { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 };
             for(int i = 1; i < 11; i++)
             {
                 foreach (var p in ps)
-                {/*
+                {
                     generator.generateGraph(
-                    250, // nodes
+                    100, // nodes
                     p, // Probability of an edge being added from a complete graph
                     i + "-Graph(250, " + p + ")",
-                    true, // writeToFile
+                    false, // writeToFile
                     false, // staticCheck
-                    false, // topology compare
+                    true, // topology compare
                     staticGraphs, dynamicGraphs);
                     //*/
                 }
@@ -52,22 +53,13 @@ namespace EmpiricalTester
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-44(250, 0.95).txt"),
 
 
-                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-26-18(1000, 0.55).txt"),
-                //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-48(1000, 0.65).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-26-18(1000, 0.55).txt"),
+                Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-48(1000, 0.65).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-18(1000, 0.75).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-24-33(1000, 0.85).txt"),                              
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-23-52(1000, 0.95).txt"),
 
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-23(250, 0.1).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-23(250, 0.2).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-24(250, 0.3).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-25(250, 0.4).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-26(250, 0.5).txt"),
-
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-27(250, 0.6).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-29(250, 0.7).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-31(250, 0.8).txt"),
-                Path.Combine(Environment.CurrentDirectory, @"Output\20160323-12-35-33(250, 0.9).txt"),
+               
 
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160303-04-00(1000, 0.9).txt"),
 
@@ -78,14 +70,15 @@ namespace EmpiricalTester
             var runner = new Measuring.GraphRunner();
             //runner.runGraph(fileNames, 5, false, true, staticGraphs, dynamicGraphs);
             //runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
+            /*
             runner.runFolder(
                 @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\250",
                 @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\250\outPut",
                 5,
-                staticGraphs
-                , dynamicGraphs
+                100,
+                dynamicGraphs
                 );
-
+                //*/
             
             var measure = new Measuring.OrderMaintenance();
             string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure3.txt");

@@ -22,6 +22,8 @@ namespace EmpiricalTester.DataStructures
         public virtual void Clear()
         {
             root = null;
+            this.n = 0;
+            this.q = 0;
         }
         public int count()
         {

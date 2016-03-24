@@ -51,7 +51,9 @@ namespace EmpiricalTester.DynamicGraph
 
         public void resetAll()
         {
-            //this.graph.Clear();
+            this.nCount = 0;
+            this.nodeOrder.Clear();
+            this.nodes.Clear();
         }
 
         public List<int> topology()
@@ -83,18 +85,17 @@ namespace EmpiricalTester.DynamicGraph
                 FL.Add(w);
             if (v.Value.InEnum.Current != null)
                 BL.Add(v);
-                        
+
             // For ease of notation, we adopt the convention that the
             // minimum of an empty set is bigger than any other value and the maximum of an empty
             // set is smaller than any other value.
- 
-            while (FL.Count > 0 && BL.Count > 0 && (FL.Min() == BL.Max() || nodeOrder.query(BL.Max(), FL.Min())))
+            var u = FL.Min();
+            var z = BL.Max();
+
+            while (FL.Count > 0 && BL.Count > 0 && (u == z || nodeOrder.query(z, u)))
             {
                 // SEARCH-STEP(vertex u, vertex z)
-
-                var u = FL.Min();
-                var z = BL.Max();
-
+                
                 // We denote by first-out(x) and first-in(x) the first arc on the outgoing 
                 // list and the first arc on the incoming list of vertex x, respectively.
                 // We denote by next-out((x, y)) and next-in((x, y)) the arcs after (x, y) 
@@ -137,9 +138,10 @@ namespace EmpiricalTester.DynamicGraph
                     if (y.Value.InEnum.Current != null)
                         BL.Add(y);
                 }
-                    
+
                 // End of SEARCH-STEP(vertex u, vertex z)
-                 
+                u = FL.Min();
+                z = BL.Max();
             }
             
 
