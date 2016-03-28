@@ -38,7 +38,7 @@ namespace EmpiricalTester.GraphGeneration
             DateTime datenow = DateTime.Now;
             //filename = datenow.ToString("yyyyMMdd-HH-mm-ss") + string.Format("({0}, {1})", n.ToString(), p.ToString());
             this.filename = filename;
-            allEdges = new List<Tuple<int, int>>();
+            allEdges = new List<Tuple<int, int>>(n);
 
             // create all possible edges
             for(int i = 0; i < n; i++)

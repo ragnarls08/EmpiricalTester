@@ -23,23 +23,23 @@ namespace EmpiricalTester
             DynamicGraph.IDynamicGraph simple = new DynamicGraph.SimpleIncremental();
             //dynamicGraphs.Add(simple);
             DynamicGraph.HKMST_V1 hkmst_v1 = new DynamicGraph.HKMST_V1(0.65);
-            //dynamicGraphs.Add(hkmst_v1);
+            dynamicGraphs.Add(hkmst_v1);
             DynamicGraph.HKMST_Final hkmst = new DynamicGraph.HKMST_Final(0.65);
-            dynamicGraphs.Add(hkmst);
+            //dynamicGraphs.Add(hkmst);
 
             
 
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
-            var ps = new List<double>() { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 };
+            var ps = new List<double>() { 0.1, 0.2, 0.3, /*0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
             for(int i = 1; i < 11; i++)
             {
                 foreach (var p in ps)
                 {/*
                     generator.generateGraph(
-                    1000, // nodes
+                    250, // nodes
                     p, // Probability of an edge being added from a complete graph
-                    i + "-Graph(2500, " + p + ")",
-                    true, // writeToFile
+                    i + "-Graph(5000, " + p + ")",
+                    false, // writeToFile
                     false, // staticCheck
                     false, // topology compare
                     staticGraphs, dynamicGraphs);
@@ -57,7 +57,7 @@ namespace EmpiricalTester
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-13-44(250, 0.95).txt"),
 
 
-                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000\0.3\3-Graph(1000, 0.3).txt",
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\2500\0.3\3-Graph(2500, 0.3).txt",
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-48(1000, 0.65).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-25-18(1000, 0.75).txt"),
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160317-07-24-33(1000, 0.85).txt"),                              
@@ -76,10 +76,10 @@ namespace EmpiricalTester
             //runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
             /*
             runner.runFolder(
-                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\2500",
-                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\2500\outPut",
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000",
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000\outPut",
                 5,
-                10000,
+                5000,
                 dynamicGraphs
                 );
                 //*/

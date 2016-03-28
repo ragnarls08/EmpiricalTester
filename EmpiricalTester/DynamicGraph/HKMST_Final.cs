@@ -47,8 +47,8 @@ namespace EmpiricalTester.DynamicGraph
             var w = nodes[iw];
 
             // Article states double linked list for F,B and normal list for FL BL
-            var F = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            var B = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
+            var F = new List<DataStructures.SGTNode<HKMSTNodeFinal>>(1);
+            var B = new List<DataStructures.SGTNode<HKMSTNodeFinal>>(1);
             F.Add(w);
             w.Value.InF = true;
             B.Add(v);
@@ -61,23 +61,23 @@ namespace EmpiricalTester.DynamicGraph
 
             DataStructures.SGTNode<HKMSTNodeFinal> s = v;
 
-            var Fa = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();// should be linked list?
-            var Fp = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            var Ba = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            var Bp = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
-
+            var Fa = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();// should be linked list?
+            var Fp = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
+            var Ba = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
+            var Bp = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
+            
             if (w.Value.OutEnum.Current != null)
-                Fa.Add(w);
+                Fa.AddFirst(w);
                              
             if (v.Value.InEnum.Current != null)
-                Ba.Add(v);
+                Ba.AddFirst(v);
 
             while (Fa.Count > 0 && Ba.Count > 0)
             {
-                var u = Fa[0];
-                var z = Ba[0];
+                var u = Fa.First.Value;
+                var z = Ba.First.Value;
 
-                if(u == z || nodeOrder.query(z, u))
+                if(nodeOrder.query(z, u) || u == z)
                 {
                     // SEARCH_STEP(u,z)
                     var x = u.Value.OutEnum.Current;
@@ -111,7 +111,7 @@ namespace EmpiricalTester.DynamicGraph
                         x.Value.OutEnum = x.Value.outgoing.GetEnumerator();
                         x.Value.OutEnum.MoveNext();
                         if (x.Value.OutEnum.Current != null)
-                            Fa.Add(x);
+                            Fa.AddFirst(x);
                     }
                     if (!y.Value.InB)
                     {
@@ -120,7 +120,7 @@ namespace EmpiricalTester.DynamicGraph
                         y.Value.InEnum = y.Value.incoming.GetEnumerator();
                         y.Value.InEnum.MoveNext();
                         if (y.Value.InEnum.Current != null)
-                            Ba.Add(y);
+                            Ba.AddFirst(y);
                     }
                     // END STEP
                 }
@@ -129,12 +129,12 @@ namespace EmpiricalTester.DynamicGraph
                     if(nodeOrder.query(u, s))
                     {
                         Fa.Remove(u);
-                        Fp.Add(u);
+                        Fp.AddFirst(u);
                     }
                     if(nodeOrder.query(s, z))
                     {
                         Ba.Remove(z);
-                        Bp.Add(z);
+                        Bp.AddFirst(z);
                     }
                 }
 
@@ -145,10 +145,21 @@ namespace EmpiricalTester.DynamicGraph
                     if(Fp.Count > 0)
                     {
                         //choose s from Fp (median stuff)
-                        s = Algorithms.Median.QuickSelect(Fp, Fp.Count / 2, 
+                        s = Algorithms.Median.QuickSelect(Fp.ToList(), Fp.Count / 2, 
                             Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a,b) => a.label > b.label ? 1: a.label < b.label ? -1 : 0));
-                        Fa = Fp.FindAll(item => item.label <= s.label);
-                        Fp.RemoveAll(item => Fa.Contains(item));                // badbadbad                        
+                        
+                        Fa.Clear();
+                        var curr = Fp.First;
+                        do
+                        {
+                            var next = curr.Next;
+                            if(curr.Value.label <= s.label)
+                            {
+                                Fp.Remove(curr);
+                                Fa.AddFirst(curr.Value);                                
+                            }
+                            curr = next;
+                        } while (curr != null);                       
                     }
                 }
                 if(Ba.Count == 0)
@@ -158,11 +169,22 @@ namespace EmpiricalTester.DynamicGraph
                     if(Bp.Count > 0)
                     {
                         //choose s from Fp (median stuff)
-                        s = Algorithms.Median.QuickSelect(Bp, Bp.Count / 2,
+                        s = Algorithms.Median.QuickSelect(Bp.ToList(), Bp.Count / 2,
                             Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0));
-                        Ba = Bp.FindAll(item => item.label >= s.label);
-                        Bp.RemoveAll(item => Ba.Contains(item));                // badbadbad
-                        //vantar að assigna i ac tive
+
+
+                        Ba.Clear();
+                        var curr = Bp.First;
+                        do
+                        {
+                            var next = curr.Next;
+                            if (curr.Value.label >= s.label)
+                            {
+                                Bp.Remove(curr);
+                                Ba.AddFirst(curr.Value);                                
+                            }
+                            curr = next;
+                        } while (curr != null);                  
                     }
                 }            
             }
