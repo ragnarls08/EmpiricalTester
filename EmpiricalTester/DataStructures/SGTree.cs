@@ -311,10 +311,7 @@ namespace EmpiricalTester.DataStructures
             node.parent = null;
             node.Right = null;
             node.Left = null;
-
-            if(root != null)
-                checkIntegrityDebug();
-
+            
             //NodeCount <= α*MaxNodeCount
             if (n <= alpha*q && root != null)
             {
@@ -335,6 +332,7 @@ namespace EmpiricalTester.DataStructures
             return inOrderLabels(root, new List<string>());
         }
 
+        /*
         private void checkIntegrityDebug()
         {
             if (root.parent != null)
@@ -354,7 +352,7 @@ namespace EmpiricalTester.DataStructures
             checkIntegrityDebug(node.Left);
             checkIntegrityDebug(node.Right);
         }
-
+        */
         private void removeParentsLinkTo(SGTNode<T> child)
         {
             if (child == child.parent?.Left)

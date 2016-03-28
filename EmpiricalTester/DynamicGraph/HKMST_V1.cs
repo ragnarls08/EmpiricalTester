@@ -11,7 +11,6 @@ namespace EmpiricalTester.DynamicGraph
         private List<DataStructures.SGTNode<HKMSTNode>> nodes;
 
         private int nCount = 0;//debug
-        private enum insertDirection { Before, After };
 
         public HKMST_V1(double alpha)
         {
@@ -35,7 +34,6 @@ namespace EmpiricalTester.DynamicGraph
 
         public void addVertex()
         {
-            //nodes.Add(new DataStructures.SGTNode<HKMSTNode>(new HKMSTNode()));
             if (nodeOrder.Root == null)
                 nodes.Add(nodeOrder.insertFirst(new HKMSTNode(nCount)));
             else
@@ -72,16 +70,16 @@ namespace EmpiricalTester.DynamicGraph
             var F = new List<DataStructures.SGTNode<HKMSTNode>>();
             var B = new List<DataStructures.SGTNode<HKMSTNode>>();
             F.Add(w);
+            w.Value.InF = true;
             B.Add(v);
+            v.Value.InB = true;
          
             w.Value.OutEnum = w.Value.outgoing.GetEnumerator();
             w.Value.OutEnum.MoveNext();
             v.Value.InEnum = v.Value.incoming.GetEnumerator();
             v.Value.InEnum.MoveNext();
-
-            //var FL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();            
+        
             var FL = new C5.IntervalHeap<DataStructures.SGTNode<HKMSTNode>>();
-            //var BL = new SortedSet<DataStructures.SGTNode<HKMSTNode>>();
             var BL = new C5.IntervalHeap<DataStructures.SGTNode<HKMSTNode>>();
 
             if (w.Value.OutEnum.Current != null)
@@ -102,17 +100,7 @@ namespace EmpiricalTester.DynamicGraph
             while (FL.Count > 0 && BL.Count > 0 && (u == z || nodeOrder.query(z, u)))
             {
                 // SEARCH-STEP(vertex u, vertex z)
-                
-                // We denote by first-out(x) and first-in(x) the first arc on the outgoing 
-                // list and the first arc on the incoming list of vertex x, respectively.
-                // We denote by next-out((x, y)) and next-in((x, y)) the arcs after (x, y) 
-                // on the outgoing list of x and the incoming list of y, respectively. 
-                // In each case, if there is no such arc, the value is null.
-
-                // For each vertex x in F, we maintain a forward pointer out(x)to the first 
-                // untraversed arc on its outgoing list
-                // (u,x) = out(u) = next-out((u,x))
-
+              
                 var x = u.Value.OutEnum.Current;
                 var y = z.Value.InEnum.Current;
                 u.Value.OutEnum.MoveNext();
@@ -120,28 +108,38 @@ namespace EmpiricalTester.DynamicGraph
 
                 if (u.Value.OutEnum.Current == null)
                     FL.DeleteMin();
-                    //FL.Remove(u);
                 if (z.Value.InEnum.Current == null)
                     BL.DeleteMax();
-                    //BL.Remove(z);
 
-                if (B.Contains(x))
+ 
+                
+                if(x.Value.InB)
+                {
+                    F.ForEach(item => item.Value.InF = false);
+                    B.ForEach(item => item.Value.InB = false);
                     return false; // Pair(uz.from, x.Current);
-                else if (F.Contains(y))
+                }
+                else if (y.Value.InF)
+                {
+                    F.ForEach(item => item.Value.InF = false);
+                    B.ForEach(item => item.Value.InB = false);
                     return false; // Pair(y.Current, uz.to);
-
-
-                if (!F.Contains(x))
+                }
+                    
+                
+                if (!x.Value.InF)                
                 {
                     F.Add(x);
+                    x.Value.InF = true;
                     x.Value.OutEnum = x.Value.outgoing.GetEnumerator();
                     x.Value.OutEnum.MoveNext();
                     if (x.Value.OutEnum.Current != null)
                         FL.Add(x);
                 }
-                if (!B.Contains(y))
+                if (!y.Value.InB)                
                 {
                     B.Add(y);
+                    y.Value.InB = true;
                     y.Value.InEnum = y.Value.incoming.GetEnumerator();
                     y.Value.InEnum.MoveNext();
                     if (y.Value.InEnum.Current != null)
@@ -155,8 +153,8 @@ namespace EmpiricalTester.DynamicGraph
                     z = BL.FindMax();
                 
             }
-            
 
+            
             // let t = min({v}∪{x ∈ F|out(x) = null} and reorder the vertices in F< and B> as discussed previously.
             var vAndf = F.FindAll(item => item.Value.OutEnum.Current != null);
             vAndf.Add(v);
@@ -201,9 +199,7 @@ namespace EmpiricalTester.DynamicGraph
 
                 foreach (var item in fb)
                     bf.Add(item);
-
                 
-
                 if (bf.Count > 0)
                 {
                     prev = nodeOrder.insertBefore(t, bf[bf.Count-1]);
@@ -215,16 +211,23 @@ namespace EmpiricalTester.DynamicGraph
                 }
             }
 
+
+            // reset bools
+            F.ForEach(item => item.Value.InF = false);
+            B.ForEach(item => item.Value.InB = false);
+
             // all done add to outgoing and incoming
             nodes[iv].Value.outgoing.Add(nodes[iw]);
             nodes[iw].Value.incoming.Add(nodes[iv]);
 
             return true; // null
-        }
-
-        List<DataStructures.SGTNode<HKMSTNode>> topoSort(List<DataStructures.SGTNode<HKMSTNode>> graph)
+        }              
+        
+        List<DataStructures.SGTNode<HKMSTNode>> topoSort(List<DataStructures.SGTNode<HKMSTNode>> graph)            
         {
-            
+            //graph.Sort();
+            //return graph;
+            ///
             var dfs = new StaticGraph.GenericTarjan<int>();
             var list = new List<Tuple<int, DataStructures.SGTNode<HKMSTNode>>>();
 
@@ -252,36 +255,8 @@ namespace EmpiricalTester.DynamicGraph
             {
                 retList.Add(graph[item]);
             }
-            
+
             return retList;
         }
-
-        private bool minLessThanMax(SortedSet<DataStructures.SGTNode<HKMSTNode>> FL,
-                                    SortedSet<DataStructures.SGTNode<HKMSTNode>> BL)
-        {
-            // For ease of notation, we adopt the convention that the
-            // minimum of an empty set is bigger than any other value and the maximum of an empty
-            // set is smaller than any other value.
-            if (FL.Count == 0)
-                return false;
-            if (BL.Count == 0)
-                return false;
-
-            // TODO double check if this is correct
-            return FL.Min(item => item.label) > BL.Max(item => item.label); 
-        }
-
-        private class Pair
-        {
-            public DataStructures.SGTNode<HKMSTNode> from { get; set; }
-            public DataStructures.SGTNode<HKMSTNode> to { get; set; }
-
-            public Pair(DataStructures.SGTNode<HKMSTNode> from, DataStructures.SGTNode<HKMSTNode> to)
-            {
-                this.from = from;
-                this.to = to;
-            }
-        }
-
     }
 }

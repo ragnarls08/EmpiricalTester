@@ -29,6 +29,10 @@ namespace EmpiricalTester.GraphGeneration
         /// <returns></returns>
         public string generateGraph(int n, double p, string filename, bool writeToFile, bool staticCheck, bool compareTopologies, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
         {
+
+            staticGraphs.ForEach(item => item.resetAll());
+            dynamicGraphs.ForEach(item => item.resetAll());
+
             this.staticCheck = staticCheck;
             this.writeToFile = writeToFile;
             DateTime datenow = DateTime.Now;
@@ -51,6 +55,7 @@ namespace EmpiricalTester.GraphGeneration
 
             edges = new List<Tuple<int, int>>();
             this.n = n;
+            this.e = 0;
 
             Random random = new Random(DateTime.Now.Millisecond);
             allEdges = allEdges.OrderBy(item => random.Next()).ToList();

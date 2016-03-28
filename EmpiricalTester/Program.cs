@@ -21,10 +21,13 @@ namespace EmpiricalTester
             List<DynamicGraph.IDynamicGraph> dynamicGraphs = new List<DynamicGraph.IDynamicGraph>();
 
             DynamicGraph.IDynamicGraph simple = new DynamicGraph.SimpleIncremental();
-            dynamicGraphs.Add(simple);
+            //dynamicGraphs.Add(simple);
             DynamicGraph.HKMST_V1 hkmst_v1 = new DynamicGraph.HKMST_V1(0.65);
-            dynamicGraphs.Add(hkmst_v1);
+            //dynamicGraphs.Add(hkmst_v1);
+            DynamicGraph.HKMST_Final hkmst = new DynamicGraph.HKMST_Final(0.65);
+            dynamicGraphs.Add(hkmst);
 
+            
 
             GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
             var ps = new List<double>() { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 };
@@ -35,7 +38,7 @@ namespace EmpiricalTester
                     generator.generateGraph(
                     1000, // nodes
                     p, // Probability of an edge being added from a complete graph
-                    i + "-Graph(1000, " + p + ")",
+                    i + "-Graph(2500, " + p + ")",
                     true, // writeToFile
                     false, // staticCheck
                     false, // topology compare
@@ -69,18 +72,21 @@ namespace EmpiricalTester
                 };
 
             var runner = new Measuring.GraphRunner();
-            //runner.runGraph(fileNames, 10, false, false, staticGraphs, dynamicGraphs);
+            runner.runGraph(fileNames, 10, false, false, staticGraphs, dynamicGraphs);
             //runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
-            
+            /*
             runner.runFolder(
-                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000",
-                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000\outPut",
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\2500",
+                @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\2500\outPut",
                 5,
-                1000,
+                10000,
                 dynamicGraphs
                 );
                 //*/
+
+
             
+
             var measure = new Measuring.OrderMaintenance();
             string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure3.txt");
             var ns = new List<int>() { 10 };

@@ -36,6 +36,7 @@ namespace EmpiricalTester.Measuring
 
             foreach (var dir in directories)
             {
+                Console.WriteLine(dir);
                 if (dir != outputFolder)
                 {
                     measurements.Add(new Measurement(dir.Substring(dir.LastIndexOf('\\')+1)));
