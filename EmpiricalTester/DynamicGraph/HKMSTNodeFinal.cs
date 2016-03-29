@@ -10,7 +10,7 @@ namespace EmpiricalTester.DynamicGraph
         public IEnumerator<DataStructures.SGTNode<HKMSTNodeFinal>> OutEnum { get; set; }
         public IEnumerator<DataStructures.SGTNode<HKMSTNodeFinal>> InEnum { get; set; }
                 
-        public bool Active { get; set; }
+        //public bool Active { get; set; }
         public bool InF { get; set; }
         public bool InB { get; set; }
 
@@ -20,7 +20,7 @@ namespace EmpiricalTester.DynamicGraph
         {
             incoming = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
             outgoing = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            this.Active = false;
+            //this.Active = false;
             this.InF = false;
             this.InB = false;
         }
@@ -29,7 +29,7 @@ namespace EmpiricalTester.DynamicGraph
         {
             incoming = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
             outgoing = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            this.Active = false;
+            //this.Active = false;
             this.InF = false;
             this.InB = false;
             this.n = n;

@@ -74,20 +74,20 @@ namespace EmpiricalTester.DynamicGraph
 
             while (Fa.Count > 0 && Ba.Count > 0)
             {
-                var u = Fa.First.Value;
-                var z = Ba.First.Value;
+                var u = Fa.First; // pointer to linkedlistnode for faster remove
+                var z = Ba.First;
 
-                if(nodeOrder.query(z, u) || u == z)
+                if(nodeOrder.query(z.Value, u.Value) || u.Value == z.Value)
                 {
                     // SEARCH_STEP(u,z)
-                    var x = u.Value.OutEnum.Current;
-                    var y = z.Value.InEnum.Current;
-                    u.Value.OutEnum.MoveNext();
-                    z.Value.InEnum.MoveNext();
+                    var x = u.Value.Value.OutEnum.Current;
+                    var y = z.Value.Value.InEnum.Current;
+                    u.Value.Value.OutEnum.MoveNext();
+                    z.Value.Value.InEnum.MoveNext();
 
-                    if (u.Value.OutEnum.Current == null)
+                    if (u.Value.Value.OutEnum.Current == null)
                         Fa.Remove(u);
-                    if (z.Value.InEnum.Current == null)
+                    if (z.Value.Value.InEnum.Current == null)
                         Ba.Remove(z);
                     
                     if (x.Value.InB)
@@ -126,12 +126,12 @@ namespace EmpiricalTester.DynamicGraph
                 }
                 else
                 {
-                    if(nodeOrder.query(u, s))
+                    if(nodeOrder.query(u.Value, s))
                     {
                         Fa.Remove(u);
                         Fp.AddFirst(u);
                     }
-                    if(nodeOrder.query(s, z))
+                    if(nodeOrder.query(s, z.Value))
                     {
                         Ba.Remove(z);
                         Bp.AddFirst(z);

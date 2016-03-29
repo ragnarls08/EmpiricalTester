@@ -23,9 +23,9 @@ namespace EmpiricalTester
             DynamicGraph.IDynamicGraph simple = new DynamicGraph.SimpleIncremental();
             //dynamicGraphs.Add(simple);
             DynamicGraph.HKMST_V1 hkmst_v1 = new DynamicGraph.HKMST_V1(0.65);
-            dynamicGraphs.Add(hkmst_v1);
+            //dynamicGraphs.Add(hkmst_v1);
             DynamicGraph.HKMST_Final hkmst = new DynamicGraph.HKMST_Final(0.65);
-            //dynamicGraphs.Add(hkmst);
+            dynamicGraphs.Add(hkmst);
 
             
 
@@ -78,7 +78,7 @@ namespace EmpiricalTester
             runner.runFolder(
                 @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000",
                 @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\1000\outPut",
-                5,
+                15,
                 5000,
                 dynamicGraphs
                 );
