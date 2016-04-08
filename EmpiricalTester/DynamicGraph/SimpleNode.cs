@@ -4,15 +4,15 @@ namespace EmpiricalTester.DynamicGraph
 {
     internal class SimpleNode
     {
-        public int level { get; set; }
-        public bool blackHole { get; set; }
+        public int Level { get; set; }
+        public bool BlackHole { get; set; }
 
-        public List<int> incoming;
+        public List<int> Incoming;
 
         public SimpleNode()
         {
-            incoming = new List<int>();
-            blackHole = false;
+            Incoming = new List<int>();
+            BlackHole = false;
         }
     }
 }

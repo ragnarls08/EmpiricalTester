@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace EmpiricalTester
@@ -11,37 +9,37 @@ namespace EmpiricalTester
         [STAThread]
         static void Main(string[] args)
         {
-            List<StaticGraph.IStaticGraph> staticGraphs = new List<StaticGraph.IStaticGraph>();
+            var staticGraphs = new List<StaticGraph.IStaticGraph>();
 
-            StaticGraph.IStaticGraph kahn = new StaticGraph.Kahn();
-            //staticGraphs.Add(kahn);
-            StaticGraph.IStaticGraph tarjan = new StaticGraph.Tarjan();
-            //staticGraphs.Add(tarjan);
+            var kahn = new StaticGraph.Kahn();
+            staticGraphs.Add(kahn);
+            var tarjan = new StaticGraph.Tarjan();
+            staticGraphs.Add(tarjan);
 
-            List<DynamicGraph.IDynamicGraph> dynamicGraphs = new List<DynamicGraph.IDynamicGraph>();
+            var dynamicGraphs = new List<DynamicGraph.IDynamicGraph>();
 
-            DynamicGraph.IDynamicGraph simple = new DynamicGraph.SimpleIncremental();
-            //dynamicGraphs.Add(simple);
-            DynamicGraph.HKMST_V1 hkmst_v1 = new DynamicGraph.HKMST_V1(0.65);
-            //dynamicGraphs.Add(hkmst_v1);
-            DynamicGraph.HKMST_Final hkmst = new DynamicGraph.HKMST_Final(0.65);
+            var simple = new DynamicGraph.SimpleIncremental();
+            dynamicGraphs.Add(simple);
+            var hkmstV1 = new DynamicGraph.HKMSTV1(0.65);
+            dynamicGraphs.Add(hkmstV1);
+            var hkmst = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoM);
             dynamicGraphs.Add(hkmst);
 
             
 
-            GraphGeneration.GraphGenerator generator = new GraphGeneration.GraphGenerator();
+            var generator = new GraphGeneration.GraphGenerator();
             var ps = new List<double>() { 0.1, 0.2, 0.3, /*0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
-            for(int i = 1; i < 11; i++)
+            for(var i = 1; i < 5; i++)
             {
                 foreach (var p in ps)
-                {/*
-                    generator.generateGraph(
-                    250, // nodes
+                {
+                    generator.GenerateGraph(
+                    100, // nodes
                     p, // Probability of an edge being added from a complete graph
                     i + "-Graph(5000, " + p + ")",
                     false, // writeToFile
-                    false, // staticCheck
-                    false, // topology compare
+                    true, // staticCheck
+                    true, // topology compare
                     staticGraphs, dynamicGraphs);
                     //*/
                 }
@@ -72,7 +70,7 @@ namespace EmpiricalTester
                 };
 
             var runner = new Measuring.GraphRunner();
-            runner.runGraph(fileNames, 10, false, false, staticGraphs, dynamicGraphs);
+            //runner.runGraph(fileNames, 10, false, false, staticGraphs, dynamicGraphs);
             //runner.runStaticVsDynamic(fileNames, 5, true, false, staticGraphs, dynamicGraphs);
             /*
             runner.runFolder(
@@ -96,8 +94,26 @@ namespace EmpiricalTester
             //measure.runSequence(outFile, ns, ps, alphas, 5);
 
 
+            /*
+            Random r = new Random();
+            List<int> x = new List<int>(120);
+            for(int i = 0; i < 10; i++)
+            {
+                x.Add(r.Next(0, 200));
+            }//*/
+
+            var x = new List<int>() { 32,46,30,54,91,102,128,152,175,147};
+            
+            /*
+            int median = Algorithms.Median.Mom(x, x.Count / 2+1, null);
+            int b = Algorithms.Median.QuickSelect(x, x.Count / 2);
+            var xl = new List<int>(x);
+            xl.Sort();
+            int c = xl.ElementAt(xl.Count / 2);
+            //*/
+
             Console.WriteLine("\n\ndone");
-            //Console.ReadLine();
+            Console.ReadLine();
 
         }
     }

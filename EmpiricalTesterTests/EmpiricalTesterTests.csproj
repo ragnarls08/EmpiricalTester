@@ -52,7 +52,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DataStructures\SGTreeTests.cs" />
-    <Compile Include="DynamicGraph\HKMST_FinalTests.cs" />
     <Compile Include="DynamicGraph\HKMST_V1Tests.cs" />
     <Compile Include="DynamicGraph\SimpleIncrementalTests.cs" />
     <Compile Include="GraphGeneration\ConnectivityGraphTests.cs" />

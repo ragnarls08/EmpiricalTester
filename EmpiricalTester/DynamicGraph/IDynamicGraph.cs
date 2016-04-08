@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace EmpiricalTester.DynamicGraph
 {
-    interface IDynamicGraph
+    internal interface IDynamicGraph
     {
-        void addVertex();
-        bool addEdge(int v, int w);
-        void removeEdge(int v, int w);
-        List<int> topology();
-        void resetAll(); // resets the algorithm to receive a new graph
+        void AddVertex();
+        bool AddEdge(int v, int w);
+        void RemoveEdge(int v, int w);
+        List<int> Topology();
+        void ResetAll(); // resets the algorithm to receive a new graph
     }
 }

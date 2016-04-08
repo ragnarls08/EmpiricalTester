@@ -5,71 +5,68 @@ namespace EmpiricalTester.DynamicGraph
 {
     public class SimpleIncremental : IDynamicGraph
     {
-        private List<SimpleNode> graph;
+        private List<SimpleNode> _graph;
 
         public SimpleIncremental()
         {
-            graph = new List<SimpleNode>();
+            _graph = new List<SimpleNode>();
         }
 
-        public void addVertex()
+        public void AddVertex()
         {
-            graph.Add(new SimpleNode());
+            _graph.Add(new SimpleNode());
         }
 
-        public void removeEdge(int v, int w)
+        public void RemoveEdge(int v, int w)
         {
-            graph[w].incoming.Remove(v);
+            _graph[w].Incoming.Remove(v);
         }
 
-        public void resetAll()
+        public void ResetAll()
         {
-            this.graph.Clear();
+            _graph.Clear();
         }
 
-        public bool addEdge(int v, int w)
+        public bool AddEdge(int v, int w)
         {            
-            graph[w].incoming.Add(v);
-            graph[w].blackHole = true;
+            _graph[w].Incoming.Add(v);
+            _graph[w].BlackHole = true;
 
-            if(!visit(graph[v], graph[w].level))
+            if(!Visit(_graph[v], _graph[w].Level))
             {
-                removeEdge(v, w);
-                graph[w].blackHole = false;                
+                RemoveEdge(v, w);
+                _graph[w].BlackHole = false;                
                 return false;
             }
                         
-            graph[w].blackHole = false;
+            _graph[w].BlackHole = false;
             
             return true;
         }
                
-        public List<int> topology()
+        public List<int> Topology()
         {
             // use select to get (index, level) pair, order the result, convert to list of indexes ordered by topo (level)
-            return graph.Select((Value, Index) => new { Index, Value.level }).OrderByDescending(item => item.level).ToList().ConvertAll(item => item.Index);
+            return _graph.Select((value, index) => new { Index = index, level = value.Level }).OrderByDescending(item => item.level).ToList().ConvertAll(item => item.Index);
         }
 
-        private bool visit(SimpleNode v, int childLevel)
+        private bool Visit(SimpleNode v, int childLevel)
         {
-            int oldLevel = v.level;
+            int oldLevel = v.Level;
 
-            if(v.blackHole)
+            if(v.BlackHole)
             {
                 return false;
             }
 
-            if (v.level <= childLevel)
+            if (v.Level <= childLevel)
             {
-                v.level = childLevel + 1;
-                        
-                for(int i = 0; i < v.incoming.Count; i++)
+                v.Level = childLevel + 1;
+
+                if (v.Incoming.Any(t => !Visit(_graph[t], v.Level)))
                 {
-                    if (!visit(graph[v.incoming[i]], v.level))
-                    {
-                        v.level = oldLevel;
-                        return false;
-                    }
+                    v.Level = oldLevel;
+                    return false;
                 }
             }
 

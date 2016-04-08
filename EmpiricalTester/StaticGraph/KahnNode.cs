@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace EmpiricalTester.StaticGraph
 {
-    class KahnNode
+    internal class KahnNode
     {
-        public List<int> incoming { get; set; }
-        public List<int> outgoing { get; set; }
+        public List<int> Incoming { get; set; }
+        public List<int> Outgoing { get; set; }
 
         public KahnNode()
         {
-            incoming = new List<int>();
-            outgoing = new List<int>();
+            Incoming = new List<int>();
+            Outgoing = new List<int>();
         }
 
         // copy constructor
         public KahnNode(KahnNode node)
         {
-            this.incoming = new List<int>(node.incoming);
-            this.outgoing = new List<int>(node.outgoing);
+            Incoming = new List<int>(node.Incoming);
+            Outgoing = new List<int>(node.Outgoing);
         }
     }
 }

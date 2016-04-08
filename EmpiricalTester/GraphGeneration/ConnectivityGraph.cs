@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace EmpiricalTester.GraphGeneration
 {
@@ -11,49 +7,49 @@ namespace EmpiricalTester.GraphGeneration
     /// </summary>
     public class ConnectivityGraph
     {
-        List<Node> graph;
+        List<Node> _graph;
 
         public ConnectivityGraph()
         {
-            graph = new List<Node>();
+            _graph = new List<Node>();
         }
 
-        public void addVertex()
+        public void AddVertex()
         {
-            graph.Add(new Node());
+            _graph.Add(new Node());
         }
 
-        public void addEdge(int v, int w)
+        public void AddEdge(int v, int w)
         {
-            graph[v].outgoing.Add(w);
+            _graph[v].Outgoing.Add(w);
         }
                 
-        public List<List<bool>> generateConnectivityMatrix()
+        public List<List<bool>> GenerateConnectivityMatrix()
         {
-            List<List<int>> dist = new List<List<int>>(this.graph.Count);
-            for(int i = 0; i < graph.Count; i++)
+            List<List<int>> dist = new List<List<int>>(_graph.Count);
+            for(int i = 0; i < _graph.Count; i++)
             {
-                dist.Add(new List<int>(graph.Count));
-                for (int x = 0; x < graph.Count; x++)
+                dist.Add(new List<int>(_graph.Count));
+                for (int x = 0; x < _graph.Count; x++)
                 {
-                    dist[i].Add((i == x ? 0 : (int.MaxValue/2)-1)); // max + max = -2
+                    dist[i].Add(i == x ? 0 : int.MaxValue / 2 - 1); // max + max = -2
                 }                    
             }
 
-            for(int i = 0; i < graph.Count; i++)
+            for(int i = 0; i < _graph.Count; i++)
             {
-                foreach(var to in graph[i].outgoing)
+                foreach(var to in _graph[i].Outgoing)
                 {
                     dist[i][to] = 1;
                 }
             }
 
             // Floyd–Warshall algorithm
-            for (int k = 0; k < graph.Count; k++)
+            for (int k = 0; k < _graph.Count; k++)
             {
-                for(int i = 0; i < graph.Count; i++)
+                for(int i = 0; i < _graph.Count; i++)
                 {
-                    for(int j = 0; j < graph.Count; j++)
+                    for(int j = 0; j < _graph.Count; j++)
                     {
                         if (dist[i][j] > dist[i][k] + dist[k][j])
                             dist[i][j] = dist[i][k] + dist[k][j];
@@ -63,15 +59,15 @@ namespace EmpiricalTester.GraphGeneration
 
             var results = new List<List<bool>>();
 
-            for (int i = 0; i < graph.Count; i++)
+            for (int i = 0; i < _graph.Count; i++)
             {
                 results.Add(new List<bool>());               
 
-                for (int x = 0; x < graph.Count; x++)
+                for (int x = 0; x < _graph.Count; x++)
                 {
                     if (i == x)
                         results[i].Add(false);
-                    else if (dist[i][x] < (int.MaxValue/2) - 1)
+                    else if (dist[i][x] < int.MaxValue / 2 - 1)
                         results[i].Add(true);
                     else
                         results[i].Add(false);
@@ -84,12 +80,12 @@ namespace EmpiricalTester.GraphGeneration
               
         protected class Node
         {
-            public List<int> outgoing;
-            public bool visited { get; set; }
+            public List<int> Outgoing;
+            public bool Visited { get; set; }
 
             public Node()
             {
-                outgoing = new List<int>();
+                Outgoing = new List<int>();
             }                       
         }
     }

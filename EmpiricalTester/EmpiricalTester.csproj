@@ -41,7 +41,7 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -68,14 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\Median.cs" />
-    <Compile Include="DataStructures\OMPList.cs" />
-    <Compile Include="DataStructures\OMPNode.cs" />
     <Compile Include="DataStructures\SGTNode.cs" />
     <Compile Include="DataStructures\SGTree.cs" />
     <Compile Include="DynamicGraph\HKMSTNode.cs" />
     <Compile Include="DynamicGraph\HKMSTNodeFinal.cs" />
-    <Compile Include="DynamicGraph\HKMST_Final.cs" />
-    <Compile Include="DynamicGraph\HKMST_V1.cs" />
+    <Compile Include="DynamicGraph\HKMSTFinal.cs" />
+    <Compile Include="DynamicGraph\HKMSTV1.cs" />
     <Compile Include="DynamicGraph\IDynamicGraph.cs" />
     <Compile Include="DynamicGraph\SimpleIncremental.cs" />
     <Compile Include="DynamicGraph\SimpleNode.cs" />

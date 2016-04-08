@@ -1,10 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EmpiricalTester.GraphGeneration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpiricalTester.GraphGeneration.Tests
 {
@@ -12,21 +6,21 @@ namespace EmpiricalTester.GraphGeneration.Tests
     public class ConnectivityGraphTests
     {
         [TestMethod()]
-        public void generateConnectivityMatrixTest()
+        public void GenerateConnectivityMatrixTest()
         {
             ConnectivityGraph cGraph = new ConnectivityGraph();
             for (int i = 0; i < 5; i++)
             {
-                cGraph.addVertex();
+                cGraph.AddVertex();
             }
 
-            cGraph.addEdge(0, 2);
-            cGraph.addEdge(0, 1);
-            cGraph.addEdge(2, 1);
-            cGraph.addEdge(1, 3);
-            cGraph.addEdge(3, 4);
+            cGraph.AddEdge(0, 2);
+            cGraph.AddEdge(0, 1);
+            cGraph.AddEdge(2, 1);
+            cGraph.AddEdge(1, 3);
+            cGraph.AddEdge(3, 4);
 
-            var connectivity = cGraph.generateConnectivityMatrix();
+            var connectivity = cGraph.GenerateConnectivityMatrix();
             bool row1 = connectivity[0][0] == false && connectivity[0][1] == true 
                      && connectivity[0][2] == true && connectivity[0][3] == true
                      && connectivity[0][4] == true;

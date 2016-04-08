@@ -86,19 +86,19 @@ namespace EmpiricalTester.Measuring
 
             for (int i = 0; i < repeatCount; i++)
             {
-                alg.resetAll();
+                alg.ResetAll();
                 int skip = 0;
                 times.Add(new List<long>());
 
                 for (int n = 0; n < graph.n; n++)
-                    alg.addVertex();
+                    alg.AddVertex();
 
                 do
                 {
                     sw.Start();
                     foreach(var edge in graph.edges.Skip(skip).Take(resolution))
                     {
-                        alg.addEdge(edge.from, edge.to);
+                        alg.AddEdge(edge.from, edge.to);
                     }
                     sw.Stop();
                     times[i].Add(sw.ElapsedTicks);
@@ -126,7 +126,7 @@ namespace EmpiricalTester.Measuring
             return outer;
         }
 
-        public void runGraph(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        public void runGraph(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<IDynamicGraph> dynamicGraphs)
         {          
             for(int x = 0; x < fileNames.Length; x++)
             {
@@ -146,19 +146,19 @@ namespace EmpiricalTester.Measuring
                     for (int i = 0; i < repeateCount; i++)
                     {
                         Console.WriteLine("Run: " + i + ", " + current.Name);
-                        algorithm.resetAll();
+                        algorithm.ResetAll();
                         // add nodes
                         for (int y = 0; y < graph.n; y++)
                         {
-                            algorithm.addVertex();
+                            algorithm.AddVertex();
                         }
 
                         current.timeElapsed.Add(new List<TimeSpan>());
                         foreach (Pair pair in graph.edges)
                         {
                             sw.Start();
-                            algorithm.addEdge(pair.from, pair.to);
-                            algorithm.topoSort();
+                            algorithm.AddEdge(pair.from, pair.to);
+                            algorithm.TopoSort();
                             sw.Stop();
                             current.timeElapsed[i].Add(sw.Elapsed);
                             sw.Reset();
@@ -167,7 +167,7 @@ namespace EmpiricalTester.Measuring
 
                 }
 
-                foreach (DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
+                foreach (IDynamicGraph algorithm in dynamicGraphs)
                 {
                     measurements.Add(new Measurements(algorithm.GetType().ToString()));
                     Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
@@ -175,18 +175,18 @@ namespace EmpiricalTester.Measuring
                     for (int i = 0; i < repeateCount; i++)
                     {
                         Console.WriteLine("Run: " + i + ", " + current.Name);
-                        algorithm.resetAll();
+                        algorithm.ResetAll();
                         // add nodes
                         for (int y = 0; y < graph.n; y++)
                         {
-                            algorithm.addVertex();
+                            algorithm.AddVertex();
                         }
 
                         current.timeElapsed.Add(new List<TimeSpan>());
                         foreach (Pair pair in graph.edges)
                         {
                             sw.Start();
-                            algorithm.addEdge(pair.from, pair.to);
+                            algorithm.AddEdge(pair.from, pair.to);
                             sw.Stop();
                             current.timeElapsed[i].Add(sw.Elapsed);
                             sw.Reset();
@@ -203,7 +203,7 @@ namespace EmpiricalTester.Measuring
             }            
         }
 
-        public void runStaticVsDynamic(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        public void runStaticVsDynamic(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<IDynamicGraph> dynamicGraphs)
         {
             for (int x = 0; x < fileNames.Length; x++)
             {
@@ -222,22 +222,22 @@ namespace EmpiricalTester.Measuring
                     for (int i = 0; i < repeateCount; i++)
                     {
                         Console.WriteLine("Run: " + i + ", " + current.Name);
-                        algorithm.resetAll();
+                        algorithm.ResetAll();
                         // add nodes
                         for (int y = 0; y < graph.n; y++)
                         {
-                            algorithm.addVertex();
+                            algorithm.AddVertex();
                         }
 
                         current.timeElapsed.Add(new List<TimeSpan>());
                         sw.Start();
                         foreach (Pair pair in graph.edges)
                         {                            
-                            algorithm.addEdge(pair.from, pair.to);
+                            algorithm.AddEdge(pair.from, pair.to);
                                                     
                         }
 
-                        algorithm.topoSort();
+                        algorithm.TopoSort();
                         sw.Stop();
                         current.timeElapsed[i].Add(sw.Elapsed);
                         sw.Reset();
@@ -245,7 +245,7 @@ namespace EmpiricalTester.Measuring
 
                 }
 
-                foreach (DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
+                foreach (IDynamicGraph algorithm in dynamicGraphs)
                 {
                     measurements.Add(new Measurements(algorithm.GetType().ToString()));
                     Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
@@ -253,18 +253,18 @@ namespace EmpiricalTester.Measuring
                     for (int i = 0; i < repeateCount; i++)
                     {
                         Console.WriteLine("Run: " + i + ", " + current.Name);
-                        algorithm.resetAll();
+                        algorithm.ResetAll();
                         // add nodes
                         for (int y = 0; y < graph.n; y++)
                         {
-                            algorithm.addVertex();
+                            algorithm.AddVertex();
                         }
 
                         current.timeElapsed.Add(new List<TimeSpan>());
                         sw.Start();
                         foreach (Pair pair in graph.edges)
                         {                            
-                            algorithm.addEdge(pair.from, pair.to);                            
+                            algorithm.AddEdge(pair.from, pair.to);                            
                         }
                         sw.Stop();
                         current.timeElapsed[i].Add(sw.Elapsed);
@@ -355,13 +355,13 @@ namespace EmpiricalTester.Measuring
             public List<List<TimeSpan>> timeElapsed { get; set; }
             public List<long> averages { get; set; } // long is the datatype of tick
 
-            public double averageTick { get; set; }
-            public double maxTick { get; set; }
-            public double minTick { get; set; }
+            private double averageTick { get; set; }
+            private double maxTick { get; set; }
+            private double minTick { get; set; }
 
             public Measurements(string name)
             {
-                this.Name = name;
+                Name = name;
                 timeElapsed = new List<List<TimeSpan>>();
                 averages = new List<long>();
             }

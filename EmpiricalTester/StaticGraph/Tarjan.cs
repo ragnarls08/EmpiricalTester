@@ -1,90 +1,82 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace EmpiricalTester.StaticGraph
 {
-    class Tarjan : IStaticGraph
+    internal class Tarjan : IStaticGraph
     {
-        private List<TarjanNode> graph = new List<TarjanNode>();
-        private List<int> L = new List<int>();
-        private bool cycle = false;
+        private List<TarjanNode> _graph = new List<TarjanNode>();
+        private List<int> _l = new List<int>();
+        private bool _cycle;
 
-        public void addVertex()
+        public void AddVertex()
         {
-            graph.Add(new TarjanNode());
+            _graph.Add(new TarjanNode());
         }
 
-        public void addEdge(int v, int w)
+        public void AddEdge(int v, int w)
         {
-            graph[v].outgoing.Add(w);
-            graph[w].incoming.Add(v);
+            _graph[v].Outgoing.Add(w);
+            _graph[w].Incoming.Add(v);
         }
 
-        public void resetAll()
+        public void ResetAll()
         {
-            graph.Clear();
-            L.Clear();
-            cycle = false;
+            _graph.Clear();
+            _l.Clear();
+            _cycle = false;
         }
 
-        public void removeEdge(int v, int w)
+        public void RemoveEdge(int v, int w)
         {
-            graph[v].outgoing.Remove(w);
-            graph[w].incoming.Remove(v);
+            _graph[v].Outgoing.Remove(w);
+            _graph[w].Incoming.Remove(v);
         }
 
-        public int[] topoSort()
+        public int[] TopoSort()
         {
-            L.Clear();
-            clearVisited();
-            cycle = false;
+            _l.Clear();
+            ClearVisited();
+            _cycle = false;
 
-            for(int i = 0; i < graph.Count; i++)
+            for(var i = 0; i < _graph.Count; i++)
             {
-                visit(i);
+                Visit(i);
             }
 
-            if (cycle)
-                return null;
-            else
-                return L.ToArray();
+            return _cycle ? null : _l.ToArray();
         }
 
-        private void visit(int n)
+        private void Visit(int n)
         {
-            if (graph[n].temporaryVisit)
+            if (_graph[n].TemporaryVisit)
             {
-                cycle = true;
+                _cycle = true;
                 return;
             }
                 
             
-            if(!graph[n].visited)
+            if(!_graph[n].Visited)
             {
-                graph[n].temporaryVisit = true;
+                _graph[n].TemporaryVisit = true;
 
-                foreach(int m in graph[n].outgoing)
+                foreach(int m in _graph[n].Outgoing)
                 {
-                    visit(m);
+                    Visit(m);
                 }
 
-                graph[n].visited = true;
-                graph[n].temporaryVisit = false;
+                _graph[n].Visited = true;
+                _graph[n].TemporaryVisit = false;
 
-                L.Insert(0, n);                
+                _l.Insert(0, n);                
             }
-
         }
 
-        private void clearVisited()
+        private void ClearVisited()
         {
-            foreach(TarjanNode node in graph)
+            foreach(var node in _graph)
             {
-                node.visited = false;
-                node.temporaryVisit = false;
+                node.Visited = false;
+                node.TemporaryVisit = false;
             }
         }
     }

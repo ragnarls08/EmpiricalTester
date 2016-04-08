@@ -1,10 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EmpiricalTester.DataStructures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpiricalTester.DataStructures.Tests
 {
@@ -18,7 +12,7 @@ namespace EmpiricalTester.DataStructures.Tests
             SGTNode<int> root = sgt.insertFirst(1);
             SGTNode<int> two = sgt.insertAfter(root, 2);
 
-            Assert.IsTrue(sgt.query(two, root));
+            Assert.IsTrue(sgt.Query(two, root));
         }
         [TestMethod()]
         public void insertTestNotSequential()
@@ -35,34 +29,34 @@ namespace EmpiricalTester.DataStructures.Tests
             SGTNode<int> c = sgt.insertAfter(root, 4);
             SGTNode<int> d = sgt.insertAfter(b, 5);
 
-            bool aGTroot = sgt.query(a, root);
-            bool bGTa = sgt.query(b, a);
-            bool aGTc = sgt.query(a, c);
-            bool dGTa = sgt.query(d, a);
-            bool dGTb = sgt.query(d, b);
+            bool aGTroot = sgt.Query(a, root);
+            bool bGTa = sgt.Query(b, a);
+            bool aGTc = sgt.Query(a, c);
+            bool dGTa = sgt.Query(d, a);
+            bool dGTb = sgt.Query(d, b);
 
             Assert.IsTrue(aGTroot && bGTa && aGTc && dGTa && dGTb);
         }
 
         [TestMethod()]
-        public void removeTestRightmostIsLeft()
+        public void RemoveTestRightmostIsLeft()
         {
-            SGTree<int> sgt = new SGTree<int>(0.15);
-            SGTNode<int> root = sgt.insertFirst(1);
-            SGTNode<int> two = sgt.insertAfter(root, 2);
-            SGTNode<int> three = sgt.insertAfter(root, 3);
-            SGTNode<int> four = sgt.insertAfter(two, 4);
-            SGTNode<int> five = sgt.insertAfter(root, 5);
-            SGTNode<int> six = sgt.insertAfter(three, 6);
-            SGTNode<int> seven = sgt.insertAfter(two, 7);
-            SGTNode<int> eight = sgt.insertAfter(four, 8);
+            var sgt = new SGTree<int>(0.15);
+            var root = sgt.insertFirst(1);
+            var two = sgt.insertAfter(root, 2);
+            var three = sgt.insertAfter(root, 3);
+            var four = sgt.insertAfter(two, 4);
+            sgt.insertAfter(root, 5);
+            sgt.insertAfter(three, 6);
+            sgt.insertAfter(two, 7);
+            sgt.insertAfter(four, 8);
 
-            // Test when remove node has 2 children and the left child rightmost node is the left child
+            // Test when Remove node has 2 children and the left child rightmost node is the left child
             //   1
             //    \
             //     6
             //    / \
-            //   3   4  <--- remove
+            //   3   4  <--- Remove
             //  /   / \
             // 5   7   8
             //    /
@@ -78,7 +72,7 @@ namespace EmpiricalTester.DataStructures.Tests
             // 5   2   8
             //    
 
-            sgt.remove(four);
+            sgt.Remove(four);
             bool a = root.Value == 1;
             bool b = root.Right.Value == 6;
             bool c = root.Right.Left.Value == 3 && root.Right.Left.Left.Value == 5;
@@ -103,17 +97,17 @@ namespace EmpiricalTester.DataStructures.Tests
             SGTNode<int> c = sgt.insertBefore(root, 4);
             SGTNode<int> d = sgt.insertBefore(b, 5);
 
-            bool aGTroot = sgt.query(root, a);
-            bool bGTa = sgt.query(a, b);
-            bool aGTc = sgt.query(c, a);
-            bool dGTa = sgt.query(a, d);
-            bool dGTb = sgt.query(b, d);
+            bool aGTroot = sgt.Query(root, a);
+            bool bGTa = sgt.Query(a, b);
+            bool aGTc = sgt.Query(c, a);
+            bool dGTa = sgt.Query(a, d);
+            bool dGTb = sgt.Query(b, d);
 
             Assert.IsTrue(aGTroot && bGTa && aGTc && dGTa && dGTb);
         }
 
         [TestMethod()]
-        public void removeTestNoChildrenNotRoot()
+        public void RemoveTestNoChildrenNotRoot()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
 
@@ -125,21 +119,21 @@ namespace EmpiricalTester.DataStructures.Tests
             sgt.insertBefore(a, b);
             sgt.insertBefore(b, c);
             
-            sgt.remove(c);
+            sgt.Remove(c);
 
-            bool b1 = sgt.query(a, b);
+            bool b1 = sgt.Query(a, b);
             
             Assert.IsTrue(b1);
         }
 
         [TestMethod()]
-        public void removeTestNoChildrenIsRoot()
+        public void RemoveTestNoChildrenIsRoot()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
             SGTNode<int> a = new SGTNode<int>(0);
 
             sgt.insertFirst(a);
-            sgt.remove(a);
+            sgt.Remove(a);
 
             bool b1 = sgt.Root == null;
 
@@ -147,7 +141,7 @@ namespace EmpiricalTester.DataStructures.Tests
         }
 
         [TestMethod()]
-        public void removeTestLeftChildNotRoot()
+        public void RemoveTestLeftChildNotRoot()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
 
@@ -161,17 +155,17 @@ namespace EmpiricalTester.DataStructures.Tests
             sgt.insertBefore(b, c);
             sgt.insertBefore(c, d);
                         
-            sgt.remove(c);
+            sgt.Remove(c);
 
-            bool b1 = sgt.query(a, b);
-            bool b2 = sgt.query(b, d);
-            bool b3 = sgt.query(a, d);
+            bool b1 = sgt.Query(a, b);
+            bool b2 = sgt.Query(b, d);
+            bool b3 = sgt.Query(a, d);
 
             Assert.IsTrue(b1 && b2 && b3);
         }
 
         [TestMethod()]
-        public void removeTestLeftChildIsRoot()
+        public void RemoveTestLeftChildIsRoot()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
 
@@ -185,17 +179,17 @@ namespace EmpiricalTester.DataStructures.Tests
             sgt.insertBefore(b, c);
             sgt.insertBefore(c, d);
 
-            sgt.remove(a);
+            sgt.Remove(a);
 
-            bool b1 = sgt.query(c, d);
-            bool b2 = sgt.query(b, c);
-            bool b3 = sgt.query(b, d);
+            bool b1 = sgt.Query(c, d);
+            bool b2 = sgt.Query(b, c);
+            bool b3 = sgt.Query(b, d);
 
             Assert.IsTrue(b1 && b2 && b3);
         }
 
         [TestMethod()]
-        public void removeTestTwoChildrenNotRootRighstmostIsLeft()
+        public void RemoveTestTwoChildrenNotRootRighstmostIsLeft()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
 
@@ -209,17 +203,17 @@ namespace EmpiricalTester.DataStructures.Tests
             sgt.insertBefore(b, c);
             sgt.insertAfter(b, d);
 
-            sgt.remove(b);
+            sgt.Remove(b);
 
-            bool b1 = sgt.query(a, c);
-            bool b2 = sgt.query(a, d);
-            bool b3 = sgt.query(d, c);
+            bool b1 = sgt.Query(a, c);
+            bool b2 = sgt.Query(a, d);
+            bool b3 = sgt.Query(d, c);
 
             Assert.IsTrue(b1 && b2 && b3);
         }
 
         [TestMethod()]
-        public void removeTestTwoChildrenIsRootRightmostIsLeft()
+        public void RemoveTestTwoChildrenIsRootRightmostIsLeft()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
             
@@ -231,15 +225,15 @@ namespace EmpiricalTester.DataStructures.Tests
             sgt.insertBefore(b, c);
             sgt.insertAfter(b, d);
 
-            sgt.remove(b);
+            sgt.Remove(b);
 
-            bool b1 = sgt.query(d, c);            
+            bool b1 = sgt.Query(d, c);            
 
             Assert.IsTrue(b1);
         }
 
         [TestMethod()]
-        public void removeTestTwoChildrenIsRootRightmostIsNotLeft()
+        public void RemoveTestTwoChildrenIsRootRightmostIsNotLeft()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
 
@@ -255,16 +249,16 @@ namespace EmpiricalTester.DataStructures.Tests
             sgt.insertAfter(b, c);
             sgt.insertBefore(c, d);
 
-            sgt.remove(a);
+            sgt.Remove(a);
 
-            bool b1 = sgt.query(c, d);
-            bool b2 = sgt.query(c, b);
+            bool b1 = sgt.Query(c, d);
+            bool b2 = sgt.Query(c, b);
 
             Assert.IsTrue(b1 && b2);
         }
 
         [TestMethod()]
-        public void removeTestTwoChildrenNotRootRightmostIsNotLeft()
+        public void RemoveTestTwoChildrenNotRootRightmostIsNotLeft()
         {
             SGTree<int> sgt = new SGTree<int>(0.75);
 
@@ -282,10 +276,10 @@ namespace EmpiricalTester.DataStructures.Tests
             sgt.insertAfter(b, c);
             sgt.insertBefore(c, d);
 
-            sgt.remove(a);
+            sgt.Remove(a);
 
-            bool b1 = sgt.query(c, d);
-            bool b2 = sgt.query(c, b);
+            bool b1 = sgt.Query(c, d);
+            bool b2 = sgt.Query(c, b);
 
             Assert.IsTrue(b1 && b2);
         }

@@ -1,102 +1,92 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace EmpiricalTester.StaticGraph
 {
-    class Kahn : IStaticGraph
+    internal class Kahn : IStaticGraph
     {
-        private List<KahnNode> graph = new List<KahnNode>();
-        private List<KahnNode> graph_temp = new List<KahnNode>();
-        private int edgeCount = 0;
-        private int edgeCount_temp = 0;
+        private List<KahnNode> _graph = new List<KahnNode>();
+        private List<KahnNode> _graphTemp = new List<KahnNode>();
+        private int _edgeCount;
+        private int _edgeCountTemp;
 
-        public void addVertex()
+        public void AddVertex()
         {
-            graph.Add(new KahnNode());
+            _graph.Add(new KahnNode());
         }
 
-        public void resetAll()
+        public void ResetAll()
         {
-            graph.Clear();
-            graph_temp.Clear();
-            edgeCount = 0;
-            edgeCount_temp = 0;
+            _graph.Clear();
+            _graphTemp.Clear();
+            _edgeCount = 0;
+            _edgeCountTemp = 0;
         }
 
-        public void addEdge(int v, int w)
+        public void AddEdge(int v, int w)
         {
-            graph[v].outgoing.Add(w);
-            graph[w].incoming.Add(v);
+            _graph[v].Outgoing.Add(w);
+            _graph[w].Incoming.Add(v);
 
-            edgeCount++;
+            _edgeCount++;
         }
 
-        public void removeEdge(int v, int w)
+        public void RemoveEdge(int v, int w)
         {
-            graph[v].outgoing.Remove(w);
-            graph[w].incoming.Remove(v);
+            _graph[v].Outgoing.Remove(w);
+            _graph[w].Incoming.Remove(v);
 
-            edgeCount--;
+            _edgeCount--;
         }
 
-        public int[] topoSort()
+        public int[] TopoSort()
         {
-            graph_temp = deepCopy(graph);
-            edgeCount_temp = edgeCount;
+            _graphTemp = DeepCopy(_graph);
+            _edgeCountTemp = _edgeCount;
 
-            List<int> L = new List<int>(); // sorted output
-            List<int> S = new List<int>(); // all nodes with no incoming
+            var l = new List<int>(); // sorted output
+            var s = new List<int>(); // all nodes with no Incoming
 
-            for(int i = 0; i < graph.Count; i++)
+            for(var i = 0; i < _graph.Count; i++)
             {
-                if(graph[i].incoming.Count == 0)
+                if(_graph[i].Incoming.Count == 0)
                 {
-                    S.Add(i);
+                    s.Add(i);
                 }
             }
 
-            while(S.Count > 0)
+            while(s.Count > 0)
             {
-                int n = S[0];
-                S.RemoveAt(0);
-                L.Add(n);
+                var n = s[0];
+                s.RemoveAt(0);
+                l.Add(n);
 
                 // for each node m with an edge e from n to m do
-                List<int> nOutgoing = new List<int>(graph[n].outgoing); // copied since items are removed.
-                for (int i = 0; i < nOutgoing.Count; i++)
+                var nOutgoing = new List<int>(_graph[n].Outgoing); // copied since items are removed.
+                foreach (int m in nOutgoing)
                 {
-                    int m = nOutgoing[i];
+                    // remove edge e from the _graph
+                    RemoveEdge(n, m);
 
-                    // remove edge e from the graph
-                    removeEdge(n, m);
-
-                    if(graph[m].incoming.Count == 0)
+                    if(_graph[m].Incoming.Count == 0)
                     {
-                        S.Add(m);
+                        s.Add(m);
                     }
-
                 }
             }
 
-            if (edgeCount > 0)
+            if (_edgeCount > 0)
             {
-                graph = deepCopy(graph_temp);
-                edgeCount = edgeCount_temp;
+                _graph = DeepCopy(_graphTemp);
+                _edgeCount = _edgeCountTemp;
                 return null;
             }
-            else
-            {
-                graph = deepCopy(graph_temp);
-                edgeCount = edgeCount_temp;
-                return L.ToArray();
-            }
-                
+
+            _graph = DeepCopy(_graphTemp);
+            _edgeCount = _edgeCountTemp;
+            return l.ToArray();    
         }
 
-        private List<KahnNode> deepCopy(List<KahnNode> toCopy)
+        private List<KahnNode> DeepCopy(List<KahnNode> toCopy)
         {
             return toCopy.ConvertAll(item => new KahnNode(item));
         }

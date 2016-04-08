@@ -1,147 +1,143 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using EmpiricalTester.DynamicGraph;
+using EmpiricalTester.StaticGraph;
 
 
 namespace EmpiricalTester.GraphGeneration
 {
     class GraphGenerator
     {
-        private string filename;
-        private List<Tuple<int, int>> edges;
-        private List<Tuple<int, int>> allEdges;
-        private int n;
-        private int e;
-        private bool staticCheck;
-        private bool writeToFile;
+        private string _filename;
+        private List<Tuple<int, int>> _edges;
+        private List<Tuple<int, int>> _allEdges;
+        private int _n;
+        private int _e;
 
         /// <summary>
-        /// 
+        /// Generates a random graph 
         /// </summary>
         /// <param name="n"></param>
-        /// <param name="p"></param>
+        /// <param name="p">Probability of an edge being added</param>
+        /// <param name="writeToFile">If true writes the graph to a file</param>
         /// <param name="staticCheck">If true always runs static check, otherwise only for the completed graph</param>
-        /// <param name="staticGraphs"></param>
-        /// <param name="dynamicGraphs"></param>
-        /// <returns></returns>
-        public string generateGraph(int n, double p, string filename, bool writeToFile, bool staticCheck, bool compareTopologies, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        /// <param name="compareTopologies">Compares the topologies of the algorithms</param>
+        /// <param name="staticGraphs">Static graph algorithms to use for cycle checks</param>
+        /// <param name="dynamicGraphs">Dynamic graph algorithms to use for cycle checks</param>
+        /// <param name="filename">Full filename of the output file</param>
+        /// <returns>Filename</returns>
+        public string GenerateGraph(int n, double p, string filename, bool writeToFile, bool staticCheck, bool compareTopologies, List<IStaticGraph> staticGraphs, List<IDynamicGraph> dynamicGraphs)
         {
+            _n = n;
+            _e = 0;
+            _filename = filename;
+            _allEdges = new List<Tuple<int, int>>(_n);
 
-            staticGraphs.ForEach(item => item.resetAll());
-            dynamicGraphs.ForEach(item => item.resetAll());
-
-            this.staticCheck = staticCheck;
-            this.writeToFile = writeToFile;
-            DateTime datenow = DateTime.Now;
-            //filename = datenow.ToString("yyyyMMdd-HH-mm-ss") + string.Format("({0}, {1})", n.ToString(), p.ToString());
-            this.filename = filename;
-            allEdges = new List<Tuple<int, int>>(n);
+            staticGraphs.ForEach(item => item.ResetAll());
+            dynamicGraphs.ForEach(item => item.ResetAll());
+            var random = new Random(DateTime.Now.Millisecond);
 
             // create all possible edges
-            for(int i = 0; i < n; i++)
+            for (var i = 0; i < _n; i++)
             {
-                for(int x = 0; x < n; x++)
+                for(var x = 0; x < _n; x++)
                 {
                     // Don't add self connecting nodes
                     if(i != x)
                     {
-                        allEdges.Add(new Tuple<int, int>(i, x));
+                        _allEdges.Add(new Tuple<int, int>(i, x));
                     }
                 }
             }
 
-            edges = new List<Tuple<int, int>>();
-            this.n = n;
-            this.e = 0;
-
-            Random random = new Random(DateTime.Now.Millisecond);
-            allEdges = allEdges.OrderBy(item => random.Next()).ToList();
+            _edges = new List<Tuple<int, int>>();
+            _allEdges = _allEdges.OrderBy(item => random.Next()).ToList();
             
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < _n; i++)
             {
-                foreach(StaticGraph.IStaticGraph graph in staticGraphs)
+                foreach(var graph in staticGraphs)
                 {
-                    graph.addVertex();
+                    graph.AddVertex();
                 }
 
-                foreach(DynamicGraph.IDynamicGraph graph in dynamicGraphs)
+                foreach(var graph in dynamicGraphs)
                 {
-                    graph.addVertex();
+                    graph.AddVertex();
                 }
             }
 
-            bool[] staticResults = new bool[staticGraphs.Count];
-            bool[] dynamicResults = new bool[dynamicGraphs.Count];
+            var staticResults = new bool[staticGraphs.Count];
+            var dynamicResults = new bool[dynamicGraphs.Count];
 
-            for(int i = 0; i < allEdges.Count; i++)
+            for(var i = 0; i < _allEdges.Count; i++)
             {
-                //System.Diagnostics.Debug.WriteLine("Progress Generation: " + (double)i/(double)n*100 +"%");                
-                if(i % (allEdges.Count / 20) == 0)
-                    Console.WriteLine("Adding edges: " + Math.Ceiling((double)i / (double)allEdges.Count * 100) + "%");
-                var currentEdge = allEdges[i];                
-                if (random.Next(0,100)/100.0 < p)
+                if(i % (_allEdges.Count / 20) == 0)
+                    Console.WriteLine("Adding edges: " + Math.Ceiling((double)i / (double)_allEdges.Count * 100) + "%");
+                
+                if (!(random.Next(0, 100)/100.0 < p))
+                    continue;
+
+                var currentEdge = _allEdges[i];
+                var v = currentEdge.Item1;
+                var w = currentEdge.Item2;
+                                         
+                for(var x = 0; x < staticGraphs.Count; x++)
                 {
-                    int v = currentEdge.Item1;
-                    int w = currentEdge.Item2;                              
-                    for(int x = 0; x < staticGraphs.Count; x++)
-                    {
-                        staticGraphs[x].addEdge(v, w);
+                    staticGraphs[x].AddEdge(v, w);
                         
-                        if(staticCheck)
-                        {
-                            // if null there is a cycle
-                            if (null == staticGraphs[x].topoSort())
-                                staticResults[x] = false; // cycle detected
-                            else
-                                staticResults[x] = true; // all is good
-                        }
-                    }
-
-                    for(int x = 0; x < dynamicGraphs.Count; x++)
+                    if(staticCheck)
                     {
-                        // dynamic graph returns false if cycle is detected
-                        dynamicResults[x] = dynamicGraphs[x].addEdge(v, w);
+                        // if null there is a cycle
+                        if (null == staticGraphs[x].TopoSort())
+                            staticResults[x] = false; // cycle detected
+                        else
+                            staticResults[x] = true; // all is good
+                    }
+                }
+
+                for(var x = 0; x < dynamicGraphs.Count; x++)
+                {
+                    // dynamic graph returns false if cycle is detected
+                    dynamicResults[x] = dynamicGraphs[x].AddEdge(v, w);
                             
-                    }
+                }
 
-                    // if static check is false only dynamic results matter
-                    bool allAgree = staticCheck ? 
-                        (staticResults.All(item => item == true) && dynamicResults.All(item => item == true))
-                        || (staticResults.All(item => item == false) && dynamicResults.All(item => item == false))
-                        : 
-                        dynamicResults.All(item => item == true) || dynamicResults.All(item => item == false);
+                // if static check is false only dynamic results matter
+                var allAgree = staticCheck ? 
+                    (staticResults.All(item => item) && dynamicResults.All(item => item))
+                    || (staticResults.All(item => item == false) && dynamicResults.All(item => item == false))
+                    : 
+                    dynamicResults.All(item => item) || dynamicResults.All(item => item == false);
 
-                    // if all are false i.e. all failed since there was a cycle
-                    bool cycle = staticCheck ?
-                        staticResults.All(item => item == false) && dynamicResults.All(item => item == false)
-                        :
-                        dynamicResults.All(item => item == false);
+                // if all are false i.e. all failed since there was a cycle
+                var cycle = staticCheck ?
+                    staticResults.All(item => item == false) && dynamicResults.All(item => item == false)
+                    :
+                    dynamicResults.All(item => item == false);
 
-                    // if all do not agree
-                    if ( ! allAgree )
-                    {
-                        edges.Add(new Tuple<int, int>(v, w)); // add the error edge to the list
-                        writeFile("Crash-NotAgree");
+                // if all do not agree
+                if ( ! allAgree )
+                {
+                    _edges.Add(new Tuple<int, int>(v, w)); // add the error edge to the list
+                    WriteFile("Crash-NotAgree");
 
-                        throw new Exception("The algorithms do not agree");
-                    }
+                    throw new Exception("The algorithms do not agree");
+                }
                     
-                    // cycle, remove this edge
-                    if(cycle)
+                // cycle, remove this edge
+                if(cycle)
+                {
+                    foreach(var graph in staticGraphs)
                     {
-                        foreach(StaticGraph.IStaticGraph graph in staticGraphs)
-                        {
-                            graph.removeEdge(v, w);
-                        }
+                        graph.RemoveEdge(v, w);
                     }
-                    else
-                    {
-                        e++; //increase edge count;
-                        edges.Add(new Tuple<int, int>(v, w));
-                    }
+                }
+                else
+                {
+                    _e++; //increase edge count;
+                    _edges.Add(new Tuple<int, int>(v, w));
                 }
             }
 
@@ -153,14 +149,14 @@ namespace EmpiricalTester.GraphGeneration
                 for (int x = 0; x < staticGraphs.Count; x++)
                 {
                     // if null there is a cycle
-                    if (null == staticGraphs[x].topoSort())
+                    if (null == staticGraphs[x].TopoSort())
                         staticResults[x] = false; // cycle detected
                     else
                         staticResults[x] = true; // all is good                 
                 }
 
                 // if not all agree throw error
-                if(!(staticResults.All(item => item == true) || staticResults.All(item => item == false)))
+                if(!(staticResults.All(item => item) || staticResults.All(item => item == false)))
                 {
                     throw new Exception("Final static check failed");
                 }
@@ -168,11 +164,11 @@ namespace EmpiricalTester.GraphGeneration
             }
             
             if(compareTopologies)
-                topologyCompare(n, staticGraphs, dynamicGraphs);
+                TopologyCompare(staticGraphs, dynamicGraphs);
                        
             if(writeToFile)
             {
-                return writeFile("");
+                return WriteFile("");
             }
             else
             {
@@ -180,53 +176,53 @@ namespace EmpiricalTester.GraphGeneration
             }                        
         }
 
-        private string writeFile(string comment)
+        private string WriteFile(string comment)
         {
-            bool exists = Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Output"));
+            var exists = Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Output"));
 
             if (!exists)
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Output"));
 
-            string filenameComplete = Path.Combine(Environment.CurrentDirectory, @"Output\" + filename + comment + ".txt");
+            var filenameComplete = Path.Combine(Environment.CurrentDirectory, @"Output\" + _filename + comment + ".txt");
 
-            edges.Insert(0, new Tuple<int, int>(n, e)); // insert the vertex and edge counters in the start of the file
-            File.WriteAllLines(filenameComplete, edges.ConvertAll(item => item.Item1.ToString() + " " + item.Item2.ToString()).ToArray());
+            _edges.Insert(0, new Tuple<int, int>(_n, _e)); // insert the vertex and edge counters in the start of the file
+            File.WriteAllLines(filenameComplete, _edges.ConvertAll(item => item.Item1.ToString() + " " + item.Item2.ToString()).ToArray());
 
             return filenameComplete;
         }
 
         // Compares the edges topological order
-        private void topologyCompare(int n, List<StaticGraph.IStaticGraph> staticGraphs, List<DynamicGraph.IDynamicGraph> dynamicGraphs)
+        private void TopologyCompare(IEnumerable<IStaticGraph> staticGraphs, IEnumerable<IDynamicGraph> dynamicGraphs)
         {
             Console.WriteLine("Starting topology comparer");
             // Find connected pairs to compare
             ConnectivityGraph connectivity = new ConnectivityGraph();
             
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < _n; i++)
             {
-                connectivity.addVertex();
+                connectivity.AddVertex();
             }
 
-            foreach(Tuple<int, int> edge in edges)
+            foreach(Tuple<int, int> edge in _edges)
             {
-                connectivity.addEdge(edge.Item1, edge.Item2);
+                connectivity.AddEdge(edge.Item1, edge.Item2);
             }
 
             // matrix of node connectivity
             Console.WriteLine("Generating connectivity matrix");
-            var matrix = connectivity.generateConnectivityMatrix();
+            var matrix = connectivity.GenerateConnectivityMatrix();
             var topologies = new List<Tuple<string, DataStructures.SGTree<int>, List<DataStructures.SGTNode<int>>>>();
             Console.WriteLine("Connectivity matrix completed");
 
-            foreach (StaticGraph.IStaticGraph algorithm in staticGraphs)
+            foreach (var algorithm in staticGraphs)
             {
                 var sgt = new DataStructures.SGTree<int>(0.75);
-                var top = algorithm.topoSort();
+                var top = algorithm.TopoSort();
                 var items = new List<DataStructures.SGTNode<int>>();
 
                 var prev = sgt.insertFirst(top[0]);
                 items.Add(prev);
-                for (int i = 1; i < top.Count(); i++)
+                for (var i = 1; i < top.Length; i++)
                 {
                     prev = sgt.insertAfter(prev, top[i]);
                     items.Add(prev);
@@ -237,15 +233,15 @@ namespace EmpiricalTester.GraphGeneration
                                          (algorithm.GetType().ToString(), sgt, items));
             }
 
-            foreach (DynamicGraph.IDynamicGraph algorithm in dynamicGraphs)
+            foreach (var algorithm in dynamicGraphs)
             {
                 var sgt = new DataStructures.SGTree<int>(0.75);
-                var top = algorithm.topology();
+                var top = algorithm.Topology();
                 var items = new List<DataStructures.SGTNode<int>>();
 
                 var prev = sgt.insertFirst(top[0]);
                 items.Add(prev);
-                for (int i = 1; i < top.Count(); i++)
+                for (var i = 1; i < top.Count; i++)
                 {
                     prev = sgt.insertAfter(prev, top[i]);
                     items.Add(prev);
@@ -256,18 +252,18 @@ namespace EmpiricalTester.GraphGeneration
             }
 
             Console.Write("Performing topology compare");
-            for(int i = 0; i < matrix.Count; i++)
+            for(var i = 0; i < matrix.Count; i++)
             {
-                for(int j = 0; j < matrix.Count; j++)
+                for(var j = 0; j < matrix.Count; j++)
                 {
                     if (matrix[i][j])
                     { 
                         foreach (var algorithm in topologies)
                         {
                             //if(!algorithm.Item2.query(algorithm.Item3[i], algorithm.Item3[j]))
-                            if (!algorithm.Item2.query(algorithm.Item3[j], algorithm.Item3[i]))
+                            if (!algorithm.Item2.Query(algorithm.Item3[j], algorithm.Item3[i]))
                             {
-                                writeFile("TopoCompFail");
+                                WriteFile("TopoCompFail");
                                 throw new Exception("Topological comparison failed for: " + algorithm.Item1);
                             }
                         }                    

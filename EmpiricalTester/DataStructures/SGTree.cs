@@ -5,50 +5,50 @@ namespace EmpiricalTester.DataStructures
 {
     public class SGTree<T> //where T : IComparable<T>
     {
-        private SGTNode<T> root;
-        private int n, q;
-        private double alpha;
+        private SGTNode<T> _root;
+        private int _n, _q;
+        private readonly double _alpha;
 
         public SGTree(double alpha)
         {
             // q/2 <= n <= q
-            root = null;
-            this.alpha = alpha;
-            n = 0;
-            q = 0;            
+            _root = null;
+            _alpha = alpha;
+            _n = 0;
+            _q = 0;            
         }
 
 
         public virtual void Clear()
         {
-            root = null;
-            this.n = 0;
-            this.q = 0;
+            _root = null;
+            _n = 0;
+            _q = 0;
         }
-        public int count()
+        public int Count()
         {
-            return n;
+            return _n;
         }
-        public bool query(SGTNode<T> a, SGTNode<T> b)
+        public bool Query(SGTNode<T> a, SGTNode<T> b)
         {            
-            return a.label > b.label;
+            return a.Label > b.Label;
         }
         public SGTNode<T> Root
         {
             get
             {
-                return root;
+                return _root;
             }
             set
             {
-                root = value;
+                _root = value;
             }
         }
         
         // only used for debugging
         public int depth()
         {
-            return depth(root) + 1;
+            return depth(_root) + 1;
         }
         private int depth(SGTNode<T> node)
         {
@@ -65,11 +65,11 @@ namespace EmpiricalTester.DataStructures
 
         public SGTNode<T> insertFirst(SGTNode<T> root)
         {
-            this.root = root;
-            root.label = (long.MaxValue / 2) + 1; 
+            _root = root;
+            root.Label = long.MaxValue / 2 + 1; 
 
-            n++;
-            q = n;
+            _n++;
+            _q = _n;
 
             return root;
         }
@@ -84,10 +84,10 @@ namespace EmpiricalTester.DataStructures
             if (existing.Left == null)
             {
                 existing.Left = newNode;
-                existing.Left.label = pathLeft(existing.label);
+                existing.Left.Label = PathLeft(existing.Label);
 
                 newNode = existing.Left;
-                newNode.parent = existing;
+                newNode.Parent = existing;
             }
             else
             {
@@ -101,13 +101,13 @@ namespace EmpiricalTester.DataStructures
 
                 // found a place for the new element
                 curr.Right = newNode;
-                curr.Right.label = pathRight(curr.label);
+                curr.Right.Label = PathRight(curr.Label);
 
                 newNode = curr.Right;
-                newNode.parent = curr;
+                newNode.Parent = curr;
             }
 
-            return insertHelper(newNode);
+            return InsertHelper(newNode);
         }
 
         public SGTNode<T> insertAfter(SGTNode<T> existing, T newData)
@@ -117,18 +117,18 @@ namespace EmpiricalTester.DataStructures
             
         public SGTNode<T> insertAfter(SGTNode<T> existing, SGTNode<T> newNode)
         {
-            if (existing.label == -1)
+            if (existing.Label == -1)
                 throw new InvalidOperationException("The node to insert after is not in the tree");
-            if (newNode.label != -1)
+            if (newNode.Label != -1)
                 throw new InvalidOperationException("newNode is already in the tree");
 
             if (existing.Right == null)
             {
                 existing.Right = newNode;
-                existing.Right.label = pathRight(existing.label);
+                existing.Right.Label = PathRight(existing.Label);
 
                 newNode = existing.Right;
-                newNode.parent = existing;
+                newNode.Parent = existing;
             }
             else
             {
@@ -142,90 +142,90 @@ namespace EmpiricalTester.DataStructures
 
                 // found a place for the new element
                 curr.Left = newNode;
-                curr.Left.label = pathLeft(curr.label);
+                curr.Left.Label = PathLeft(curr.Label);
 
                 newNode = curr.Left;
-                newNode.parent = curr;
+                newNode.Parent = curr;
             }
             
-            return insertHelper(newNode);
+            return InsertHelper(newNode);
         }
 
-        private SGTNode<T> insertHelper(SGTNode<T> newNode)
+        private SGTNode<T> InsertHelper(SGTNode<T> newNode)
         {
-            n++;
-            q = Math.Max(q, n); // after insertion is set to max(MaxNodeCount, NodeCount)
+            _n++;
+            _q = Math.Max(_q, _n); // after insertion is set to max(MaxNodeCount, NodeCount)
 
             // find depth of newNode
-            int d = depth(newNode.label);
+            int d = depth(newNode.Label);
 
-            if (d > alphaLog(q))
+            if (d > AlphaLog(_q))
             {
                 // depth exceeded, find scapegoat
                 SGTNode<T> wChildKnown = newNode;
-                SGTNode<T> w = newNode.parent;
+                SGTNode<T> w = newNode.Parent;
 
                 // start from bottom, size(w) = 1, add 1 every loop and only do size(the other side)
                 int sizeW = 2; //newNode + parent (w)
-                int sizeLeft = wChildKnown == w.Left ? 1 : size(w.Left);
-                int sizeRight = wChildKnown == w.Right ? 1 : size(w.Right);
+                int sizeLeft = wChildKnown == w.Left ? 1 : Size(w.Left);
+                int sizeRight = wChildKnown == w.Right ? 1 : Size(w.Right);
 
 
-                while (sizeLeft <= alpha * sizeW &&
-                      sizeRight <= alpha * sizeW)
+                while (sizeLeft <= _alpha * sizeW &&
+                      sizeRight <= _alpha * sizeW)
                 {
                     wChildKnown = w;
-                    w = w.parent;
+                    w = w.Parent;
 
-                    sizeLeft = wChildKnown == w.Left ? sizeW : size(w.Left);
-                    sizeRight = wChildKnown == w.Right ? sizeW : size(w.Right);
+                    sizeLeft = wChildKnown == w.Left ? sizeW : Size(w.Left);
+                    sizeRight = wChildKnown == w.Right ? sizeW : Size(w.Right);
                     sizeW = sizeLeft + sizeRight + 1;
 
                 }
 
 
-                SGTNode<T> wParent = w.parent.parent; // TODO can this be null? probably
-                w = w.parent;
-                sizeLeft = wChildKnown == w.Left ? sizeW : size(w.Left);
-                sizeRight = wChildKnown == w.Right ? sizeW : size(w.Right);
+                SGTNode<T> wParent = w.Parent.Parent; // TODO can this be null? probably
+                w = w.Parent;
+                sizeLeft = wChildKnown == w.Left ? sizeW : Size(w.Left);
+                sizeRight = wChildKnown == w.Right ? sizeW : Size(w.Right);
                 sizeW = sizeLeft + sizeRight + 1;
 
-                rebuild(w, sizeW);
-                reLabel(wParent);
+                Rebuild(w, sizeW);
+                ReLabel(wParent);
             }
 
             return newNode;
         }
 
-        public void remove(SGTNode<T> node)
+        public void Remove(SGTNode<T> node)
         {
-            bool isRoot = node.parent == null ? true : false;
+            bool isRoot = node.Parent == null;
             SGTNode<T> relabelNode = null;
-            node.label = -1; // to indiciate this node has been removed, in case: remove(x), insert(x, newData)
+            node.Label = -1; // to indiciate this node has been removed, in case: remove(x), insert(x, newData)
 
             if(node.Left == null && node.Right == null)
             {
                 //Console.WriteLine("both null, is root = " + isRoot);
                 if (isRoot) 
-                    root = null;
+                    _root = null;
                 
-                relabelNode = node.parent;
-                removeParentsLinkTo(node);
+                relabelNode = node.Parent;
+                RemoveParentsLinkTo(node);
             }
             else if(node.Left == null || node.Right == null)
             {
                 //Console.WriteLine("one child, is root = " + isRoot);
-                SGTNode<T> child = node.Left != null ? node.Left : node.Right;
+                SGTNode<T> child = node.Left ?? node.Right;
 
                 if (!isRoot)
                 {
-                    replaceParentLink(node, child);
-                    relabelNode = child.parent;
+                    ReplaceParentLink(node, child);
+                    relabelNode = child.Parent;
                 }
                 else
                 {
-                    root = child;
-                    root.parent = null;
+                    _root = child;
+                    _root.Parent = null;
                 }                    
             }
             else
@@ -245,24 +245,24 @@ namespace EmpiricalTester.DataStructures
                     //Console.WriteLine("rm is left, is root = " + isRoot);
                     if (isRoot)
                     {
-                        root = rightMost;
-                        root.Right = node.Right;
-                        node.Right.parent = root;
-                        root.parent = null;                      
+                        _root = rightMost;
+                        _root.Right = node.Right;
+                        node.Right.Parent = _root;
+                        _root.Parent = null;                      
                     }
                     else
                     {                        
                         // move rightMost in nodes place
-                        rightMost.parent = node.parent;
-                        if (node.parent.Left == node)
-                            node.parent.Left = rightMost;
+                        rightMost.Parent = node.Parent;
+                        if (node.Parent.Left == node)
+                            node.Parent.Left = rightMost;
                         else
-                            node.parent.Right = rightMost;
+                            node.Parent.Right = rightMost;
 
                         // rightmost was left so it doesnt have any right child
                         // put nodes right child on rightmost right
                         rightMost.Right = node.Right;
-                        node.Right.parent = rightMost;                        
+                        node.Right.Parent = rightMost;                        
                     }
                 }
                 else
@@ -271,65 +271,62 @@ namespace EmpiricalTester.DataStructures
                     //node has 2 children, rightMost is not left
                     if (rightMost.Left != null)
                     {
-                        rightMost.Left.parent = rightMost.parent;
-                        rightMost.parent.Right = rightMost.Left;
+                        rightMost.Left.Parent = rightMost.Parent;
+                        rightMost.Parent.Right = rightMost.Left;
                     }
                     else
                     {
-                        rightMost.parent.Right = null;
+                        rightMost.Parent.Right = null;
                     }
 
                     if (isRoot)
                     {
-                        root = rightMost;
-                        rightMost.parent = null;
+                        _root = rightMost;
+                        rightMost.Parent = null;
                         rightMost.Left = node.Left;
-                        node.Left.parent = root;
+                        node.Left.Parent = _root;
                         rightMost.Right = node.Right;
-                        node.Right.parent = root;
+                        node.Right.Parent = _root;
                     }
                     else
                     {
-                        rightMost.parent = node.parent;
-                        if (node.parent.Left == node)
-                            node.parent.Left = rightMost;
+                        rightMost.Parent = node.Parent;
+                        if (node.Parent.Left == node)
+                            node.Parent.Left = rightMost;
                         else
-                            node.parent.Right = rightMost;
+                            node.Parent.Right = rightMost;
 
                         rightMost.Left = node.Left;
-                        node.Left.parent = rightMost;
+                        node.Left.Parent = rightMost;
                         rightMost.Right = node.Right;
-                        node.Right.parent = rightMost;
+                        node.Right.Parent = rightMost;
                     }                    
                 }
 
-                relabelNode = rightMost.parent;                               
+                relabelNode = rightMost.Parent;                               
             }
 
-            n--;
+            _n--;
 
-            node.parent = null;
+            node.Parent = null;
             node.Right = null;
             node.Left = null;
             
             //NodeCount <= α*MaxNodeCount
-            if (n <= alpha*q && root != null)
+            if (_n <= _alpha*_q && _root != null)
             {
-                q = n;
-                rebuild(root, n);
-                reLabel(root); 
+                _q = _n;
+                Rebuild(_root, _n);
+                ReLabel(_root); 
             }
-            else if (root != null)
+            else if (_root != null)
             {
-                if (isRoot)
-                    reLabel(root);
-                else
-                    reLabel(relabelNode); 
+                ReLabel(isRoot ? _root : relabelNode);
             }                    
         }
         public List<string> inOrderLabels()
         {
-            return inOrderLabels(root, new List<string>());
+            return inOrderLabels(_root, new List<string>());
         }
 
         /*
@@ -353,27 +350,27 @@ namespace EmpiricalTester.DataStructures
             checkIntegrityDebug(node.Right);
         }
         */
-        private void removeParentsLinkTo(SGTNode<T> child)
+        private void RemoveParentsLinkTo(SGTNode<T> child)
         {
-            if (child == child.parent?.Left)
-                child.parent.Left = null;
-            if (child == child.parent?.Right)
-                child.parent.Right = null;
+            if (child == child.Parent?.Left)
+                child.Parent.Left = null;
+            if (child == child.Parent?.Right)
+                child.Parent.Right = null;
         }
 
-        private void replaceParentLink(SGTNode<T> oldChild, SGTNode<T> newChild)
+        private void ReplaceParentLink(SGTNode<T> oldChild, SGTNode<T> newChild)
         {
-            if(oldChild.parent?.Left == oldChild)
+            if(oldChild.Parent?.Left == oldChild)
             {
-                oldChild.parent.Left = newChild;
-                newChild.parent = oldChild.parent;
-                oldChild.parent = null;
+                oldChild.Parent.Left = newChild;
+                newChild.Parent = oldChild.Parent;
+                oldChild.Parent = null;
             }
-            if(oldChild.parent?.Right == oldChild)
+            if(oldChild.Parent?.Right == oldChild)
             {
-                oldChild.parent.Right = newChild;
-                newChild.parent = oldChild.parent;
-                oldChild.parent = null;
+                oldChild.Parent.Right = newChild;
+                newChild.Parent = oldChild.Parent;
+                oldChild.Parent = null;
             }
         }
 
@@ -383,14 +380,14 @@ namespace EmpiricalTester.DataStructures
                 return list;
 
             inOrderLabels(node.Left, list);
-            list.Add(Convert.ToString(node.label, 2).PadLeft(63, '0'));
+            list.Add(Convert.ToString(node.Label, 2).PadLeft(63, '0'));
             inOrderLabels(node.Right, list);
 
             return list;
         }
         public List<T> inOrder()
         {
-            return inOrder(root, new List<T>());
+            return inOrder(_root, new List<T>());
         }
         private List<T> inOrder(SGTNode<T> node, List<T> list)
         {
@@ -403,108 +400,108 @@ namespace EmpiricalTester.DataStructures
 
             return list;
         }
-        private int alphaLog(int q)
+        private int AlphaLog(int q)
         {
-            return (int)Math.Ceiling(Math.Log(q, (1/alpha))) + 1;
+            return (int)Math.Ceiling(Math.Log(q, 1/_alpha)) + 1;
         }
-        private int size(SGTNode<T> node)
+        private int Size(SGTNode<T> node)
         {
             if (node == null)
                 return 0;
             else
             {
                 int c = 1;
-                c += size(node.Left);
-                c += size(node.Right);
+                c += Size(node.Left);
+                c += Size(node.Right);
 
                 return c;
             }
         }        
         private int depth(long label)
         {
-            long lastBit = (label & -label);
+            long lastBit = label & -label;
             return 62 - (int)Math.Log(lastBit, 2);
         }
-        private int packIntoArray(SGTNode<T> u, SGTNode<T>[] a, int i)
+        private int PackIntoArray(SGTNode<T> u, SGTNode<T>[] a, int i)
         {
             if (u == null)
             {
                 return i;
             }
 
-            i = packIntoArray(u.Left, a, i);
+            i = PackIntoArray(u.Left, a, i);
             a[i++] = u;
-            return packIntoArray(u.Right, a, i);
+            return PackIntoArray(u.Right, a, i);
         }
-        private void rebuild(SGTNode<T> u, int ns)
+        private void Rebuild(SGTNode<T> u, int ns)
         {
-            SGTNode<T> p = u.parent;
+            SGTNode<T> p = u.Parent;
             SGTNode<T>[] a = new SGTNode<T>[ns];
-            packIntoArray(u, a, 0);
+            PackIntoArray(u, a, 0);
 
             if (p == null)
             {
-                root = buildBalanced(a, 0, ns);
-                root.parent = null;
+                _root = BuildBalanced(a, 0, ns);
+                _root.Parent = null;
             }
             else if (p.Right == u)
             {
-                p.Right = buildBalanced(a, 0, ns);
-                p.Right.parent = p; 
+                p.Right = BuildBalanced(a, 0, ns);
+                p.Right.Parent = p; 
             }
             else
             {
-                p.Left = buildBalanced(a, 0, ns);
-                p.Left.parent = p;
+                p.Left = BuildBalanced(a, 0, ns);
+                p.Left.Parent = p;
             }
         }        
-        private SGTNode<T> buildBalanced(SGTNode<T>[] a, int i, int ns)
+        private SGTNode<T> BuildBalanced(SGTNode<T>[] a, int i, int ns)
         {
             if (ns == 0)
                 return null;
 
             int m = ns / 2;
-            a[i+m].Left = buildBalanced(a, i, m);
+            a[i+m].Left = BuildBalanced(a, i, m);
 
             if (a[i + m].Left != null)
-                a[i + m].Left.parent = a[i + m];
-            a[i + m].Right = buildBalanced(a, i + m + 1, ns - m - 1);
+                a[i + m].Left.Parent = a[i + m];
+            a[i + m].Right = BuildBalanced(a, i + m + 1, ns - m - 1);
             if (a[i + m].Right != null)
-                a[i + m].Right.parent = a[i + m];
+                a[i + m].Right.Parent = a[i + m];
             return a[i + m];
         }
 
 
         #region Labeling
         // least significant bit moved "right"
-        private long pathLeft(long label)
+        private long PathLeft(long label)
         {
-            long lastBit = (label & -label);
-            return (label ^ lastBit) | (lastBit >> 1);             
+            long lastBit = label & -label;
+            return label ^ lastBit | (lastBit >> 1);             
         }
         // least significant bit copied "right"
-        private long pathRight(long label)
+        private long PathRight(long label)
         {
-            long lastBit = (label & -label);
+            long lastBit = label & -label;
             return label | (lastBit >> 1);
         }
-        private void reLabel(SGTNode<T> node)
+        private void ReLabel(SGTNode<T> node)
         {
-            if(node == root)
-                node.label = (long.MaxValue / 2) + 1;
+            if(node == _root)
+                node.Label = long.MaxValue / 2 + 1;
 
             if (node.Left != null)
-                recursiveRelabel(node.Left, pathLeft(node.label));
+                RecursiveRelabel(node.Left, PathLeft(node.Label));
             if (node.Right != null)
-                recursiveRelabel(node.Right, pathRight(node.label));
+                RecursiveRelabel(node.Right, PathRight(node.Label));
         }
-        private void recursiveRelabel(SGTNode<T> node, long newLabel)
+        private void RecursiveRelabel(SGTNode<T> node, long newLabel)
         {
-            node.label = newLabel;
+            node.Label = newLabel;
             if (node.Left != null)
-                recursiveRelabel(node.Left, pathLeft(node.label));
+                RecursiveRelabel(node.Left, PathLeft(node.Label));
             if (node.Right != null)
-                recursiveRelabel(node.Right, pathRight(node.label));
+                RecursiveRelabel(node.Right, PathRight(node.Label));
         }
         #endregion Labeling
 
