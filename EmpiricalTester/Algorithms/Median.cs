@@ -5,12 +5,19 @@ namespace EmpiricalTester.Algorithms
 {
     public static class Median
     {
+        private static Random _random = new Random(DateTime.Now.Millisecond);
+
         public static T Mom<T>(this List<T> list, int i, IComparer<T> comp) where T : IComparable<T>
         {
-            return Select(list, i, 0, list.Count - 1, comp);
+            return Select(list, i, 0, list.Count - 1, false, comp);
         }
 
-        public static T Select<T>(List<T> list, int i, int left, int right, IComparer<T> comp) where T : IComparable<T>
+        public static T MomRandom<T>(this List<T> list, int i, IComparer<T> comp) where T : IComparable<T>
+        {
+            return Select(list, i, 0, list.Count - 1, true, comp);
+        }
+
+        public static T Select<T>(List<T> list, int i, int left, int right, bool isRandom, IComparer<T> comp) where T : IComparable<T>
         {
             if ((right - left) < 5)
             {
@@ -29,16 +36,22 @@ namespace EmpiricalTester.Algorithms
                     x + 4 > right ? x + (right - x) / 2 : x + 2);
             }
 
-            T medianOfMedians = Select<T>(list, left + ((swapIndex-left-1) / 2), left, swapIndex-1, comp);
-            Swap(list, left, list.IndexOf(medianOfMedians));
+            if(isRandom)
+                Swap(list, left, _random.Next(left, swapIndex -1));
+            else
+            {
+                T medianOfMedians = Select<T>(list, left + ((swapIndex - left - 1) / 2), left, swapIndex - 1, isRandom, comp);
+                Swap(list, left, list.IndexOf(medianOfMedians));
+            }
 
             var r = list.Partition(comp.Compare, left, right);
  
             if (i == r)
                 return list[i];
-            return i < r 
-                ? Select(list, i, left, r - 1, comp) 
-                : Select(list, i, r, right, comp);
+            if (i < r)
+                return Select(list, i, left, r - 1, isRandom, comp);
+
+            return Select(list, i, r, right, isRandom, comp);
         }
         
         private static void Swap<T>(T[] list, int a, int b)
