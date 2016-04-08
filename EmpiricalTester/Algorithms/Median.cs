@@ -1,184 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace EmpiricalTester.Algorithms
 {
     public static class Median
     {
-        public static T Mom<T>(this IList<T> list, int i, Comparison<T> comp) where T : IComparable<T>
+        public static T Mom<T>(this List<T> list, int i, IComparer<T> comp) where T : IComparable<T>
         {
-            
-            if (list.Count <= 2)
-                return list.First();
-            
-            return Select(list.ToArray(), i, 0, list.Count - 1, comp);
+            return Select(list, i, 0, list.Count - 1, comp);
         }
 
-        public static T Select<T>(this T[] list, int i, int start, int end, Comparison<T> comp) where T : IComparable<T>
+        public static T Select<T>(List<T> list, int i, int left, int right, IComparer<T> comp) where T : IComparable<T>
         {
-            if (start == end)
-                return list[start];
-            
-            int swap_index = start;
-            for (int x = start; x <= end; x += 5)
+            if ((right - left) < 5)
             {
-                if (end >= x + 4)
-                {
-                    Array.Sort(list, x, 5);
-                    Swap(list, swap_index, x + 2);
-                    swap_index++;
-                }
-            }
-            int remainder = ((end + 1) - start) % 5;
-            Array.Sort(list, end - remainder, remainder + 1);
-            Swap(list, swap_index, end - (remainder / 2));
-            swap_index++; // ?
-
-            T median = Select(list, i, start, swap_index, comp);
-            int r = list.Partition(comp, start, end);
-            int k = r - start + 1;
-
-            if (i == k)
-                return list[i];
-            else if (i < k)
-                return Select(list, i, start, r - 1, comp);
-            else
-                return Select(list, i, r - 1, end, comp);
-
-        }
-        /*
-        public static T Select<T>(this T[] list, int i, int start, int end) where T : IComparable<T>
-        {
-            if (end - start <= 5)
-            {
-                Array.Sort(list, start, end - start);
+                list.Sort(left, right-left+1, comp);
                 return list[i];
             }
+                
+            if (left == right)
+                return list[left];
 
-            int swap_index = start;
-            for (int x = start; x <= end; x += 5)
+            int swapIndex = left;
+            for (var x = left; x <= right; x+=5)
             {
-                if (end >= x + 4)
-                {
-                    Array.Sort(list, x, 5);
-                    Swap(list, swap_index, x + 2);
-                    swap_index++;
-                }
+                list.Sort(x, x + 4 > right ? right - x + 1 : 5, comp);
+                Swap(list, swapIndex++, 
+                    x + 4 > right ? x + (right - x) / 2 : x + 2);
             }
 
-            int newN = start + ((swap_index - start) / 2);
-            T median = Select(list, newN, start, swap_index - 1); // finds the median of medians
+            T medianOfMedians = Select<T>(list, left + ((swapIndex-left-1) / 2), left, swapIndex-1, comp);
+            Swap(list, left, list.IndexOf(medianOfMedians));
 
-            int countL = 0;
-            int countS = 0;
-            for(int x = start; x <= end; x++)
-            {
-                int c = median.CompareTo(list[x]);
-                if (c < 0)
-                    countL++;
-                if (c > 0)
-                    countS++;
-            }
-
-            T[] smaller = new T[countS];
-            T[] bigger = new T[countL];
-            countL = 0;
-            countS = 0;
-            for(int x = start; x <= end; x++)
-            {
-                int c = median.CompareTo(list[x]);
-                if (c < 0)
-                    bigger[countL++] = list[x];                                    
-                if (c > 0)
-                    smaller[countS++] = list[x];
-            }
-
-            //list = new T[countS + countL + 1];
-            //smaller.CopyTo(list, 0);
-            //list[countS] = median;
-            //bigger.CopyTo(list, countS + 1);
-
-
-            if (i <= countL)
-                return Select(bigger, i, 0, countL-1);
-            else if (i - 1 == countL)
-                return median;
-            else
-                return Select(smaller, i - countL - 1, 0, countS-1);
-
+            var r = list.Partition(comp.Compare, left, right);
+ 
+            if (i == r)
+                return list[i];
+            return i < r 
+                ? Select(list, i, left, r - 1, comp) 
+                : Select(list, i, r, right, comp);
         }
-        */
-
-            /*
-            public static T Select<T>(this T[] list, int i, int start, int end, Comparison<T> comp) where T : IComparable<T>
-            {
-                if(end - start <= 5)
-                {
-                    Array.Sort(list, start, end - start);
-                    return list[i];                
-                }
-
-                int swap_index = start;
-                for(int x = start; x < end; x+=5)
-                {
-                    if(end >= x+4)
-                    {
-                        Array.Sort(list, x, 5);
-                        Swap(list, swap_index, x + 2);
-                        swap_index++;
-                    }                
-                }
-
-                int newN = start + ((swap_index - start) / 2);
-                T median = Select(list, newN, start, swap_index -1, comp); // finds the median of medians
-
-                int location = pivot(list, median, start, end, comp);
-
-                if (location == i)
-                    return list[i];
-                else if (i > newN)
-                    return Select(list, i, newN + 1, end, comp);
-                else
-                    return Select(list, i, start, newN, comp);
-
-            }
-
-            private static int pivot<T>(this T[] list, T value, int start, int end, Comparison<T> comp) where T : IComparable<T>
-            {
-                int tPos = start;
-                int tCurr = 0;
-                for(int i = start; i <= end; i++)
-                {
-                    if (list[i].CompareTo(value) < 0)
-                        tPos++;
-                    if (value.CompareTo(list[i]) == 0)
-                        tCurr = i;
-                }
-                tPos--;
-
-                int swapPos = tPos + 1;
-                Swap(list, tPos, tCurr); // move t to its final position
-                while (swapPos <= end && start <= end)
-                {
-                    if(value.CompareTo(list[start]) <= 0)
-                    {
-                        while (swapPos <= end && value.CompareTo(list[swapPos]) < 0)
-                            swapPos++;
-                        if(swapPos <= end)
-                        {
-                            Swap(list, start, swapPos);
-                            swapPos++;
-                        }                    
-                    }
-
-                    start++;
-                }
-
-                return tPos;
-            }          */
-
+        
         private static void Swap<T>(T[] list, int a, int b)
+        {
+            T t = list[a];
+            list[a] = list[b];
+            list[b] = t;
+        }
+
+        private static void Swap<T>(IList<T> list, int a, int b)
         {
             T t = list[a];
             list[a] = list[b];

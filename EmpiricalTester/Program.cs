@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using EmpiricalTester.Algorithms;
 
 namespace EmpiricalTester
 {
@@ -32,7 +36,7 @@ namespace EmpiricalTester
             for(var i = 1; i < 5; i++)
             {
                 foreach (var p in ps)
-                {
+                {/*
                     generator.GenerateGraph(
                     100, // nodes
                     p, // Probability of an edge being added from a complete graph
@@ -97,15 +101,32 @@ namespace EmpiricalTester
             /*
             Random r = new Random();
             List<int> x = new List<int>(120);
-            for(int i = 0; i < 10; i++)
+            for(int i = 0; i < 11; i++)
             {
                 x.Add(r.Next(0, 200));
             }//*/
 
-            var x = new List<int>() { 32,46,30,54,91,102,128,152,175,147};
-            
+            var x = new List<int>() { 23, 15, 41, 34, 48, 42, 56, 69, 98, 99 };
             /*
-            int median = Algorithms.Median.Mom(x, x.Count / 2+1, null);
+            54
+            147
+            0
+            */
+            //var blee = x.Mom(x.Count / 2 + 1, Comparer<int>.Default);
+            
+            int median0 = Algorithms.Median.Mom(x, 0, Comparer<int>.Default);
+            int median1 = Algorithms.Median.Mom(x, 1, Comparer<int>.Default);
+            int median2 = Algorithms.Median.Mom(x, 2, Comparer<int>.Default);
+            int median3 = Algorithms.Median.Mom(x, 3, Comparer<int>.Default);
+            int median4 = Algorithms.Median.Mom(x, 4, Comparer<int>.Default);
+            int median5 = Algorithms.Median.Mom(x, 5, Comparer<int>.Default);
+            int median6 = Algorithms.Median.Mom(x, 6, Comparer<int>.Default);
+            int median7 = Algorithms.Median.Mom(x, 7, Comparer<int>.Default);
+            int median8 = Algorithms.Median.Mom(x, 8, Comparer<int>.Default);
+            int median9 = Algorithms.Median.Mom(x, 9, Comparer<int>.Default);
+            //int median10 = Algorithms.Median.Mom(x, 10, Comparer<int>.Default);
+            //int median11 = Algorithms.Median.Mom(x, 11, Comparer<int>.Default);
+
             int b = Algorithms.Median.QuickSelect(x, x.Count / 2);
             var xl = new List<int>(x);
             xl.Sort();

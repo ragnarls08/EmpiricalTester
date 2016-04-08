@@ -51,6 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Algorithms\MedianTests.cs" />
     <Compile Include="DataStructures\SGTreeTests.cs" />
     <Compile Include="DynamicGraph\HKMST_V1Tests.cs" />
     <Compile Include="DynamicGraph\SimpleIncrementalTests.cs" />
