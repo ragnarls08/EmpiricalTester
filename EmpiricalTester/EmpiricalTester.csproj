@@ -80,6 +80,7 @@
     <Compile Include="GraphGeneration\ConnectivityGraph.cs" />
     <Compile Include="GraphGeneration\GraphGenerator.cs" />
     <Compile Include="Measuring\GraphRunner.cs" />
+    <Compile Include="Measuring\MedianMeasure.cs" />
     <Compile Include="Measuring\OrderMaintenance.cs" />
     <Compile Include="StaticGraph\GenericTarjan.cs" />
     <Compile Include="StaticGraph\GenericTarjanNode.cs" />

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
+using static System.Console;
 using EmpiricalTester.Algorithms;
+using static EmpiricalTester.Measuring.MedianMeasure;
+
 
 namespace EmpiricalTester
 {
@@ -94,7 +94,8 @@ namespace EmpiricalTester
             //measure.run(outFile, ns, ps, alphas, 5);
             //measure.runSequence(outFile, ns, ps, alphas, 5);
 
-
+            ns = new List<int>() { 1000, 10000, 100000, 1000000 };
+            WriteLine(MeasureMedian(ns, 0, 100, 25)); 
 
             Console.WriteLine("\n\ndone");
             Console.ReadLine();
