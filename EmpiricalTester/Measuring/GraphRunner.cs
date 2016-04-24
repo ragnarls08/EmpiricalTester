@@ -86,7 +86,7 @@ namespace EmpiricalTester.Measuring
 
             for (int i = 0; i < repeatCount; i++)
             {
-                alg.ResetAll();
+                alg.ResetAll(graph.n);
                 int skip = 0;
                 times.Add(new List<long>());
 
@@ -136,9 +136,8 @@ namespace EmpiricalTester.Measuring
                 List<Measurements> measurements = new List<Measurements>();
 
                 Console.WriteLine("File " + (x+1) + "/ " + fileNames.Length);
-
-                // TODO simpleincremental is quite fast already, maybe edges need to be added in "batches" for the measurments to be more accurate
-                foreach (StaticGraph.IStaticGraph algorithm in staticGraphs)
+                
+                foreach (var algorithm in staticGraphs)
                 {
                     measurements.Add(new Measurements(algorithm.GetType().ToString()));
                     Measurements current = measurements.Find(item => item.Name == algorithm.GetType().ToString());
@@ -175,7 +174,7 @@ namespace EmpiricalTester.Measuring
                     for (int i = 0; i < repeateCount; i++)
                     {
                         Console.WriteLine("Run: " + i + ", " + current.Name);
-                        algorithm.ResetAll();
+                        algorithm.ResetAll(graph.n);
                         // add nodes
                         for (int y = 0; y < graph.n; y++)
                         {
@@ -253,7 +252,7 @@ namespace EmpiricalTester.Measuring
                     for (int i = 0; i < repeateCount; i++)
                     {
                         Console.WriteLine("Run: " + i + ", " + current.Name);
-                        algorithm.ResetAll();
+                        algorithm.ResetAll(graph.n);
                         // add nodes
                         for (int y = 0; y < graph.n; y++)
                         {
@@ -289,7 +288,7 @@ namespace EmpiricalTester.Measuring
             chart.ChartAreas.Add("area");
             chart.ChartAreas["area"].AxisX.Name = "Nr of edge";
             chart.ChartAreas["area"].AxisY.Name = "Ticks";
-            chart.ChartAreas["area"].AxisY.Maximum = 15000; // TODO this needs to be in relation to the data
+            chart.ChartAreas["area"].AxisY.Maximum = 15000; 
             // controls the resolution of the output file            
             chart.Width = 1920;
             chart.Height = 1080;
@@ -341,7 +340,7 @@ namespace EmpiricalTester.Measuring
             // split input and add to the graph list
             for (int i = 1; i < text.Length; i++)
             {
-                string[] s = text[i].Split();
+                var s = text[i].Split();
                 retValue.edges.Add(new Pair(int.Parse(s.First()), int.Parse(s.Skip(1).First())));
             }
 

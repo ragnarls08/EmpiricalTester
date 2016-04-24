@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpiricalTester", "EmpiricalTester\EmpiricalTester.csproj", "{EA84A06D-A8DA-4ECE-A3AD-4941BE6F3D80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpiricalTesterTests", "EmpiricalTesterTests\EmpiricalTesterTests.csproj", "{9B2A358C-E5FE-4600-AB43-40535583E035}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA84A06D-A8DA-4ECE-A3AD-4941BE6F3D80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA84A06D-A8DA-4ECE-A3AD-4941BE6F3D80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA84A06D-A8DA-4ECE-A3AD-4941BE6F3D80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA84A06D-A8DA-4ECE-A3AD-4941BE6F3D80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B2A358C-E5FE-4600-AB43-40535583E035}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B2A358C-E5FE-4600-AB43-40535583E035}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B2A358C-E5FE-4600-AB43-40535583E035}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B2A358C-E5FE-4600-AB43-40535583E035}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

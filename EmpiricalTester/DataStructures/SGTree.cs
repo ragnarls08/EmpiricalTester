@@ -5,6 +5,8 @@ namespace EmpiricalTester.DataStructures
 {
     public class SGTree<T> //where T : IComparable<T>
     {
+        public int Count => _n;
+
         private SGTNode<T> _root;
         private int _n, _q;
         private readonly double _alpha;
@@ -25,14 +27,17 @@ namespace EmpiricalTester.DataStructures
             _n = 0;
             _q = 0;
         }
-        public int Count()
-        {
-            return _n;
-        }
+        
         public bool Query(SGTNode<T> a, SGTNode<T> b)
         {            
             return a.Label > b.Label;
         }
+
+        public bool LT(SGTNode<T> a, SGTNode<T> b)
+        {
+            return a.Label < b.Label;
+        }
+
         public SGTNode<T> Root
         {
             get
@@ -95,7 +100,6 @@ namespace EmpiricalTester.DataStructures
 
                 while (curr.Right != null)
                 {
-                    // TODO special case if bottom is reached. probably wont happens ince tree balances
                     curr = curr.Right;
                 }
 
@@ -136,7 +140,6 @@ namespace EmpiricalTester.DataStructures
 
                 while(curr.Left != null)
                 {
-                    // TODO special case if bottom is reached. probably wont happens ince tree balances
                     curr = curr.Left;
                 }
 
@@ -184,7 +187,7 @@ namespace EmpiricalTester.DataStructures
                 }
 
 
-                SGTNode<T> wParent = w.Parent.Parent; // TODO can this be null? probably
+                var wParent = w.Parent.Parent; 
                 w = w.Parent;
                 sizeLeft = wChildKnown == w.Left ? sizeW : Size(w.Left);
                 sizeRight = wChildKnown == w.Right ? sizeW : Size(w.Right);

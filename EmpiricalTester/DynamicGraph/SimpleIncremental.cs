@@ -22,7 +22,7 @@ namespace EmpiricalTester.DynamicGraph
             _graph[w].Incoming.Remove(v);
         }
 
-        public void ResetAll()
+        public void ResetAll(int newN)
         {
             _graph.Clear();
         }

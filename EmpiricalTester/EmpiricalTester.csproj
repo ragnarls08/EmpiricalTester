@@ -70,11 +70,15 @@
     <Compile Include="Algorithms\Median.cs" />
     <Compile Include="DataStructures\SGTNode.cs" />
     <Compile Include="DataStructures\SGTree.cs" />
+    <Compile Include="DynamicGraph\BFGT.cs" />
+    <Compile Include="DynamicGraph\BFGTNode.cs" />
+    <Compile Include="DynamicGraph\HKMSTDense.cs" />
     <Compile Include="DynamicGraph\HKMSTNode.cs" />
     <Compile Include="DynamicGraph\HKMSTNodeFinal.cs" />
     <Compile Include="DynamicGraph\HKMSTFinal.cs" />
     <Compile Include="DynamicGraph\HKMSTV1.cs" />
     <Compile Include="DynamicGraph\IDynamicGraph.cs" />
+    <Compile Include="DynamicGraph\PearceKelly.cs" />
     <Compile Include="DynamicGraph\SimpleIncremental.cs" />
     <Compile Include="DynamicGraph\SimpleNode.cs" />
     <Compile Include="GraphGeneration\ConnectivityGraph.cs" />

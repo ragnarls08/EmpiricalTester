@@ -8,6 +8,6 @@ namespace EmpiricalTester.DynamicGraph
         bool AddEdge(int v, int w);
         void RemoveEdge(int v, int w);
         List<int> Topology();
-        void ResetAll(); // resets the algorithm to receive a new graph
+        void ResetAll(int newN); // resets the algorithm to receive a new graph
     }
 }

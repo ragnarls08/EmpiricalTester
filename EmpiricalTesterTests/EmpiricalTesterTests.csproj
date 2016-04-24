@@ -53,7 +53,9 @@
   <ItemGroup>
     <Compile Include="Algorithms\MedianTests.cs" />
     <Compile Include="DataStructures\SGTreeTests.cs" />
+    <Compile Include="DynamicGraph\HKMSTDenseTests.cs" />
     <Compile Include="DynamicGraph\HKMST_V1Tests.cs" />
+    <Compile Include="DynamicGraph\PearceKellyTests.cs" />
     <Compile Include="DynamicGraph\SimpleIncrementalTests.cs" />
     <Compile Include="GraphGeneration\ConnectivityGraphTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

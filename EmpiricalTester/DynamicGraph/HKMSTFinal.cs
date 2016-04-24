@@ -159,10 +159,10 @@ namespace EmpiricalTester.DynamicGraph
                             if(curr.Value.Label <= s.Label)
                             {
                                 fp.Remove(curr);
-                                fa.AddFirst(curr.Value);                                
+                                fa.AddFirst(curr.Value);
                             }
                             curr = next;
-                        } while (curr != null);                       
+                        } while (curr != null);
                     }
                 }
                 if(ba.Count == 0)
@@ -288,7 +288,7 @@ namespace EmpiricalTester.DynamicGraph
             //graph[w].Outgoing.Remove(v);
         }
 
-        public void ResetAll()
+        public void ResetAll(int newN)
         {
             _nCount = 0;
             _nodeOrder.Clear();
