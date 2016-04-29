@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
+using EmpiricalTester.DataStructures;
 
 namespace EmpiricalTester.DynamicGraph 
 {
 
-    public enum SPickMethod { Random, MoMRandom, MoM };
+    public enum SPickMethod { Random, MoMRandom, MoM, QuickSelect };
     public class HKMSTFinal : IDynamicGraph
     {
         private DataStructures.SGTree<HKMSTNodeFinal> _nodeOrder;
@@ -65,7 +67,8 @@ namespace EmpiricalTester.DynamicGraph
 
             DataStructures.SGTNode<HKMSTNodeFinal> s = v;
 
-            var fa = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();// should be linked list?
+            // To implement soft-threshold search, we maintain FA , FP, BA , and BP as doublylinked lists
+            var fa = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
             var fp = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
             var ba = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
             var bp = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
@@ -302,15 +305,20 @@ namespace EmpiricalTester.DynamicGraph
 
         private DataStructures.SGTNode<HKMSTNodeFinal> PickS(LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>> list)
         {
+            //todo cant be converting tolist
             switch (_sPickMethod)
             {
                 case SPickMethod.Random:                    
                     return list.ElementAt(_r.Next(0, list.Count -1));
                 case SPickMethod.MoMRandom:
-                    return null;
+                    return Algorithms.Median.MomRandom(list.ToList(), list.Count / 2,
+                        Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
+                case SPickMethod.MoM:
+                    return Algorithms.Median.Mom(list.ToList(), list.Count / 2,
+                        Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
                 default:
                     return Algorithms.Median.QuickSelect(list.ToList(), list.Count / 2,
-                            Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
+                        Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
 
             }
         }

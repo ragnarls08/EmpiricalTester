@@ -10,11 +10,18 @@ namespace EmpiricalTester.GraphGeneration
 {
     internal class GraphGenerator
     {
-        private List<Tuple<int, int>> _allEdges;
-        private int _e;
+        private List<Tuple<int, int>> _allEdges;        
         private List<Tuple<int, int>> _edges;
         private string _filename;
+        private int _e;        
         private int _n;
+
+        private Random rng;
+
+        public GraphGenerator()
+        {
+            rng = new Random(DateTime.Now.Millisecond * DateTime.Now.Second);
+        }
 
         /// <summary>
         ///     Generates a random graph
@@ -48,7 +55,7 @@ namespace EmpiricalTester.GraphGeneration
                     // Don't add self connecting nodes
                     if (i != x)
                     {
-                        if (!(random.Next(0, 100) / 100.0 < p))
+                        if (!(random.Next(0, 1000000000) / 1000000000.0 < p))
                             continue;
                         _allEdges.Add(new Tuple<int, int>(i, x));
                     }
@@ -169,6 +176,109 @@ namespace EmpiricalTester.GraphGeneration
             return "";
         }
 
+
+        public void GenerateGraphs(int n, List<int> ms, int repeatCount, string folder, List<IStaticGraph> statics, List<IDynamicGraph> dynamics)
+        {
+            foreach (var m in ms)
+            {
+                var currFolder = Path.Combine(folder, $@"{n}-{m}");
+                mkdir(currFolder);
+                for (int i = 0; i < repeatCount; i++)
+                {
+                    Console.WriteLine($"{currFolder} - {i}");
+                    CreateGraph(n, m, i, currFolder, statics, dynamics);
+                }
+            }
+            
+        }
+
+        private void CreateGraph(int n, int m, int graphNumber, string folder, List<IStaticGraph> statics, List<IDynamicGraph> dynamics)
+        {
+            string filename = $"{n}-{m}-{graphNumber}.txt";
+            PrepareAlgorithms(n, statics, dynamics);
+            var edges = new List<Edge>(m);
+
+            for (int i = 0; i < m; i++) // number of edges wanted
+            {
+                while (true)
+                {
+                    var edge = RandomEdge(n);
+                    var cycles = new List<bool>(statics.Count + dynamics.Count);
+
+                    foreach (var graph in statics)
+                    {
+                        graph.AddEdge(edge.V, edge.W);
+                        cycles.Add(graph.TopoSort() != null); 
+                    }
+
+                    foreach (var graph in dynamics)
+                    {
+                        cycles.Add(graph.AddEdge(edge.V, edge.W)); 
+                    }
+
+                    if (cycles.Any(b => b == false)) // cycle
+                    {
+                        statics.ForEach(g => g.RemoveEdge(edge.V, edge.W));
+                    }
+                    else
+                    {
+                        edges.Add(edge);
+                        break;
+                    }
+                }
+            }
+
+            WriteGraph(folder, filename, n, m, edges);
+        }
+
+        private void WriteGraph(string folder, string filename, int n, int m, List<Edge> edges)
+        {
+            var filenameComplete = Path.Combine(folder, filename);
+
+            edges.Insert(0, new Edge(n, m));
+            // insert the vertex and edge counters in the start of the file
+            File.WriteAllLines(filenameComplete,
+                edges.ConvertAll(item => $"{item.V} {item.W}").ToArray());
+        }
+
+        private void PrepareAlgorithms(int n, List<IStaticGraph> statics, List<IDynamicGraph> dynamics)
+        {
+            foreach (var graph in statics)
+            {
+                graph.ResetAll();
+            }
+
+            foreach (var graph in dynamics)
+            {
+                graph.ResetAll(n);
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                statics.ForEach(g => g.AddVertex());
+                dynamics.ForEach(g => g.AddVertex());
+            }
+        }
+
+        private Edge RandomEdge(int n)
+        {
+            var v = rng.Next(0, n);
+            var w = rng.Next(0, n);
+            while (v == w)
+            {
+                v = rng.Next(0, n);
+                w = rng.Next(0, n);
+            }
+
+            return new Edge(v, w);
+        }
+
+        private void mkdir(string folder)
+        {
+            if(!Directory.Exists(Path.Combine(folder)))
+                Directory.CreateDirectory(Path.Combine(folder));
+        }
+
         private string WriteFile(string comment)
         {
             var exists = Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Output"));
@@ -267,5 +377,18 @@ namespace EmpiricalTester.GraphGeneration
                 }
             }
         }
+
+        internal class Edge
+        {
+            public int V { get; set; }
+            public int W { get; set; }
+
+            public Edge(int v, int w)
+            {
+                V = v;
+                W = w;
+            }         
+        }
+
     }
 }

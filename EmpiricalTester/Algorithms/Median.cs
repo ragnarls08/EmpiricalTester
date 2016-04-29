@@ -7,17 +7,17 @@ namespace EmpiricalTester.Algorithms
     {
         private static Random _random = new Random(DateTime.Now.Millisecond);
 
-        public static T Mom<T>(this List<T> list, int i, IComparer<T> comp) where T : IComparable<T>
+        public static T Mom<T>(this List<T> list, int i, IComparer<T> comp) 
         {
             return Select(list, i, 0, list.Count - 1, false, comp);
         }
 
-        public static T MomRandom<T>(this List<T> list, int i, IComparer<T> comp) where T : IComparable<T>
+        public static T MomRandom<T>(this List<T> list, int i, IComparer<T> comp) 
         {
             return Select(list, i, 0, list.Count - 1, true, comp);
         }
 
-        public static T Select<T>(List<T> list, int i, int left, int right, bool isRandom, IComparer<T> comp) where T : IComparable<T>
+        public static T Select<T>(List<T> list, int i, int left, int right, bool isRandom, IComparer<T> comp) 
         {
             if ((right - left) < 5)
             {

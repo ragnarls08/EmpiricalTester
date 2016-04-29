@@ -5,6 +5,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms.DataVisualization.Charting;
 using EmpiricalTester.DynamicGraph;
+using EmpiricalTester.StaticGraph;
 
 namespace EmpiricalTester.Measuring
 {
@@ -77,6 +78,7 @@ namespace EmpiricalTester.Measuring
             File.WriteAllLines(outputFolder + "\\" + DateTime.Now.ToString("yyyyMMdd-HH-mm-ss") + ".txt", lines);
         }
 
+
         private List<long> runFile(string file, IDynamicGraph alg, int resolution, int repeatCount)
         {
             InputFile graph = readFile(file);
@@ -113,18 +115,6 @@ namespace EmpiricalTester.Measuring
             return ret;
         }
 
-        // @Rawling, stackoverflow
-        private static List<List<T>> Transpose<T>(List<List<T>> lists)
-        {
-            var longest = lists.Any() ? lists.Max(l => l.Count) : 0;
-            List<List<T>> outer = new List<List<T>>(longest);
-            for (int i = 0; i < longest; i++)
-                outer.Add(new List<T>(lists.Count));
-            for (int j = 0; j < lists.Count; j++)
-                for (int i = 0; i < longest; i++)
-                    outer[i].Add(lists[j].Count > i ? lists[j][i] : default(T));
-            return outer;
-        }
 
         public void runGraph(string[] fileNames, int repeateCount, bool writeToFile, bool makeGraphImage, List<StaticGraph.IStaticGraph> staticGraphs, List<IDynamicGraph> dynamicGraphs)
         {          
@@ -282,6 +272,144 @@ namespace EmpiricalTester.Measuring
             }
         }
 
+
+        public void RunDirectoryPerGraph(string baseDir, List<IStaticGraph> statics, List<IDynamicGraph> dynamics)
+        {
+            if (!Directory.Exists(baseDir))
+                throw new InvalidDataException("Input folder does not exist");
+            
+            var directories = Directory.GetDirectories(baseDir).ToList();
+            directories = directories.OrderByDescending(path => int.Parse(path.Substring(path.LastIndexOf("-")))).ToList();
+            
+            var measurements = new List<Tuple<string, List<long>>>();
+
+
+            foreach (var alg in statics)
+            {
+                string algName = alg.GetType().ToString().Substring(alg.GetType().ToString().LastIndexOf("."));
+
+                var aMin = new Tuple<string, List<long>>($"{algName}-Min", new List<long>());
+                var aAvg = new Tuple<string, List<long>>($"{algName}-Avg", new List<long>());
+                var aMax = new Tuple<string, List<long>>($"{algName}-Max", new List<long>());
+                measurements.Add(aMin);
+                measurements.Add(aAvg);
+                measurements.Add(aMax);
+
+                foreach (var dir in directories)
+                {
+                    Console.WriteLine($"{algName}\n{dir}");
+                    var minavgmax = RunFolderStaticGraph(dir, alg);
+                    aMin.Item2.Add(minavgmax.Min);
+                    aAvg.Item2.Add(minavgmax.Avg);
+                    aMax.Item2.Add(minavgmax.Max);
+                }
+            }
+
+            foreach (var alg in dynamics)
+            {
+                string algName = alg.GetType().ToString().Substring(alg.GetType().ToString().LastIndexOf(".")+1);
+
+                var aMin = new Tuple<string, List<long>>($"{algName}-Min", new List<long>());
+                var aAvg = new Tuple<string, List<long>>($"{algName}-Avg", new List<long>());
+                var aMax = new Tuple<string, List<long>>($"{algName}-Max", new List<long>());
+                measurements.Add(aMin);
+                measurements.Add(aAvg);
+                measurements.Add(aMax);
+
+                foreach (var dir in directories)
+                {
+                    Console.WriteLine($"{algName}\n{dir}");
+                    var minavgmax = RunFolderDynamicGraph(dir, alg);
+                    aMin.Item2.Add(minavgmax.Min);
+                    aAvg.Item2.Add(minavgmax.Avg);
+                    aMax.Item2.Add(minavgmax.Max);
+                }
+            }
+
+            WriteFolderMeasurements(baseDir + $"measurements{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}.txt", measurements);
+
+        }
+
+        private void WriteFolderMeasurements(string filename, List<Tuple<string, List<long>>> ms)
+        {
+            var lines = new List<string>();
+            foreach (var m in ms)
+            {
+                lines.Add($"{m.Item1}\t{m.Item2.ConvertAll(Convert.ToString).Aggregate((a,b) => a + "\t" + b)}");
+            }
+
+            File.WriteAllLines(filename, lines);
+        }
+
+        private MinAvgMax RunFolderStaticGraph(string folder, IStaticGraph alg)
+        {
+            var values = new List<long>();
+            var sw = new Stopwatch();
+
+            foreach (var file in Directory.EnumerateFiles(folder))
+            {
+                alg.ResetAll();
+                var graph = readFile(file);
+                
+                for(int i = 0; i < graph.n; i++)
+                    alg.AddVertex();
+
+                sw.Reset();
+                sw.Start();
+                foreach (var edge in graph.edges)
+                {
+                    alg.AddEdge(edge.from, edge.to);
+                }
+
+                var top = alg.TopoSort();
+                sw.Stop();
+                values.Add(sw.ElapsedTicks);
+            }
+            
+            return new MinAvgMax(values.Min(), (long)values.Average(), values.Max());
+        }
+
+        private MinAvgMax RunFolderDynamicGraph(string folder, IDynamicGraph alg)
+        {
+            var values = new List<long>();
+            var sw = new Stopwatch();
+
+            foreach (var file in Directory.EnumerateFiles(folder))
+            {
+                var graph = readFile(file);
+                alg.ResetAll(graph.n);
+
+                for(int i = 0; i < graph.n; i++)
+                    alg.AddVertex();
+
+                sw.Reset();
+                sw.Start();
+                foreach (var edge in graph.edges)
+                {
+                    alg.AddEdge(edge.from, edge.to);
+                }
+
+                var top = alg.Topology();
+                sw.Stop();
+                values.Add(sw.ElapsedTicks);
+            }
+
+            return new MinAvgMax(values.Min(), (long)values.Average(), values.Max());
+        }
+
+        // @Rawling, stackoverflow
+        private static List<List<T>> Transpose<T>(List<List<T>> lists)
+        {
+            var longest = lists.Any() ? lists.Max(l => l.Count) : 0;
+            List<List<T>> outer = new List<List<T>>(longest);
+            for (int i = 0; i < longest; i++)
+                outer.Add(new List<T>(lists.Count));
+            for (int j = 0; j < lists.Count; j++)
+                for (int i = 0; i < longest; i++)
+                    outer[i].Add(lists[j].Count > i ? lists[j][i] : default(T));
+            return outer;
+        }
+
         private void createGraph(string fileName, List<Measurements> measurements, int n, int m, int repeateCount)
         {
             Chart chart = new Chart();
@@ -407,6 +535,20 @@ namespace EmpiricalTester.Measuring
             {
                 this.from = from;
                 this.to = to;
+            }
+        }
+
+        private struct MinAvgMax
+        {
+            public long Min { get; set; }
+            public long Avg { get; set; }
+            public long Max { get; set; }
+
+            public MinAvgMax(long min, long avg, long max)
+            {
+                Min = min;
+                Avg = avg;
+                Max = max;
             }
         }
     }

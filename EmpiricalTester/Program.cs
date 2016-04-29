@@ -18,42 +18,52 @@ namespace EmpiricalTester
             var staticGraphs = new List<StaticGraph.IStaticGraph>();
 
             var kahn = new StaticGraph.Kahn();
-            staticGraphs.Add(kahn);
+            //staticGraphs.Add(kahn);
             var tarjan = new StaticGraph.Tarjan();
-            staticGraphs.Add(tarjan);
+            //staticGraphs.Add(tarjan);
 
             var dynamicGraphs = new List<DynamicGraph.IDynamicGraph>();
 
             var simple = new DynamicGraph.SimpleIncremental();
-            dynamicGraphs.Add(simple);
+            //dynamicGraphs.Add(simple);
             var hkmstV1 = new DynamicGraph.HKMSTV1(0.65);
             dynamicGraphs.Add(hkmstV1);
-            var hkmst = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoM);
-            dynamicGraphs.Add(hkmst);
+            var hkmstMoM = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoM);
+            dynamicGraphs.Add(hkmstMoM);
+            var hkmstMoMR = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoMRandom);
+            dynamicGraphs.Add(hkmstMoMR);
+            var hkmstR = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.Random);
+            dynamicGraphs.Add(hkmstR);
+            var hkmstQS = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.QuickSelect);
+            dynamicGraphs.Add(hkmstQS);
             //var hkmstDense = new HKMSTDense(100);
             //dynamicGraphs.Add(hkmstDense);
             var bfgt = new BFGT();
-            dynamicGraphs.Add(bfgt);
+            //dynamicGraphs.Add(bfgt);
             
 
             var generator = new GraphGeneration.GraphGenerator();
-            var ps = new List<double>() { 0.9, /*0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
+            var ps = new List<double>() { 0.004  /*0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
             for(var i = 1; i < 50; i++)
             {
                 foreach (var p in ps)
                 {/*
                     generator.GenerateGraph(
-                    5, // nodes
+                    15000, // nodes
                     p, // Probability of an edge being added from a complete graph
-                    i + "-Graph(5000, " + p + ")",
-                    false, // writeToFile
+                    i + "-Graph(15000, " + p + ")",
+                    true, // writeToFile
                     false, // staticCheck
-                    true, // topology compare
+                    false, // topology compare
                     staticGraphs, dynamicGraphs);
                     //*/
                 }
             }
-            
+
+            var ms = new List<int>() { 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500,
+                                       8000, 8500, 9000, 9500, 10000, 10500, 11000, 11500, 12000, 12500, 13000, 13500, 14000, 14500, 15000 };
+            //generator.GenerateGraphs(5000, ms, 100, @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\SuperSparse", staticGraphs, dynamicGraphs );
+
 
 
             string[] fileNames = new string[] {
@@ -93,6 +103,8 @@ namespace EmpiricalTester
                 );
                 //*/
 
+            runner.RunDirectoryPerGraph(@"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\Sparse", staticGraphs, dynamicGraphs);
+
             var measure = new Measuring.OrderMaintenance();
             string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure3.txt");
             var ns = new List<int>() { 10 };
@@ -108,7 +120,7 @@ namespace EmpiricalTester
 
 
 
-            
+            /*
             bfgt = new BFGT();
             for (int i = 0; i < 5; i++)
             {
