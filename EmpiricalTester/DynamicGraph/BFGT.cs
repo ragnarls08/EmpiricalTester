@@ -1,238 +1,250 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EmpiricalTester.DynamicGraph 
 {
     internal class BFGT : IDynamicGraph
     {
-        private List<BFGTNode> _nodes;
-        private int _currIndex;
-        private int _m;
-        private int _delta;
-        private int _label;
-
         private enum ReturnState { Cycle, Normal, Delta };
-        
 
+        private List<BFGTNode> nodes;
+        private int a; // current index
+        private int b;
+        private int n;
+        private int m;
+        private int delta;
+        private int totalM;
+        
         public BFGT()
         {
-            _m = 0;
-            _label = 0;
-            _currIndex = -1;
-            _delta = 1;
-            _nodes = new List<BFGTNode>();
-        }
-
-        public void ResetAll(int n)
-        {
-            _m = 0;
-            _label = 0;
-            _currIndex = -1;
-            _delta = 1;
-           _nodes = new List<BFGTNode>(n);
-        }
-
-        public void RemoveEdge(int a, int b)
-        {
-            
+            a = int.MaxValue / 10 - 1;                        
+            n = 0;
+            m = 0;
+            totalM = 25;
+            delta = Math.Min((int)Math.Pow(totalM, 1 / 2.0), (int)Math.Pow(n, 2 / 3.0));
+            nodes = new List<BFGTNode>();          
         }
 
         public void AddVertex()
         {
-            _nodes.Add(new BFGTNode(1, _currIndex--, _label++));
+            nodes.Add(new BFGTNode(0, a--, n++, b));  
         }
 
         public bool AddEdge(int iv, int iw)
         {
-            var v = _nodes[iv];
-            var w = _nodes[iw];
-            bool noCycle = true;
+            var v = nodes[iv];
+            var w = nodes[iw];
 
-            if (!LT(v, w))
-                noCycle = Search(v, w);
-
-            if(!noCycle)
-                return false;
-
-            // Step 5 insert arc
-            v.Outgoing.Add(w);
-            if (v.Level == w.Level)
-                w.Incoming.Add(v);
-
-            _m++;
-            // Let ∆ = min m 1 / 2 ,n 2 / 3
-            _delta = Math.Min((int)Math.Pow(_m, 1 / 2.0), (int)Math.Pow(_label, 2 / 3.0));
-
-            //insert arc
-            return true;
-        }
-
-        private bool Search(BFGTNode v, BFGTNode w)
-        {
             var F = new List<BFGTNode>();
             var B = new List<BFGTNode>();
-            int arcs = 0;
+            var L = new List<BFGTNode>();
 
-            var retStateB = BVisit(v, B, ref arcs, w, v);
-            var retStateF = ReturnState.Normal;
-            //If the search ends without detecting a cycle or traversing at least ∆ arcs, test whether k(w) = k(v).
-            if ( retStateB == ReturnState.Normal)
+            if ((v.BK + v.Index) > (w.BK + w.Index))
             {
-                if (w.Level != v.Level)
+                //step 2                
+                var arcs = 0;
+                var wIncomingTemp = new List<int>(w.Incoming);
+                var wTempLevel = w.Level;
+
+                var retStateB = BVisit(v, B, ref arcs, w);
+                if (retStateB == ReturnState.Cycle)
                 {
-                    w.Level = v.Level;
-                    w.Incoming.Clear();
-                    //search forward
-                    retStateF = FVisit(w, F, v, B, w);
+                    foreach (var node in B)
+                    {
+                        node.Visited = false;
+                    }
+                    return false;
                 }
-            }
-            else if (retStateB == ReturnState.Delta)
-                retStateF = FVisit(w, F, v, B, w);
+                    
 
-
-            // Step 4 reindex
-            if (retStateF != ReturnState.Cycle && retStateB != ReturnState.Cycle)
-            {
-                B.AddRange(F);
-                while (B.Count > 0)
+                if (retStateB == ReturnState.Normal && v.Level == w.Level)
                 {
-                    var x = B[B.Count - 1];
-                    B.RemoveAt(B.Count - 1);
+                    L = B;
+                }
+                else
+                {
+                    bool do3 = false;
+                    if (retStateB == ReturnState.Normal && w.Level < v.Level)
+                    {
+                        w.Level = v.Level;
+                        w.Incoming.Clear();
+                        do3 = true;
+                    }
+                    else if (retStateB == ReturnState.Delta)
+                    {
+                        w.Level = v.Level + 1;
+                        B.Clear();
+                        B.Add(v);
+                        w.Incoming.Clear();
+                        do3 = true;
+                    }
+                    if (do3)
+                    {
+                        // step 3
+                        var backupStack = new List<BFGTNode>();
+                        var retStateF = FVisit(w, F, v, B, backupStack);
+
+                        if (retStateF == ReturnState.Cycle)
+                        {
+                            w.Level = wTempLevel;
+                            w.Incoming = wIncomingTemp;
+
+                            foreach (var node in backupStack)
+                            {
+                                nodes[node.Label] = node;
+                                nodes[node.Label].Visited = false;
+                            }
+
+                            return false;
+                        }
+
+                        if (v.Level < w.Level)
+                            L = F;
+                        if (v.Level == w.Level)
+                        {
+                            L = B;
+                            L.AddRange(F);
+                        }
+                    }
+                }
+
+                //step 4
+                while (L.Count > 0)
+                {
+                    var x = L[L.Count - 1];
+                    L.RemoveAt(L.Count - 1);
                     x.Visited = false;
-                    x.Index = _currIndex--;
+                    x.Index = a--;                    
+                    /*
+                    
+                    var x = L[0];
+                    L.RemoveAt(0);
+                    x.Visited = false;
+                    x.Index = a--;
+                    */
                 }
             }
             
-            return (retStateF != ReturnState.Cycle && retStateB != ReturnState.Cycle);
+            //step 5
+            v.Outgoing.Add(w.Label);
+            if(v.Level == w.Level)
+                w.Incoming.Add(v.Label);
+
+            m++;
+            //delta = Math.Min((int)Math.Pow(m, 1 / 2.0), (int)Math.Pow(n, 2 / 3.0));
+            //delta = (int)Math.Pow(n, 2 / 3.0);
+
+
+            return true;
         }
 
-        private ReturnState BVisit(BFGTNode y, List<BFGTNode> B, ref int arcs, BFGTNode w, BFGTNode v)
+        public void RemoveEdge(int v, int w)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<int> Topology()
+        {
+
+            return nodes.OrderBy(n => n.BK + n.Index).ToList().ConvertAll(i => i.Label);
+        }
+
+        public void ResetAll(int newN)
+        {
+            //a = int.MaxValue / 10 - 1;
+            a = (int)Math.Pow(newN, 3) + 1;
+            b = (int)Math.Pow(newN, 3) + newN + 1;
+            m = 0;
+            n = 0;
+            totalM = 6;
+            delta = Math.Min((int)Math.Pow(totalM, 1 / 2.0), (int)Math.Pow(newN, 2 / 3.0));
+            nodes.Clear();            
+        }
+        
+        private ReturnState BVisit(BFGTNode y, List<BFGTNode> B, ref int arcs, BFGTNode w)
         {
             y.Visited = true;
             ReturnState retState = ReturnState.Normal;
             foreach (var inNode in y.Incoming)
             {
-                retState = BTraverse(inNode, y, B, ref arcs, w, v);
-                if(retState == ReturnState.Cycle)
-                    return retState;
-                
-                if (retState == ReturnState.Delta)
+                retState = BTraverse(nodes[inNode], y, B, ref arcs, w);
+                if (retState == ReturnState.Cycle)
                 {
                     y.Visited = false;
                     return retState;
-                    //break;
                 }
                     
+
+                if (retState == ReturnState.Delta)
+                {
+                    y.Visited = false;
+                    //return retState;
+                    break;
+                }
             }
-
             B.Add(y);
-
+            y.Visited = false;
             return retState;
         }
 
-        private ReturnState BTraverse(BFGTNode x, BFGTNode y, List<BFGTNode> B, ref int arcs, BFGTNode w, BFGTNode v)
+        private ReturnState BTraverse(BFGTNode x, BFGTNode y, List<BFGTNode> B, ref int arcs, BFGTNode w)
         {
             if (x == w)
-                return ReturnState.Cycle; 
+                return ReturnState.Cycle;
 
             arcs++;
-            if (arcs >= _delta)////////////////////////////////////////////////////
+            if (arcs >= delta)
             {
-                w.Level = v.Level + 1;
-                w.Incoming.Clear();
-                B.Clear();
-                return ReturnState.Delta; //////////////// unmark and go to step 3
+                return ReturnState.Delta; 
             }
-                
-            if(!x.Visited)
-                return BVisit(x, B, ref arcs, w, v);
+
+            if (!x.Visited)
+                return BVisit(x, B, ref arcs, w);
 
             return ReturnState.Normal;
         }
 
-        private ReturnState FVisit(BFGTNode x, List<BFGTNode> F, BFGTNode v, List<BFGTNode> B, BFGTNode w)
+        private ReturnState FVisit(BFGTNode x, List<BFGTNode> F, BFGTNode v, List<BFGTNode> B, List<BFGTNode> backupStack)
         {
+            x.Visited = true;
             foreach (var outNode in x.Outgoing)
             {
-                if (FTraverse(x, outNode, F, v, B, w) == ReturnState.Cycle)
+                if (FTraverse(x, nodes[outNode], F, v, B, backupStack) == ReturnState.Cycle)
+                {
+                    x.Visited = false;
                     return ReturnState.Cycle;
+                }
+                    
             }
             F.Insert(0, x);
+            //x.Visited = false;
 
             return ReturnState.Normal;
         }
 
-        private ReturnState FTraverse(BFGTNode x, BFGTNode y, List<BFGTNode> F, BFGTNode v, List<BFGTNode> B, BFGTNode w)
+        private ReturnState FTraverse(BFGTNode x, BFGTNode y, List<BFGTNode> F, BFGTNode v, List<BFGTNode> B, List<BFGTNode> backupStack)
         {
             if (y == v || B.Contains(y))
-                return ReturnState.Cycle; ///////////////////////////// cycle
+                return ReturnState.Cycle; 
 
             ReturnState retState;
+            backupStack.Add(new BFGTNode(y.Level, y.Index, y.Label, b, new List<int>(y.Incoming), new List<int>(y.Outgoing)));
 
-            if (y.Level <= w.Level)
+            if (x.Level == y.Level)
+                y.Incoming.Add(x.Label);
+
+            if (x.Level > y.Level)
             {
-                y.Level = w.Level;
+                y.Level = x.Level;
                 y.Incoming.Clear();
-                retState = FVisit(y, F, v, B, w);
-                if (retState == ReturnState.Cycle)
-                    return retState;
+                y.Incoming.Add(x.Label);    
             }
 
-            if(y.Level == w.Level)
-                y.Incoming.Add(x);
-
+            if (!y.Visited)
+                return FVisit(y, F, v, B, backupStack);
             return ReturnState.Normal;
         }
-
-        private bool LT(BFGTNode v, BFGTNode w)
-        {
-            // a,b < c,d if and only if either a < b, or a = b and c < d
-            // this is wrong??? 
-            // wiki lex order: (a,b) ≤ (a′,b′) if and only if a < a′ or (a = a′ and b ≤ b′).            
-            if (v.Level < w.Level)
-                return true;
-            if (v.Level == w.Level && v.Index < w.Index)
-                return true;
-            
-            return false;
-        }
-
-        public List<int> Topology()
-        {
-            var x = _nodes.ConvertAll(i => new Tuple<int, int, int>(i.Label, i.Level, i.Index));
-            x.Sort((a, b) =>
-            {
-                
-                if (a.Item2 < b.Item2)
-                    return -1;
-                if (a.Item2 == b.Item2 && a.Item3 < b.Item3)
-                    return -1;
-                return 1;
-            });
-
-            return x.ConvertAll(i => i.Item1);
-        }
-
-        public List<int> Topology2()
-        {
-            var x = _nodes.ConvertAll(i => new Tuple<int, int, int>(i.Label, i.Level, i.Index));
-            x.Sort((a, b) =>
-            {
-
-                if (a.Item2 > b.Item2)
-                    return -1;
-                if (a.Item2 == b.Item2 && a.Item3 > b.Item3)
-                    return -1;
-                return 1;
-            });
-
-            return x.ConvertAll(i => i.Item1);
-        }
+        
     }
 }

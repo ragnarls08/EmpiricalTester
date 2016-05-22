@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EmpiricalTester.Algorithms
 {
@@ -16,6 +17,9 @@ namespace EmpiricalTester.Algorithms
         {
             return Select(list, i, 0, list.Count - 1, true, comp);
         }
+
+        
+
 
         public static T Select<T>(List<T> list, int i, int left, int right, bool isRandom, IComparer<T> comp) 
         {
