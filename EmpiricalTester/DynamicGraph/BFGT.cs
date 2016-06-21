@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace EmpiricalTester.DynamicGraph 
 {
@@ -115,14 +116,7 @@ namespace EmpiricalTester.DynamicGraph
                     var x = L[L.Count - 1];
                     L.RemoveAt(L.Count - 1);
                     x.Visited = false;
-                    x.Index = a--;                    
-                    /*
-                    
-                    var x = L[0];
-                    L.RemoveAt(0);
-                    x.Visited = false;
-                    x.Index = a--;
-                    */
+                    x.Index = a--;                                       
                 }
             }
             
@@ -134,8 +128,7 @@ namespace EmpiricalTester.DynamicGraph
             m++;
             //delta = Math.Min((int)Math.Pow(m, 1 / 2.0), (int)Math.Pow(n, 2 / 3.0));
             //delta = (int)Math.Pow(n, 2 / 3.0);
-
-
+            
             return true;
         }
 
@@ -210,6 +203,12 @@ namespace EmpiricalTester.DynamicGraph
             x.Visited = true;
             foreach (var outNode in x.Outgoing)
             {
+                if (!nodes[outNode].Visited)
+                {
+                    backupStack.Add(new BFGTNode(nodes[outNode].Level, nodes[outNode].Index, nodes[outNode].Label, b, new List<int>(nodes[outNode].Incoming), new List<int>(nodes[outNode].Outgoing)));
+                }
+                    
+
                 if (FTraverse(x, nodes[outNode], F, v, B, backupStack) == ReturnState.Cycle)
                 {
                     x.Visited = false;
@@ -229,20 +228,21 @@ namespace EmpiricalTester.DynamicGraph
                 return ReturnState.Cycle; 
 
             ReturnState retState;
-            backupStack.Add(new BFGTNode(y.Level, y.Index, y.Label, b, new List<int>(y.Incoming), new List<int>(y.Outgoing)));
+            //backupStack.Add(new BFGTNode(y.Level, y.Index, y.Label, b, new List<int>(y.Incoming), new List<int>(y.Outgoing)));
 
             if (x.Level == y.Level)
                 y.Incoming.Add(x.Label);
 
-            if (x.Level > y.Level)
+            if (x.Level > y.Level) // Todo should x be w
             {
                 y.Level = x.Level;
                 y.Incoming.Clear();
-                y.Incoming.Add(x.Label);    
-            }
+                y.Incoming.Add(x.Label);
 
-            if (!y.Visited)
-                return FVisit(y, F, v, B, backupStack);
+                if (!y.Visited)
+                    return FVisit(y, F, v, B, backupStack);
+            }
+            
             return ReturnState.Normal;
         }
         

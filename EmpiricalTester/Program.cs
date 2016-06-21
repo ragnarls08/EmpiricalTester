@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
+using C5;
 using static System.Console;
 using EmpiricalTester.Algorithms;
 using EmpiricalTester.DataStructures;
@@ -11,6 +12,8 @@ using static EmpiricalTester.Measuring.MedianMeasure;
 
 namespace EmpiricalTester
 {
+    
+
     class Program
     {
         [STAThread]
@@ -41,16 +44,18 @@ namespace EmpiricalTester
             dynamicGraphs.Add(hkmstDense);
             var bfgt = new BFGT();
             dynamicGraphs.Add(bfgt);
+            var bfgtDense = new BFGTDense();
+            dynamicGraphs.Add(bfgtDense);
             
 
             var generator = new GraphGeneration.GraphGenerator();
             var ps = new List<double>() { 0.5  /*0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
-            for(var i = 1; i < 50000; i++)
+            for(var i = 1; i < 20000; i++)
             {
                 foreach (var p in ps)
-                {/*
+                {
                     generator.GenerateGraph(
-                    6, // nodes
+                    70, // nodes
                     p, // Probability of an edge being added from a complete graph
                     i + "-Graph(15000, " + p + ")",
                     false, // writeToFile
@@ -118,110 +123,32 @@ namespace EmpiricalTester
             ns = new List<int>() { 1000, 10000, 100000, 1000000 };
             WriteLine(MeasureMedian(ns, 0, 100, 25)); */
 
-            var blebb = new List<int>() { 1,2,3,4,5,6 };
+           
 
             /*
-            var dense = new HKMSTDense(3);
-            for (int i = 0; i < 3; i++)
+            bfgtDense = new BFGTDense();
+            bfgtDense.ResetAll(5);
+            for (int i = 0; i < 5; i++)
             {
-                dense.AddVertex();
+                bfgtDense.AddVertex();
             }
 
-            var b1 = dense.AddEdge(2, 1);
-            var b2 = dense.AddEdge(2, 0);
-            var b3 = dense.AddEdge(0, 1);
-            var b4 = dense.AddEdge(1, 2);
-
+            var b1 = bfgtDense.AddEdge(3, 1);
+            var b2 = bfgtDense.AddEdge(4, 2);
             
-            //*/
+            var b3 = bfgtDense.AddEdge(2, 4);//
+            var b4 = bfgtDense.AddEdge(3, 4);
 
-            
-            bfgt = new BFGT();
-            bfgt.ResetAll(6);
-            for (int i = 0; i < 6; i++)
-            {
-                bfgt.AddVertex();
-            }
-
-            /*
-    [0]: {(6, 1)}
-    [1]: {(1, 3)}
-    [2]: {(4, 3)}
-    [3]: {(6, 0)}
-    [4]: {(5, 1)}
-
-    [5]: {(2, 0)}
-    [6]: {(1, 0)}
-    [7]: {(5, 0)}
-    [8]: {(4, 5)}
-    [9]: {(1, 5)}
-
-    [10]: {(0, 1)}
-    [11]: {(0, 2)}
-    [12]: {(4, 2)}
-    [13]: {(3, 0)}
-    [14]: {(5, 4)}
-
-    [15]: {(0, 5)}
-    [16]: {(1, 2)}
-    [17]: {(1, 4)}
-    [18]: {(4, 6)}
-    [19]: {(2, 5)}
-
-    [20]: {(2, 4)}
-    [21]: {(6, 4)}
-    [22]: {(0, 3)}
-    [23]: {(6, 3)}
-    0 3
-            */
-
-            
-            var b1 = bfgt.AddEdge(4, 1);
-            var b2 = bfgt.AddEdge(5, 1);
-            var b3 = bfgt.AddEdge(1, 3);
-            var b4 = bfgt.AddEdge(3, 0);
-            var b5 = bfgt.AddEdge(2, 0);
-
-            var b6 = bfgt.AddEdge(1, 2);
-
-
-            /*
-            var b1 = bfgt.AddEdge(6, 1);
-            var b2 = bfgt.AddEdge(1, 3);
-            var b3 = bfgt.AddEdge(4, 3);
-            var b4 = bfgt.AddEdge(6, 0);
-            var b5 = bfgt.AddEdge(5, 1);
-
-            var b6 = bfgt.AddEdge(2, 0);
-            var b7 = bfgt.AddEdge(1, 0);
-            var b8 = bfgt.AddEdge(5, 0);
-            var b9 = bfgt.AddEdge(4, 5);
-            var b10 = bfgt.AddEdge(1, 5);//
-
-            var b11 = bfgt.AddEdge(0, 1);//
-            var b12 = bfgt.AddEdge(0, 2);//
-            var b13 = bfgt.AddEdge(4, 2);
-            var b14 = bfgt.AddEdge(3, 0);
-            var b15 = bfgt.AddEdge(5, 4);//
-
-            var b16 = bfgt.AddEdge(0, 5);//
-            var b17 = bfgt.AddEdge(1, 2);
-            var b18 = bfgt.AddEdge(1, 4);//
-            var b19 = bfgt.AddEdge(4, 6);
-            var b20 = bfgt.AddEdge(2, 5);//
-
-            var b21 = bfgt.AddEdge(2, 4);//
-            var b22 = bfgt.AddEdge(6, 4);//
-            var b23 = bfgt.AddEdge(0, 3);//
-            var b24 = bfgt.AddEdge(6, 3);
-            var b25 = bfgt.AddEdge(0, 3);// 
+            var b5 = bfgtDense.AddEdge(2, 3);//
+            var b6 = bfgtDense.AddEdge(0, 3);
+            var b7 = bfgtDense.AddEdge(4, 1);
+            var b8 = bfgtDense.AddEdge(0, 1);
+            var b9 = bfgtDense.AddEdge(2, 0);
             //*/
 
 
 
-
-
-             Console.WriteLine("\n\ndone");
+            Console.WriteLine("\n\ndone");
             Console.ReadLine();            
         }
     }
