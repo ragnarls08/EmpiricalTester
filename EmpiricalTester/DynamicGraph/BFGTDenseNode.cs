@@ -21,8 +21,13 @@ namespace EmpiricalTester.DynamicGraph
         {
             Outgoing.Add(new KVP(y.Level, y));
             y.InDegree++;
+            /*
             Bound.Add($"0-{y.Index}", 1);
-            Count.Add($"0-{y.Index}", 0);            
+            Count.Add($"0-{y.Index}", 0);            */
+            if(!Bound.ContainsKey($"0-{y.Index}"))
+                Bound.Add($"0-{y.Index}", 1);
+            if(!Count.ContainsKey($"0-{y.Index}"))
+                Count.Add($"0-{y.Index}", 0);
         }
         
 

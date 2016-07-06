@@ -1,9 +1,6 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static System.Math;
 
 namespace EmpiricalTester.DynamicGraph
@@ -32,11 +29,12 @@ namespace EmpiricalTester.DynamicGraph
             if (v.Level >= w.Level)
             {
                 var A = new List<Edge>();
+                /*
                 var Recovery = new List<BFGTDenseNode>();
                 foreach (var node in nodes)
                 {
                     Recovery.Add(new BFGTDenseNode(node));
-                }
+                }*/
                 //Recovery.Add(new BFGTDenseNode(v));
                 //Recovery.Add(new BFGTDenseNode(w));
 
@@ -50,6 +48,7 @@ namespace EmpiricalTester.DynamicGraph
 
                     if (y == v)
                     {
+                        /*
                         foreach (var node in Recovery)
                         {
                             nodes[node.Index].Level = node.Level;
@@ -60,7 +59,7 @@ namespace EmpiricalTester.DynamicGraph
                             nodes[node.Index].KOut = node.KOut;
                             nodes[node.Index].Bound = node.Bound;
                             nodes[node.Index].Count = node.Count;
-                        }
+                        }*/
                         return false; // cycle
                     }
                         
@@ -98,15 +97,14 @@ namespace EmpiricalTester.DynamicGraph
                             if (y.Outgoing.IsEmpty)
                                 break;
                             curr = y.Outgoing.FindMin();
-                        }
-                        
+                        }                        
                     }
-                    x.KOut[y.Index] = y.Level;
+                    //x.KOut[y.Index] = y.Level;
                     x.Outgoing.Add(new KVP(y.Level, y));
                 }
             }
 
-            v.KOut[iw] = w.Level;
+            //v.KOut[iw] = w.Level;
             v.AddOutGoing(w);
             
 
@@ -159,20 +157,5 @@ namespace EmpiricalTester.DynamicGraph
         }
     }
 
-    internal class DHO
-    {
-        public int Level { get; set; }
-        public BFGTDenseNode Node { get; set; }
-
-        public DHO(int level, BFGTDenseNode node)
-        {
-            Level = level;
-            Node = node;
-        }
-
-        public override int GetHashCode()
-        {
-            return Node.Index;
-        }
-    }
+    
 }

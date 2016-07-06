@@ -76,6 +76,8 @@
     <Compile Include="DynamicGraph\BFGTDense.cs" />
     <Compile Include="DynamicGraph\BFGTDenseNode.cs" />
     <Compile Include="DynamicGraph\BFGTNode.cs" />
+    <Compile Include="DynamicGraph\CFKR.cs" />
+    <Compile Include="DynamicGraph\CFKRNode.cs" />
     <Compile Include="DynamicGraph\HKMSTDense.cs" />
     <Compile Include="DynamicGraph\HKMSTNode.cs" />
     <Compile Include="DynamicGraph\HKMSTNodeFinal.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="DynamicGraph\HKMSTV1.cs" />
     <Compile Include="DynamicGraph\IDynamicGraph.cs" />
     <Compile Include="DynamicGraph\PearceKelly.cs" />
+    <Compile Include="DynamicGraph\PKNode.cs" />
     <Compile Include="DynamicGraph\SimpleIncremental.cs" />
     <Compile Include="DynamicGraph\SimpleNode.cs" />
     <Compile Include="GraphGeneration\ConnectivityGraph.cs" />
@@ -105,6 +108,7 @@
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Contributions.txt" />
     <Content Include="Inputs\tiny.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

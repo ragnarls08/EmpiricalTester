@@ -1,0 +1,10 @@
+﻿Practical advice on which algorithm
+to pick depending on circumstance
+
+Account and comparison of techniques 
+used by the algorithms, compare
+similarities/differences.
+
+Implementation of the algorithms.
+
+Measurements

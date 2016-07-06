@@ -4,153 +4,128 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using EmpiricalTester.DataStructures;
 
 namespace EmpiricalTester.DynamicGraph
 {
     public class PearceKelly : IDynamicGraph
     {
-
-        private List<SGTNode<PKNode>> _nodes; 
-        private SGTree<PKNode> _order;
-        private int _nCount;
-
-        private List<SGTNode<PKNode>> _forward;
-        private List<SGTNode<PKNode>> _backward;
+        private List<PKNode> nodes;
+        private int n;
 
         public PearceKelly()
         {
-            _order = new SGTree<PKNode>(0.65);
-            _nodes = new List<SGTNode<PKNode>>();
-            _nCount = 0;
+            nodes = new List<PKNode>();
+            n = 0;
         }
 
         public void AddVertex()
         {
-            _nodes.Add(_order.Count == 0
-                ? _order.insertFirst(new PKNode(_nCount))
-                : _order.insertAfter(_order.Root, new PKNode(_nCount)));
-
-            _nCount++;
+            nodes.Add(new PKNode(n, n++));
         }
 
-        public bool AddEdge(int x, int y)
+        public bool AddEdge(int ix, int iy)
         {
-            var lb = _nodes[y];
-            var ub = _nodes[x];
-            bool noCycle = true;
+            var lb = nodes[iy];
+            var ub = nodes[ix];
 
-            if (_order.LT(lb, ub))
+            if (lb.Ord < ub.Ord)
             {
-                _forward = new List<SGTNode<PKNode>>();
-                _backward = new List<SGTNode<PKNode>>();
+                var F = new List<PKNode>();
+                var B = new List<PKNode>();
 
-                noCycle = DfsF(lb, ub);
-                DfsB(ub, lb);
+                var noCycleF = dfsF(lb, ref F, ub.Ord);
+                if (!noCycleF)
+                {
+                    foreach (var v in F)
+                    {
+                        v.Visited = false;
+                    }
+                    return false;
+                }
 
-                Reorder();
+
+                dfsB(ub, ref B, lb.Ord);
+
+                // reorder phase
+                F = F.OrderBy(a => a.Ord).ToList();
+                B = B.OrderBy(a => a.Ord).ToList();
+                
+                var L = new List<int>(F.Count + B.Count);
+                for (int i = 0; i < B.Count; i++)
+                {
+                    L.Add(B[i].Ord);
+                    B[i].Visited = false;
+                }
+                for (int i = 0; i < F.Count; i++)
+                {
+                    L.Add(F[i].Ord);
+                    F[i].Visited = false;
+                }
+                L.Sort();
+
+                for (int i = 0; i < B.Count; i++)
+                {
+                    B[i].Ord = L[i];
+                }
+                for (int i = B.Count; i < L.Count; i++)
+                {
+                    F[i - B.Count].Ord = L[i];
+                }
             }
 
-            if (noCycle)
-            {
-                _nodes[x].Value.Outgoing.Add(_nodes[y]);
-                _nodes[y].Value.Incoming.Add(_nodes[x]);
-            }
+            ub.Outgoing.Add(lb);
+            lb.Incoming.Add(ub);
 
-            return noCycle;
-        }
-
-        private bool DfsF(SGTNode<PKNode> n, SGTNode<PKNode> ub)
-        {
-            n.Value.Visited = true;
-            // add to affected nodes for reorder
-            _forward.Add(n);
-            foreach (var w in n.Value.Outgoing)
-            {
-                if (n == ub)
-                    return false;//cycle
-                if(!w.Value.Visited && _order.LT(w, ub))
-                    return DfsF(w, ub);
-            }
             return true;
         }
 
-        private void DfsB(SGTNode<PKNode> n, SGTNode<PKNode> lb)
+        private bool dfsF(PKNode n, ref List<PKNode> F, int ub)
         {
-            n.Value.Visited = true;
-            // add to affected nodes for reorder
-            _backward.Add(n);
-            foreach (var w in n.Value.Incoming)
+            n.Visited = true;
+            F.Add(n);
+            foreach (var w in n.Outgoing)
             {
-                if (!w.Value.Visited && _order.LT(lb, w))
-                    DfsB(w, lb);
+                if (w.Ord == ub)
+                    return false;
+                if (!w.Visited && w.Ord < ub)
+                {
+                    if (dfsF(w, ref F, ub) == false)
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void dfsB(PKNode n, ref List<PKNode> B, int lb)
+        {
+            n.Visited = true;
+            B.Add(n);
+            foreach (var w in n.Incoming)
+            {
+                if(!w.Visited && lb < w.Ord)
+                    dfsB(w, ref B, lb);
             }
         }
 
-        private void Reorder()
+        public void RemoveEdge(int v, int w)
         {
-            var first = _backward[0];
-            _backward.RemoveAt(0);
-
-            //check the sort
-            _forward.Sort((a, b) => a.CompareTo(b));
-            _backward.Sort((a, b) => a.CompareTo(b));
-
-            foreach (var node in _forward)
-            {
-                node.Value.Visited = false;
-                _order.Remove(node);
-            }
-
-            foreach (var node in _backward)
-            {
-                node.Value.Visited = false;
-                _order.Remove(node);
-            }
-            
-            //insert all after ub ( _backwards[0] )
-            for (int i = 0; i < _backward.Count; i++)
-            {
-                first = _order.insertAfter(first, _backward[i]);
-            }
-            for (int i = 0; i < _forward.Count; i++)
-            {
-                first = _order.insertAfter(first, _forward[i]);
-            }            
-        }
-
-
-        public void RemoveEdge(int iv, int iw)
-        {
-            
+            throw new NotImplementedException();
         }
 
         public List<int> Topology()
         {
-            return null;
+            return nodes.OrderBy(x => x.Ord).ToList().ConvertAll(a => a.Index);
         }
 
-        public void ResetAll(int n)
+        public void ResetAll(int newN)
         {
-            
+            nodes = new List<PKNode>();
+            n = 0;
         }
-
-
-
     }
 
-    internal class PKNode
-    {
-        public List<SGTNode<PKNode>> Outgoing { get; set; }
-        public List<SGTNode<PKNode>> Incoming { get; set; }
-        public bool Visited { get; set; }
-        public int Value { get; set; }
-
-        public PKNode(int nVal)
-        {
-            Value = nVal;
-            Outgoing = new List<SGTNode<PKNode>>();
-            Incoming = new List<SGTNode<PKNode>>();
-        }
-    }
+    
 }

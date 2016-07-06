@@ -1,14 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Diagnostics;
-using C5;
-using static System.Console;
-using EmpiricalTester.Algorithms;
-using EmpiricalTester.DataStructures;
 using EmpiricalTester.DynamicGraph;
-using static EmpiricalTester.Measuring.MedianMeasure;
-
 
 namespace EmpiricalTester
 {
@@ -22,16 +15,17 @@ namespace EmpiricalTester
             var staticGraphs = new List<StaticGraph.IStaticGraph>();
 
             var kahn = new StaticGraph.Kahn();
-            staticGraphs.Add(kahn);
+            //staticGraphs.Add(kahn);
             var tarjan = new StaticGraph.Tarjan();
-            staticGraphs.Add(tarjan);
+            //staticGraphs.Add(tarjan);
 
             var dynamicGraphs = new List<DynamicGraph.IDynamicGraph>();
-
+            
             var simple = new DynamicGraph.SimpleIncremental();
             dynamicGraphs.Add(simple);
+
             var hkmstV1 = new DynamicGraph.HKMSTV1(0.65);
-            dynamicGraphs.Add(hkmstV1);
+            //dynamicGraphs.Add(hkmstV1);
             var hkmstMoM = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoM);
             //dynamicGraphs.Add(hkmstMoM);
             var hkmstMoMR = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoMRandom);
@@ -39,21 +33,28 @@ namespace EmpiricalTester
             var hkmstR = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.Random);
             //dynamicGraphs.Add(hkmstR);
             var hkmstQS = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.QuickSelect);
-            //dynamicGraphs.Add(hkmstQS);
+            dynamicGraphs.Add(hkmstQS);
+
             var hkmstDense = new HKMSTDense(100);
-            dynamicGraphs.Add(hkmstDense);
+            //dynamicGraphs.Add(hkmstDense);
+
             var bfgt = new BFGT();
             dynamicGraphs.Add(bfgt);
+
             var bfgtDense = new BFGTDense();
-            dynamicGraphs.Add(bfgtDense);
+            //dynamicGraphs.Add(bfgtDense);
+
+            var pk = new PearceKelly();
+            dynamicGraphs.Add(pk);
             
+
 
             var generator = new GraphGeneration.GraphGenerator();
             var ps = new List<double>() { 0.5  /*0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
             for(var i = 1; i < 20000; i++)
             {
                 foreach (var p in ps)
-                {
+                {/*
                     generator.GenerateGraph(
                     70, // nodes
                     p, // Probability of an edge being added from a complete graph
@@ -110,7 +111,7 @@ namespace EmpiricalTester
                 );
                 //*/
 
-            //runner.RunDirectoryPerGraph(@"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\SuperSparse", staticGraphs, dynamicGraphs);
+            runner.RunDirectoryPerGraph(@"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\SuperSparse", staticGraphs, dynamicGraphs);
 
             var measure = new Measuring.OrderMaintenance();
             string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure3.txt");
@@ -123,31 +124,22 @@ namespace EmpiricalTester
             ns = new List<int>() { 1000, 10000, 100000, 1000000 };
             WriteLine(MeasureMedian(ns, 0, 100, 25)); */
 
-           
-
-            /*
-            bfgtDense = new BFGTDense();
-            bfgtDense.ResetAll(5);
-            for (int i = 0; i < 5; i++)
+           /*
+            pk = new PearceKelly();
+            for (int i = 0; i < 3; i++)
             {
-                bfgtDense.AddVertex();
+                pk.AddVertex();
             }
 
-            var b1 = bfgtDense.AddEdge(3, 1);
-            var b2 = bfgtDense.AddEdge(4, 2);
-            
-            var b3 = bfgtDense.AddEdge(2, 4);//
-            var b4 = bfgtDense.AddEdge(3, 4);
-
-            var b5 = bfgtDense.AddEdge(2, 3);//
-            var b6 = bfgtDense.AddEdge(0, 3);
-            var b7 = bfgtDense.AddEdge(4, 1);
-            var b8 = bfgtDense.AddEdge(0, 1);
-            var b9 = bfgtDense.AddEdge(2, 0);
+               
+            var b1 = pk.AddEdge(1, 0);
+            var b2 = pk.AddEdge(2, 1);
+            var b3 = pk.AddEdge(0, 1);
+            var b4 = pk.AddEdge(0, 2);
+            //var basdf = cfkr1.Topology();
+            //var b4 = cfkr.AddEdge(0, 1);
+            //var b5 = cfkr.AddEdge(0, 1);
             //*/
-
-
-
             Console.WriteLine("\n\ndone");
             Console.ReadLine();            
         }

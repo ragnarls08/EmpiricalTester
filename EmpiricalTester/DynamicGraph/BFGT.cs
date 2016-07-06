@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace EmpiricalTester.DynamicGraph 
 {
@@ -26,7 +25,7 @@ namespace EmpiricalTester.DynamicGraph
             delta = Math.Min((int)Math.Pow(totalM, 1 / 2.0), (int)Math.Pow(n, 2 / 3.0));
             nodes = new List<BFGTNode>();          
         }
-
+        
         public void AddVertex()
         {
             nodes.Add(new BFGTNode(0, a--, n++, b));  
