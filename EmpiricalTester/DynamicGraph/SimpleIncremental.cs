@@ -27,6 +27,11 @@ namespace EmpiricalTester.DynamicGraph
             _graph.Clear();
         }
 
+        public void ResetAll(int newN, int newM)
+        {
+            ResetAll(newN);
+        }
+
         public bool AddEdge(int v, int w)
         {            
             _graph[w].Incoming.Add(v);

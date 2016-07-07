@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using EmpiricalTester.DataStructures;
 
 namespace EmpiricalTester.DynamicGraph 
 {
-
     public enum SPickMethod { Random, MoMRandom, MoM, QuickSelect };
     public class HKMSTFinal : IDynamicGraph
     {
-        private DataStructures.SGTree<HKMSTNodeFinal> _nodeOrder;
-        private List<DataStructures.SGTNode<HKMSTNodeFinal>> _nodes;
+        private SGTree<HKMSTNodeFinal> _nodeOrder;
+        private List<SGTNode<HKMSTNodeFinal>> _nodes;
         private SPickMethod _sPickMethod;
 
         private readonly Random _r = new Random(DateTime.Now.Millisecond);
@@ -19,8 +17,8 @@ namespace EmpiricalTester.DynamicGraph
 
         public HKMSTFinal(double alpha, SPickMethod spick)
         {
-            _nodeOrder = new DataStructures.SGTree<HKMSTNodeFinal>(alpha);
-            _nodes = new List<DataStructures.SGTNode<HKMSTNodeFinal>>();
+            _nodeOrder = new SGTree<HKMSTNodeFinal>(alpha);
+            _nodes = new List<SGTNode<HKMSTNodeFinal>>();
             _sPickMethod = spick;
         }
 
@@ -53,8 +51,8 @@ namespace EmpiricalTester.DynamicGraph
             var w = _nodes[iw];
 
             // Article states double linked list for F,B and normal list for FL BL
-            var f = new List<DataStructures.SGTNode<HKMSTNodeFinal>>(1);
-            var b = new List<DataStructures.SGTNode<HKMSTNodeFinal>>(1);
+            var f = new List<SGTNode<HKMSTNodeFinal>>(1);
+            var b = new List<SGTNode<HKMSTNodeFinal>>(1);
             f.Add(w);
             w.Value.InF = true;
             b.Add(v);
@@ -65,13 +63,13 @@ namespace EmpiricalTester.DynamicGraph
             v.Value.InEnum = v.Value.Incoming.GetEnumerator();
             v.Value.InEnum.MoveNext();
 
-            DataStructures.SGTNode<HKMSTNodeFinal> s = v;
+            SGTNode<HKMSTNodeFinal> s = v;
 
             // To implement soft-threshold search, we maintain FA , FP, BA , and BP as doublylinked lists
-            var fa = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            var fp = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            var ba = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
-            var bp = new LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>>();
+            var fa = new LinkedList<SGTNode<HKMSTNodeFinal>>();
+            var fp = new LinkedList<SGTNode<HKMSTNodeFinal>>();
+            var ba = new LinkedList<SGTNode<HKMSTNodeFinal>>();
+            var bp = new LinkedList<SGTNode<HKMSTNodeFinal>>();
             
             if (w.Value.OutEnum.Current != null)
                 fa.AddFirst(w);
@@ -109,8 +107,7 @@ namespace EmpiricalTester.DynamicGraph
                         b.ForEach(item => item.Value.InB = false);
                         return false; // Pair(y.Current, uz.to);
                     }
-
-
+                    
                     if (!x.Value.InF)
                     {
                         f.Add(x);
@@ -223,7 +220,7 @@ namespace EmpiricalTester.DynamicGraph
             {
                 // move all vertices in fb just before t and all vertices in bf just before all vertices in fb
 
-                //bf.Sort(); topologically if needed, try both
+                // This is required as the articles states
                 if (bf.Count > 1)
                     bf = TopoSort(bf);
                 if (fb.Count > 1)
@@ -259,10 +256,10 @@ namespace EmpiricalTester.DynamicGraph
         }
 
 
-        List<DataStructures.SGTNode<HKMSTNodeFinal>> TopoSort(List<DataStructures.SGTNode<HKMSTNodeFinal>> graph)
+        List<SGTNode<HKMSTNodeFinal>> TopoSort(List<SGTNode<HKMSTNodeFinal>> graph)
         {
             var dfs = new StaticGraph.GenericTarjan<int>();
-            var dict = new Dictionary<DataStructures.SGTNode<HKMSTNodeFinal>, int>();
+            var dict = new Dictionary<SGTNode<HKMSTNodeFinal>, int>();
 
             for (int i = 0; i < graph.Count; i++)
             {
@@ -270,6 +267,7 @@ namespace EmpiricalTester.DynamicGraph
                 dfs.AddVertex(graph[i].Value.N);
             }
 
+            // "graph" will only ever be a list of nodes already traversed backward or forwards, not the entire graph
             foreach (var node in graph)
             {
                 foreach (var to in node.Value.Outgoing)
@@ -298,27 +296,36 @@ namespace EmpiricalTester.DynamicGraph
             _nodes.Clear();
         }
 
+        public void ResetAll(int newN, int newM)
+        {
+            ResetAll(newN);
+        }
+
         public List<int> Topology()
         {
             return _nodeOrder.inOrder().ConvertAll(item => item.N);
         }
 
-        private DataStructures.SGTNode<HKMSTNodeFinal> PickS(LinkedList<DataStructures.SGTNode<HKMSTNodeFinal>> list)
+        private SGTNode<HKMSTNodeFinal> PickS(LinkedList<SGTNode<HKMSTNodeFinal>> list)
         {
-            //todo cant be converting tolist
+            // The doubly linked lists are converted to lists.
+            // Seeing as the methods for picking the median utilize array indexing
+            // there is no way around it afaik
+            // The article specificallys tates the lists using the median picks 
+            // should be doubly linked lists
             switch (_sPickMethod)
             {
                 case SPickMethod.Random:                    
                     return list.ElementAt(_r.Next(0, list.Count -1));
                 case SPickMethod.MoMRandom:
                     return Algorithms.Median.MomRandom(list.ToList(), list.Count / 2,
-                        Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
+                        Comparer<SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
                 case SPickMethod.MoM:
                     return Algorithms.Median.Mom(list.ToList(), list.Count / 2,
-                        Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
+                        Comparer<SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
                 default:
                     return Algorithms.Median.QuickSelect(list.ToList(), list.Count / 2,
-                        Comparer<DataStructures.SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
+                        Comparer<SGTNode<HKMSTNodeFinal>>.Create((a, b) => a.Label > b.Label ? 1 : a.Label < b.Label ? -1 : 0));
 
             }
         }

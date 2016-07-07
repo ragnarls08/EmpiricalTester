@@ -1,26 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using EmpiricalTester.DataStructures;
 
 namespace EmpiricalTester.DynamicGraph
 {
     public class HKMSTV1 : IDynamicGraph
     {        
-        private DataStructures.SGTree<HKMSTNode> _nodeOrder;
-        private List<DataStructures.SGTNode<HKMSTNode>> _nodes;
+        private SGTree<HKMSTNode> _nodeOrder;
+        private List<SGTNode<HKMSTNode>> _nodes;
 
-        private List<DataStructures.SGTNode<HKMSTNode>> f;
-        private List<DataStructures.SGTNode<HKMSTNode>> b;
+        private List<SGTNode<HKMSTNode>> f;
+        private List<SGTNode<HKMSTNode>> b;
 
         private int _nCount;
 
         public HKMSTV1(double alpha)
         {
-            _nodeOrder = new DataStructures.SGTree<HKMSTNode>(alpha);
-            _nodes = new List<DataStructures.SGTNode<HKMSTNode>>();
+            _nodeOrder = new SGTree<HKMSTNode>(alpha);
+            _nodes = new List<SGTNode<HKMSTNode>>();
 
 
-            f = new List<DataStructures.SGTNode<HKMSTNode>>();
-            b = new List<DataStructures.SGTNode<HKMSTNode>>();            
+            f = new List<SGTNode<HKMSTNode>>();
+            b = new List<SGTNode<HKMSTNode>>();            
         }
 
         public bool AddEdge(int v, int w)
@@ -59,6 +60,11 @@ namespace EmpiricalTester.DynamicGraph
             _nodes.Clear();
         }
 
+        public void ResetAll(int newN, int newM)
+        {
+            ResetAll(newN);
+        }
+
         public List<int> Topology()
         {
             return _nodeOrder.inOrder().ConvertAll(item => item.N);            
@@ -69,10 +75,7 @@ namespace EmpiricalTester.DynamicGraph
         {
             var v = _nodes[iv];
             var w = _nodes[iw];
-
-            // Article states double linked list for F,B and normal list for FL BL
-            //var f = new List<DataStructures.SGTNode<HKMSTNode>>();
-            //var b = new List<DataStructures.SGTNode<HKMSTNode>>();
+            
             f.Clear();
             b.Clear();
 
@@ -86,8 +89,8 @@ namespace EmpiricalTester.DynamicGraph
             v.Value.InEnum = v.Value.Incoming.GetEnumerator();
             v.Value.InEnum.MoveNext();
         
-            var fl = new C5.IntervalHeap<DataStructures.SGTNode<HKMSTNode>>();
-            var bl = new C5.IntervalHeap<DataStructures.SGTNode<HKMSTNode>>();
+            var fl = new C5.IntervalHeap<SGTNode<HKMSTNode>>();
+            var bl = new C5.IntervalHeap<SGTNode<HKMSTNode>>();
             
             if (w.Value.OutEnum.Current != null)
                 fl.Add(w);
@@ -97,8 +100,8 @@ namespace EmpiricalTester.DynamicGraph
             // For ease of notation, we adopt the convention that the
             // minimum of an empty set is bigger than any other value and the maximum of an empty
             // set is smaller than any other value.
-            DataStructures.SGTNode<HKMSTNode> u = null;
-            DataStructures.SGTNode<HKMSTNode> z = null;
+            SGTNode<HKMSTNode> u = null;
+            SGTNode<HKMSTNode> z = null;
             if(fl.Count > 0)
                 u = fl.FindMin();
             if(bl.Count > 0)
@@ -106,8 +109,7 @@ namespace EmpiricalTester.DynamicGraph
             
             while (fl.Count > 0 && bl.Count > 0 && (u == z || _nodeOrder.Query(z, u)))
             {
-                // SEARCH-STEP(vertex u, vertex z)
-              
+                // SEARCH-STEP(vertex u, vertex z)              
                 var x = u.Value.OutEnum.Current;
                 var y = z.Value.InEnum.Current;
                 u.Value.OutEnum.MoveNext();
@@ -117,8 +119,6 @@ namespace EmpiricalTester.DynamicGraph
                     fl.DeleteMin();
                 if (z.Value.InEnum.Current == null)
                     bl.DeleteMax();
-
- 
                 
                 if(x.Value.InB)
                 {
@@ -132,8 +132,7 @@ namespace EmpiricalTester.DynamicGraph
                     b.ForEach(item => item.Value.InB = false);
                     return false; // Pair(y.Current, uz.to);
                 }
-                    
-                
+                                    
                 if (!x.Value.InF)                
                 {
                     f.Add(x);
@@ -191,7 +190,7 @@ namespace EmpiricalTester.DynamicGraph
             {
                 // move all vertices in fb just before t and all vertices in bf just before all vertices in fb
 
-                //bf.Sort(); topologically if needed, try both
+                // This is required as the articles states
                 if (bf.Count > 1)
                     bf = TopoSort(bf);
                 if (fb.Count > 1)
@@ -215,8 +214,7 @@ namespace EmpiricalTester.DynamicGraph
                     }
                 }
             }
-
-
+            
             // reset bools
             f.ForEach(item => item.Value.InF = false);
             b.ForEach(item => item.Value.InB = false);
@@ -225,21 +223,22 @@ namespace EmpiricalTester.DynamicGraph
             _nodes[iv].Value.Outgoing.Add(_nodes[iw]);
             _nodes[iw].Value.Incoming.Add(_nodes[iv]);
 
-            return true; // null
+            return true; 
         }              
         
-        List<DataStructures.SGTNode<HKMSTNode>> TopoSort(List<DataStructures.SGTNode<HKMSTNode>> graph)            
+        List<SGTNode<HKMSTNode>> TopoSort(List<SGTNode<HKMSTNode>> graph)
         {
             var dfs = new StaticGraph.GenericTarjan<int>();
-            var dict = new Dictionary<DataStructures.SGTNode<HKMSTNode>, int>();
+            var dict = new Dictionary<SGTNode<HKMSTNode>, int>();
 
             for (int i = 0; i < graph.Count; i++)
             {
                 dict.Add(graph[i], i);
                 dfs.AddVertex(graph[i].Value.N);
             }
-            
-            foreach(var node in graph)
+
+            // "graph" will only ever be a list of nodes already traversed backward or forwards, not the entire graph
+            foreach (var node in graph)
             {
                 foreach (var to in node.Value.Outgoing)
                 {

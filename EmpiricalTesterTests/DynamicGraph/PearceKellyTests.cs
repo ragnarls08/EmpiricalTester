@@ -21,8 +21,7 @@ namespace EmpiricalTester.DynamicGraph.Tests
             var b1 = pk.AddEdge(0, 1);
             var b2 = pk.AddEdge(1, 2);
             var b3 = pk.AddEdge(2, 0);
-
-            var e = 1 + 1;
+            
             Assert.Fail();
         }
     }

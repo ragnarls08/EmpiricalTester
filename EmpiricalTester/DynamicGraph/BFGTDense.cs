@@ -8,12 +8,16 @@ namespace EmpiricalTester.DynamicGraph
     class BFGTDense : IDynamicGraph
     {
         private List<BFGTDenseNode> nodes;
-        private int n; 
+        private int n;
+
+        public bool CycleBackup { get; set; }
 
         public BFGTDense()
         {
             n = 0;
             nodes = new List<BFGTDenseNode>();
+
+            CycleBackup = false; // Set to true for graph generation (when cycles are added) 
         }
 
         public void AddVertex()
@@ -29,12 +33,17 @@ namespace EmpiricalTester.DynamicGraph
             if (v.Level >= w.Level)
             {
                 var A = new List<Edge>();
-                /*
-                var Recovery = new List<BFGTDenseNode>();
-                foreach (var node in nodes)
+                
+                // TODO make this more targetted
+                var Recovery = CycleBackup ? new List<BFGTDenseNode>() : null;
+                if (CycleBackup)
                 {
-                    Recovery.Add(new BFGTDenseNode(node));
-                }*/
+                    foreach (var node in nodes)
+                    {
+                        Recovery.Add(new BFGTDenseNode(node));
+                    }
+                }
+                
                 //Recovery.Add(new BFGTDenseNode(v));
                 //Recovery.Add(new BFGTDenseNode(w));
 
@@ -48,18 +57,21 @@ namespace EmpiricalTester.DynamicGraph
 
                     if (y == v)
                     {
-                        /*
-                        foreach (var node in Recovery)
+                        if (CycleBackup)
                         {
-                            nodes[node.Index].Level = node.Level;
-                            nodes[node.Index].InDegree = node.InDegree;
-                            nodes[node.Index].J = node.J;
+                            foreach (var node in Recovery)
+                            {
+                                nodes[node.Index].Level = node.Level;
+                                nodes[node.Index].InDegree = node.InDegree;
+                                nodes[node.Index].J = node.J;
 
-                            nodes[node.Index].Outgoing = node.Outgoing;
-                            nodes[node.Index].KOut = node.KOut;
-                            nodes[node.Index].Bound = node.Bound;
-                            nodes[node.Index].Count = node.Count;
-                        }*/
+                                nodes[node.Index].Outgoing = node.Outgoing;
+                                nodes[node.Index].KOut = node.KOut;
+                                nodes[node.Index].Bound = node.Bound;
+                                nodes[node.Index].Count = node.Count;
+                            }
+                        }
+                        
                         return false; // cycle
                     }
                         
@@ -97,16 +109,13 @@ namespace EmpiricalTester.DynamicGraph
                             if (y.Outgoing.IsEmpty)
                                 break;
                             curr = y.Outgoing.FindMin();
-                        }                        
+                        }
                     }
-                    //x.KOut[y.Index] = y.Level;
                     x.Outgoing.Add(new KVP(y.Level, y));
                 }
             }
 
-            //v.KOut[iw] = w.Level;
             v.AddOutGoing(w);
-            
 
             return true;
         }
@@ -125,6 +134,11 @@ namespace EmpiricalTester.DynamicGraph
         {
             nodes.Clear();
             n = 0;
+        }
+
+        public void ResetAll(int newN, int newM)
+        {
+            ResetAll(newN);
         }
     }
 

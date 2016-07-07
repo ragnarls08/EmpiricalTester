@@ -15,15 +15,19 @@ namespace EmpiricalTester.DynamicGraph
         private int m;
         private int delta;
         private int totalM;
+
+        public bool CycleBackup { get; set; }
         
         public BFGT()
         {
             a = int.MaxValue / 10 - 1;                        
             n = 0;
             m = 0;
-            totalM = 25;
+            totalM = 25; // For runtime tests, ResetAll is called prior to every graph giving totalM
             delta = Math.Min((int)Math.Pow(totalM, 1 / 2.0), (int)Math.Pow(n, 2 / 3.0));
-            nodes = new List<BFGTNode>();          
+            nodes = new List<BFGTNode>();
+
+            CycleBackup = false; // Set to true for graph generation (when cycles are added) 
         }
         
         public void AddVertex()
@@ -44,7 +48,7 @@ namespace EmpiricalTester.DynamicGraph
             {
                 //step 2                
                 var arcs = 0;
-                var wIncomingTemp = new List<int>(w.Incoming);
+                var wIncomingTemp = CycleBackup ? new List<int>(w.Incoming) : null;
                 var wTempLevel = w.Level;
 
                 var retStateB = BVisit(v, B, ref arcs, w);
@@ -56,8 +60,7 @@ namespace EmpiricalTester.DynamicGraph
                     }
                     return false;
                 }
-                    
-
+                
                 if (retStateB == ReturnState.Normal && v.Level == w.Level)
                 {
                     L = B;
@@ -82,18 +85,21 @@ namespace EmpiricalTester.DynamicGraph
                     if (do3)
                     {
                         // step 3
-                        var backupStack = new List<BFGTNode>();
+                        var backupStack = CycleBackup ? new List<BFGTNode>() : null;
                         var retStateF = FVisit(w, F, v, B, backupStack);
 
                         if (retStateF == ReturnState.Cycle)
                         {
-                            w.Level = wTempLevel;
-                            w.Incoming = wIncomingTemp;
-
-                            foreach (var node in backupStack)
+                            if (CycleBackup)
                             {
-                                nodes[node.Label] = node;
-                                nodes[node.Label].Visited = false;
+                                w.Level = wTempLevel;
+                                w.Incoming = wIncomingTemp;
+
+                                foreach (var node in backupStack)
+                                {
+                                    nodes[node.Label] = node;
+                                    nodes[node.Label].Visited = false;
+                                }
                             }
 
                             return false;
@@ -126,7 +132,6 @@ namespace EmpiricalTester.DynamicGraph
 
             m++;
             //delta = Math.Min((int)Math.Pow(m, 1 / 2.0), (int)Math.Pow(n, 2 / 3.0));
-            //delta = (int)Math.Pow(n, 2 / 3.0);
             
             return true;
         }
@@ -138,13 +143,11 @@ namespace EmpiricalTester.DynamicGraph
 
         public List<int> Topology()
         {
-
             return nodes.OrderBy(n => n.BK + n.Index).ToList().ConvertAll(i => i.Label);
         }
 
         public void ResetAll(int newN)
         {
-            //a = int.MaxValue / 10 - 1;
             a = (int)Math.Pow(newN, 3) + 1;
             b = (int)Math.Pow(newN, 3) + newN + 1;
             m = 0;
@@ -153,11 +156,22 @@ namespace EmpiricalTester.DynamicGraph
             delta = Math.Min((int)Math.Pow(totalM, 1 / 2.0), (int)Math.Pow(newN, 2 / 3.0));
             nodes.Clear();            
         }
-        
+
+        public void ResetAll(int newN, int newM)
+        {
+            a = (int)Math.Pow(newN, 3) + 1;
+            b = (int)Math.Pow(newN, 3) + newN + 1;
+            m = 0;
+            n = 0;
+            totalM = newM;
+            delta = Math.Min((int)Math.Pow(totalM, 1 / 2.0), (int)Math.Pow(newN, 2 / 3.0));
+            nodes.Clear();
+        }
+
         private ReturnState BVisit(BFGTNode y, List<BFGTNode> B, ref int arcs, BFGTNode w)
         {
             y.Visited = true;
-            ReturnState retState = ReturnState.Normal;
+            var retState = ReturnState.Normal;
             foreach (var inNode in y.Incoming)
             {
                 retState = BTraverse(nodes[inNode], y, B, ref arcs, w);
@@ -167,11 +181,9 @@ namespace EmpiricalTester.DynamicGraph
                     return retState;
                 }
                     
-
                 if (retState == ReturnState.Delta)
                 {
                     y.Visited = false;
-                    //return retState;
                     break;
                 }
             }
@@ -202,12 +214,11 @@ namespace EmpiricalTester.DynamicGraph
             x.Visited = true;
             foreach (var outNode in x.Outgoing)
             {
-                if (!nodes[outNode].Visited)
+                if (CycleBackup && !nodes[outNode].Visited)
                 {
                     backupStack.Add(new BFGTNode(nodes[outNode].Level, nodes[outNode].Index, nodes[outNode].Label, b, new List<int>(nodes[outNode].Incoming), new List<int>(nodes[outNode].Outgoing)));
                 }
                     
-
                 if (FTraverse(x, nodes[outNode], F, v, B, backupStack) == ReturnState.Cycle)
                 {
                     x.Visited = false;
@@ -216,7 +227,6 @@ namespace EmpiricalTester.DynamicGraph
                     
             }
             F.Insert(0, x);
-            //x.Visited = false;
 
             return ReturnState.Normal;
         }
@@ -225,9 +235,6 @@ namespace EmpiricalTester.DynamicGraph
         {
             if (y == v || B.Contains(y))
                 return ReturnState.Cycle; 
-
-            ReturnState retState;
-            //backupStack.Add(new BFGTNode(y.Level, y.Index, y.Label, b, new List<int>(y.Incoming), new List<int>(y.Outgoing)));
 
             if (x.Level == y.Level)
                 y.Incoming.Add(x.Label);

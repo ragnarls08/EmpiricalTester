@@ -4,6 +4,18 @@ using System.Data;
 using System.Linq;
 using static EmpiricalTester.DynamicGraph.CFKRNode;
 
+
+/// <summary>
+/// No topo sort, not used
+/// 
+/// 
+/// 
+/// 
+/// 
+/// 
+/// 
+/// </summary>
+
 namespace EmpiricalTester.DynamicGraph
 {   
     internal enum ReturnMessage { NoCycle, Cycle };
@@ -198,6 +210,11 @@ namespace EmpiricalTester.DynamicGraph
             rankedCount = 0;
             visitedCurrentRound = 1;
             nodes = new List<CFKRNode>();           
+        }
+
+        public void ResetAll(int newN, int newM)
+        {
+            ResetAll(newN);
         }
 
         

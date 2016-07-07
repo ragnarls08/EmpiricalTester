@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using EmpiricalTester.DataStructures;
 
 namespace EmpiricalTester.DynamicGraph
 {
@@ -45,7 +40,6 @@ namespace EmpiricalTester.DynamicGraph
                     return false;
                 }
 
-
                 dfsB(ub, ref B, lb.Ord);
 
                 // reorder phase
@@ -53,6 +47,10 @@ namespace EmpiricalTester.DynamicGraph
                 B = B.OrderBy(a => a.Ord).ToList();
                 
                 var L = new List<int>(F.Count + B.Count);
+
+                // The unique identifiers for the topological order of each vertex is added to L
+                // L is then sorted and the identifiers (Ord) redistributed over the vertices
+                // who are now in the correct order
                 for (int i = 0; i < B.Count; i++)
                 {
                     L.Add(B[i].Ord);
@@ -125,7 +123,10 @@ namespace EmpiricalTester.DynamicGraph
             nodes = new List<PKNode>();
             n = 0;
         }
-    }
 
-    
+        public void ResetAll(int newN, int newM)
+        {
+            ResetAll(newN);
+        }
+    }
 }

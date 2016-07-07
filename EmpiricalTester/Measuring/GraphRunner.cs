@@ -377,7 +377,7 @@ namespace EmpiricalTester.Measuring
             foreach (var file in Directory.EnumerateFiles(folder))
             {
                 var graph = readFile(file);
-                alg.ResetAll(graph.n);
+                alg.ResetAll(graph.n, graph.m);
 
                 for(int i = 0; i < graph.n; i++)
                     alg.AddVertex();

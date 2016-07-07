@@ -5,8 +5,6 @@ using EmpiricalTester.DynamicGraph;
 
 namespace EmpiricalTester
 {
-    
-
     class Program
     {
         [STAThread]
@@ -15,34 +13,34 @@ namespace EmpiricalTester
             var staticGraphs = new List<StaticGraph.IStaticGraph>();
 
             var kahn = new StaticGraph.Kahn();
-            //staticGraphs.Add(kahn);
+            staticGraphs.Add(kahn);
             var tarjan = new StaticGraph.Tarjan();
-            //staticGraphs.Add(tarjan);
+            staticGraphs.Add(tarjan);
 
-            var dynamicGraphs = new List<DynamicGraph.IDynamicGraph>();
+            var dynamicGraphs = new List<IDynamicGraph>();
             
-            var simple = new DynamicGraph.SimpleIncremental();
+            var simple = new SimpleIncremental();
             dynamicGraphs.Add(simple);
 
-            var hkmstV1 = new DynamicGraph.HKMSTV1(0.65);
-            //dynamicGraphs.Add(hkmstV1);
-            var hkmstMoM = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoM);
-            //dynamicGraphs.Add(hkmstMoM);
-            var hkmstMoMR = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.MoMRandom);
-            //dynamicGraphs.Add(hkmstMoMR);
-            var hkmstR = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.Random);
-            //dynamicGraphs.Add(hkmstR);
-            var hkmstQS = new DynamicGraph.HKMSTFinal(0.65, DynamicGraph.SPickMethod.QuickSelect);
+            var hkmstV1 = new HKMSTV1(0.65);
+            dynamicGraphs.Add(hkmstV1);
+            var hkmstMoM = new HKMSTFinal(0.65, SPickMethod.MoM);
+            dynamicGraphs.Add(hkmstMoM);
+            var hkmstMoMR = new HKMSTFinal(0.65, SPickMethod.MoMRandom);
+            dynamicGraphs.Add(hkmstMoMR);
+            var hkmstR = new HKMSTFinal(0.65, SPickMethod.Random);
+            dynamicGraphs.Add(hkmstR);
+            var hkmstQS = new HKMSTFinal(0.65, SPickMethod.QuickSelect);
             dynamicGraphs.Add(hkmstQS);
 
             var hkmstDense = new HKMSTDense(100);
-            //dynamicGraphs.Add(hkmstDense);
+            dynamicGraphs.Add(hkmstDense);
 
-            var bfgt = new BFGT();
+            var bfgt = new BFGT {CycleBackup = true};
             dynamicGraphs.Add(bfgt);
 
-            var bfgtDense = new BFGTDense();
-            //dynamicGraphs.Add(bfgtDense);
+            var bfgtDense = new BFGTDense() {CycleBackup = true};
+            dynamicGraphs.Add(bfgtDense);
 
             var pk = new PearceKelly();
             dynamicGraphs.Add(pk);
@@ -51,12 +49,12 @@ namespace EmpiricalTester
 
             var generator = new GraphGeneration.GraphGenerator();
             var ps = new List<double>() { 0.5  /*0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
-            for(var i = 1; i < 20000; i++)
+            for(var i = 1; i < 10000; i++)
             {
                 foreach (var p in ps)
-                {/*
+                {
                     generator.GenerateGraph(
-                    70, // nodes
+                    40, // nodes
                     p, // Probability of an edge being added from a complete graph
                     i + "-Graph(15000, " + p + ")",
                     false, // writeToFile
@@ -111,7 +109,7 @@ namespace EmpiricalTester
                 );
                 //*/
 
-            runner.RunDirectoryPerGraph(@"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\SuperSparse", staticGraphs, dynamicGraphs);
+            //runner.RunDirectoryPerGraph(@"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\SuperSparse", staticGraphs, dynamicGraphs);
 
             var measure = new Measuring.OrderMaintenance();
             string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure3.txt");

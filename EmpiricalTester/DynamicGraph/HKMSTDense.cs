@@ -61,6 +61,11 @@ namespace EmpiricalTester.DynamicGraph
             adjMatrix = new bool[_n, _n];
         }
 
+        public void ResetAll(int newN, int newM)
+        {
+            ResetAll(newN);
+        }
+
         private bool TopologicalSearch(HKMSTDNode v, HKMSTDNode w)
         {
             var F = new C5.CircularQueue<int>();
@@ -97,7 +102,7 @@ namespace EmpiricalTester.DynamicGraph
 
             //Once the search finishes, test for a cycle by checking whether there is an arc(u, z)
             //with u in F and z in B
-            bool noCycle = !(from u in F from z in B where adjMatrix[u, z] select u).Any();
+            bool noCycle = !(from u in F from z in B where adjMatrix[u, z] select u).Any(); // Any stops when first occurance is found
             if (!noCycle)
             {
                 foreach (var x in F)
@@ -111,9 +116,9 @@ namespace EmpiricalTester.DynamicGraph
 
                 return false;
             }
-            else
+            else //cycle
             {
-                var fix = new List<HKMSTDNode>();
+                var fix = new List<HKMSTDNode>();// putting things back the way they were
                 // Reorder
                 while (!F.IsEmpty)
                 {
