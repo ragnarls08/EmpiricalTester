@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using EmpiricalTester.DynamicGraph;
 
 namespace EmpiricalTester
@@ -10,20 +12,22 @@ namespace EmpiricalTester
         [STAThread]
         static void Main(string[] args)
         {
+
             var staticGraphs = new List<StaticGraph.IStaticGraph>();
 
             var kahn = new StaticGraph.Kahn();
-            staticGraphs.Add(kahn);
+            //staticGraphs.Add(kahn);
             var tarjan = new StaticGraph.Tarjan();
-            staticGraphs.Add(tarjan);
+            //staticGraphs.Add(tarjan);
 
             var dynamicGraphs = new List<IDynamicGraph>();
             
             var simple = new SimpleIncremental();
             dynamicGraphs.Add(simple);
-
+            
             var hkmstV1 = new HKMSTV1(0.65);
             dynamicGraphs.Add(hkmstV1);
+            
             var hkmstMoM = new HKMSTFinal(0.65, SPickMethod.MoM);
             dynamicGraphs.Add(hkmstMoM);
             var hkmstMoMR = new HKMSTFinal(0.65, SPickMethod.MoMRandom);
@@ -32,29 +36,46 @@ namespace EmpiricalTester
             dynamicGraphs.Add(hkmstR);
             var hkmstQS = new HKMSTFinal(0.65, SPickMethod.QuickSelect);
             dynamicGraphs.Add(hkmstQS);
-
-            var hkmstDense = new HKMSTDense(100);
+            //
+            var hkmstDense = new HKMSTDense(3000);
             dynamicGraphs.Add(hkmstDense);
-
-            var bfgt = new BFGT {CycleBackup = true};
+            /*
+            var bfgt = new BFGT {CycleBackup = false};
             dynamicGraphs.Add(bfgt);
-
-            var bfgtDense = new BFGTDense() {CycleBackup = true};
-            dynamicGraphs.Add(bfgtDense);
-
+            */
+            var bfgt1 = new BFGTIter() { CycleBackup = false };
+            dynamicGraphs.Add(bfgt1);
+            
+            var bfgtDense = new BFGTDense() {CycleBackup = false};
+            //dynamicGraphs.Add(bfgtDense);
+            
+            var bfgtDenseFix = new BFGTDenseFix() { CycleBackup = false };
+            //dynamicGraphs.Add(bfgtDenseFix);
+            
             var pk = new PearceKelly();
             dynamicGraphs.Add(pk);
-            
+            /**/
 
+            /*
+            bfgt1.ResetAll(3);
+            bfgt1.AddVertex();
+            bfgt1.AddVertex();
+            bfgt1.AddVertex();
+
+            var b1 = bfgt1.AddEdge(0, 1);
+            var b2 = bfgt1.AddEdge(1, 2);
+            var b3 = bfgt1.AddEdge(2, 0);
+            */
 
             var generator = new GraphGeneration.GraphGenerator();
-            var ps = new List<double>() { 0.5  /*0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/ };
+            var ps = new List<double>() { 0.5  /*0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9*/
+        };
             for(var i = 1; i < 10000; i++)
             {
                 foreach (var p in ps)
-                {
+                {/*
                     generator.GenerateGraph(
-                    40, // nodes
+                    100, // nodes
                     p, // Probability of an edge being added from a complete graph
                     i + "-Graph(15000, " + p + ")",
                     false, // writeToFile
@@ -65,10 +86,23 @@ namespace EmpiricalTester
                 }
             }
 
-            var ms = new List<int>() { 340000, 360000, 380000, 400000,
-                                       420000, 440000, 460000, 480000, 500000,
-                                       520000, 540000, 560000, 580000, 600000 };
-            //generator.GenerateGraphs(5000, ms, 100, @"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\NotSparse", staticGraphs, dynamicGraphs );
+            var ms = new List<int>() {1979010
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        };
+            //generator.GenerateGraphs(2000, ms, 100, @"D:\Graphs\FinalGraphs\A1", staticGraphs, dynamicGraphs );
 
 
 
@@ -94,7 +128,6 @@ namespace EmpiricalTester
                 //Path.Combine(Environment.CurrentDirectory, @"Output\20160303-04-00(10000, 0.9).txt"),
                 };
 
-
             
             var runner = new Measuring.GraphRunner();
             //runner.runGraph(fileNames, 10, false, false, staticGraphs, dynamicGraphs);
@@ -109,7 +142,21 @@ namespace EmpiricalTester
                 );
                 //*/
 
-            //runner.RunDirectoryPerGraph(@"C:\Users\Ragnar\Dropbox\Chalmers\Thesis\Graphs\SuperSparse", staticGraphs, dynamicGraphs);
+            
+            //runner.RunDirectoryPK(@"D:\Graphs\FinalGraphs\B3\1500-1113007", dynamicGraphs, 11243);
+            //runner.RunDirectoryPK(@"D:\Graphs\FinalGraphs\A1\2000-1979010", dynamicGraphs, 19791);
+            //runner.RunDirectoryPK(@"D:\Graphs\FinalGraphs\A1\1000-494505", dynamicGraphs, 4946);
+            //runner.RunDirectoryPK(@"D:\Graphs\FinalGraphs\C1\2000-39980", dynamicGraphs, 1999);
+            //runner.RunDirectoryPK(@"D:\Graphs\FinalGraphs\C3\3000-89970", dynamicGraphs, 4499);
+            //runner.RunDirectoryPK(@"D:\Graphs\FinalGraphs\C4\6000-359940", dynamicGraphs, 17997);
+            //runner.RunDirectoryPK(@"D:\Graphs\FinalGraphs\C5\4500-202455", dynamicGraphs, 10123);
+
+
+
+            //runner.RunDirectoryPerGraph(@"D:\Graphs\FinalGraphs\test", staticGraphs, dynamicGraphs);
+            //runner.RunDirectoryHistogram(@"D:\Graphs\FinalGraphs\histo\C5", dynamicGraphs, 1, 202455);
+            runner.RunDirectoryHistogram(@"D:\Graphs\FinalGraphs\histo\C1", dynamicGraphs, 1, 459770);
+            
 
             var measure = new Measuring.OrderMaintenance();
             string outFile = Path.Combine(Environment.CurrentDirectory, @"Output\ompMeasure3.txt");
@@ -122,22 +169,26 @@ namespace EmpiricalTester
             ns = new List<int>() { 1000, 10000, 100000, 1000000 };
             WriteLine(MeasureMedian(ns, 0, 100, 25)); */
 
-           /*
-            pk = new PearceKelly();
-            for (int i = 0; i < 3; i++)
-            {
-                pk.AddVertex();
-            }
 
-               
-            var b1 = pk.AddEdge(1, 0);
-            var b2 = pk.AddEdge(2, 1);
-            var b3 = pk.AddEdge(0, 1);
-            var b4 = pk.AddEdge(0, 2);
-            //var basdf = cfkr1.Topology();
-            //var b4 = cfkr.AddEdge(0, 1);
-            //var b5 = cfkr.AddEdge(0, 1);
-            //*/
+
+
+
+            /*
+             pk = new PearceKelly();
+             for (int i = 0; i < 3; i++)
+             {
+                 pk.AddVertex();
+             }
+
+
+             var b1 = pk.AddEdge(1, 0);
+             var b2 = pk.AddEdge(2, 1);
+             var b3 = pk.AddEdge(0, 1);
+             var b4 = pk.AddEdge(0, 2);
+             //var basdf = cfkr1.Topology();
+             //var b4 = cfkr.AddEdge(0, 1);
+             //var b5 = cfkr.AddEdge(0, 1);
+             //*/
             Console.WriteLine("\n\ndone");
             Console.ReadLine();            
         }

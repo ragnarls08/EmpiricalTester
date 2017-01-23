@@ -83,27 +83,38 @@ namespace EmpiricalTester.DynamicGraph
                     {
                         int j = (int)Floor(Log(Min(y.Level - x.Level, y.InDegree), 2));
                         x.J = j;
-                        if(x.Count.ContainsKey($"{j}-{y.Index}"))
-                            x.Count[$"{j}-{y.Index}"]++;
+
+                        if (x.Count.ContainsKey(j) && x.Count[j].ContainsKey(y.Index))
+                            x.Count[j][y.Index]++;
                         else
-                            x.Count.Add($"{j}-{y.Index}", 1);
-
-                        if (x.Count[$"{j}-{y.Index}"] == (3*Pow(2, j)))
                         {
-                            x.Count[$"{j}-{y.Index}"] = 0;
+                            if(!x.Count.ContainsKey(j))
+                                x.Count.Add(j, new Dictionary<int, int>());
+                            x.Count[j].Add(y.Index, 1);
+                        }
+                        
+                        if (x.Count[j][y.Index] == (3*Pow(2, j)))
+                        {
+                            x.Count[j][y.Index] = 0;
 
-                            int bound = x.Bound.ContainsKey($"{j}-{y.Index}") ? x.Bound[$"{j}-{y.Index}"] : 1;
+                            int bound = x.Bound.ContainsKey(j) && x.Bound[j].ContainsKey(y.Index) ? x.Bound[j][y.Index] : 1;
                             y.Level = Max(y.Level, bound + (int)Pow(2, j));
-                            x.Bound[$"{j}-{y.Index}"] = y.Level;
+                            if(!x.Bound.ContainsKey(j))
+                                x.Bound.Add(j, new Dictionary<int, int>());
+                            if(!x.Bound[j].ContainsKey(y.Index))
+                                x.Bound[j].Add(y.Index, y.Level);
+                            else
+                                x.Bound[j][y.Index] = y.Level;
                         }
                     }
 
                     if (!y.Outgoing.IsEmpty)
                     {
                         var curr = y.Outgoing.FindMin();
+                        
                         while (curr.Key <= y.Level)
                         {
-                            y.Outgoing.DeleteMin();
+                            y.Outgoing.DeleteMin();                           
                             A.Add(new Edge(y, curr.Value));
                             //Recovery.Add(new BFGTDenseNode(curr.Value));
                             if (y.Outgoing.IsEmpty)

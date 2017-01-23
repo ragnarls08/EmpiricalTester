@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms.DataVisualization.Charting;
 using EmpiricalTester.DynamicGraph;
 using EmpiricalTester.StaticGraph;
@@ -272,6 +273,171 @@ namespace EmpiricalTester.Measuring
             }
         }
 
+        public void RunDirectoryHistogram(string baseDir, List<IDynamicGraph> algorithms, int startNumber, int endNumber)
+        {
+            if (!Directory.Exists(baseDir))
+                throw new InvalidDataException("Input folder does not exist");
+
+            var directories = Directory.GetDirectories(baseDir).ToList();
+            directories = directories.OrderByDescending(path => int.Parse(path.Substring(path.LastIndexOf("-")))).ToList();
+
+            var measurements = new List<Tuple<string, Dictionary<int, int>>>();// <name, dict<tick,count>>
+            var sw = new Stopwatch();
+
+            foreach (var alg in algorithms)
+            {
+                string algName = alg.GetType().ToString().Substring(alg.GetType().ToString().LastIndexOf(".") + 1);                
+                var dict = new Dictionary<int, int>();
+
+                foreach (var dir in directories)
+                {
+                    Console.WriteLine($"{algName}: {dir}");
+                    foreach (var file in Directory.EnumerateFiles(dir))
+                    {
+                        var graph = readFile(file);
+                        alg.ResetAll(graph.n, graph.m);
+
+                        for (int i = 0; i < graph.n; i++)
+                            alg.AddVertex();
+
+                        foreach (var edge in graph.edges.GetRange(0, startNumber-1))
+                        {
+                            alg.AddEdge(edge.from, edge.to);
+                        }
+
+                        foreach (var edge in graph.edges.GetRange(startNumber, endNumber - startNumber))
+                        {
+                            sw.Reset();
+                            sw.Start();
+                            alg.AddEdge(edge.from, edge.to);
+                            sw.Stop();
+                            if (!dict.ContainsKey((int) sw.ElapsedTicks))
+                                dict.Add((int) sw.ElapsedTicks, 1);
+                            else
+                                dict[(int) sw.ElapsedTicks]++;
+                        }                        
+                    }
+                }
+                
+                //add to measurements
+                measurements.Add(new Tuple<string, Dictionary<int, int>>(algName, dict));
+            }
+
+            // writeFile
+            string outFile = baseDir + $"measurementsHisto{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}.txt";
+            var lines = new List<string>();
+            foreach (var alg in measurements)
+            {
+                var ordered = alg.Item2.OrderBy(x => x.Key)
+                    .ToList()
+                    .ConvertAll(x => new Tuple<int, int>(x.Key, x.Value));
+
+                lines.Add($"{alg.Item1}\t{ordered.ConvertAll(x => Convert.ToString(x.Item1)).Aggregate((a, b) => a + "\t" + b)}");
+                lines.Add($"{alg.Item1}\t{ordered.ConvertAll(x => Convert.ToString(x.Item2)).Aggregate((a, b) => a + "\t" + b)}");                
+            }
+
+            File.WriteAllLines(outFile, lines);           
+        }
+
+
+        public void RunDirectoryPK(string baseDir, List<IDynamicGraph> dynamics, int segSize)
+        {
+            if (!Directory.Exists(baseDir))
+                throw new InvalidDataException("Input folder does not exist");
+
+            
+            var sw = new Stopwatch();
+            var measurements = new List<Tuple<string, List<List<long>>>>();
+
+
+            foreach (var alg in dynamics)
+            {
+                var allValues = new List<List<long>>();
+
+                foreach (var file in Directory.EnumerateFiles(baseDir))
+                {
+                    Console.WriteLine(alg.GetType().ToString().Substring(alg.GetType().ToString().LastIndexOf(".") + 1) + file);
+                    var values = new List<long>();
+                    var graph = readFile(file);
+                    alg.ResetAll(graph.n, graph.m);
+
+                    var segments = new List<List<Pair>>();
+                    int index = 0;
+                    while (index + segSize <= graph.edges.Count)
+                    {
+                        segments.Add(new List<Pair>(graph.edges.GetRange(index, segSize)));
+                        index += segSize;
+                    }
+                    if(index < graph.edges.Count)
+                        segments.Add(new List<Pair>(graph.edges.GetRange(index, graph.edges.Count - index)));
+
+
+                    for (int i = 0; i < graph.n; i++)
+                        alg.AddVertex();
+
+                    sw.Reset();
+
+                    //force gc
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                    foreach (var segment in segments)
+                    {
+                        sw.Start();
+                        foreach (var edge in segment)
+                        {
+                            alg.AddEdge(edge.from, edge.to);
+                        }
+
+                        //var top = alg.Topology();
+                        sw.Stop();
+                        values.Add(sw.ElapsedTicks);
+                    }
+
+                    allValues.Add(values);
+                }
+
+
+                //return new MinAvgMax(values.Min(), (long)values.Average(), values.Max());
+                string algName = alg.GetType().ToString().Substring(alg.GetType().ToString().LastIndexOf(".") + 1);
+                measurements.Add(new Tuple<string, List<List<long>>>(algName, allValues));
+                
+            }
+
+            
+            var output = new List<List<string>>();
+            for (int i = 0; i < measurements.Count; i++)
+            {
+                var curr = new List<string>();
+                curr.Add(measurements[i].Item1);
+                for (int segm = 0; segm < measurements[i].Item2[0].Count; segm++)
+                {
+                    var tot = 0.0;
+                    for (int filenr = 0; filenr < measurements[i].Item2.Count; filenr++)
+                    {
+                        tot += measurements[i].Item2[filenr][segm];
+                    }
+                    curr.Add((tot / (long)measurements[i].Item2[0].Count).ToString());
+                }
+                output.Add(curr);
+            }
+
+
+
+            var filename = baseDir + $"measurements{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}.txt";
+
+       
+            var lines = new List<string>();
+            for (int i = 0; i < output.Count; i++)
+            {
+                lines.Add(output[i].Aggregate((a, b) => a + "\t" + b));
+            }
+
+            File.WriteAllLines(filename, lines);
+
+
+        }
+
 
         public void RunDirectoryPerGraph(string baseDir, List<IStaticGraph> statics, List<IDynamicGraph> dynamics)
         {
@@ -383,10 +549,16 @@ namespace EmpiricalTester.Measuring
                     alg.AddVertex();
 
                 sw.Reset();
+
+                //force gc               
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
                 sw.Start();
                 foreach (var edge in graph.edges)
                 {
-                    alg.AddEdge(edge.from, edge.to);
+                    alg.AddEdge(edge.from, edge.to);                    
                 }
 
                 var top = alg.Topology();
@@ -396,6 +568,8 @@ namespace EmpiricalTester.Measuring
 
             return new MinAvgMax(values.Min(), (long)values.Average(), values.Max());
         }
+
+        
 
         // @Rawling, stackoverflow
         private static List<List<T>> Transpose<T>(List<List<T>> lists)

@@ -74,7 +74,10 @@
     <Compile Include="DataStructures\SGTree.cs" />
     <Compile Include="DynamicGraph\BFGT.cs" />
     <Compile Include="DynamicGraph\BFGTDense.cs" />
+    <Compile Include="DynamicGraph\BFGTDenseFix.cs" />
     <Compile Include="DynamicGraph\BFGTDenseNode.cs" />
+    <Compile Include="DynamicGraph\BFGTDenseNode2.cs" />
+    <Compile Include="DynamicGraph\BFGTIter.cs" />
     <Compile Include="DynamicGraph\BFGTNode.cs" />
     <Compile Include="DynamicGraph\CFKR.cs" />
     <Compile Include="DynamicGraph\CFKRNode.cs" />

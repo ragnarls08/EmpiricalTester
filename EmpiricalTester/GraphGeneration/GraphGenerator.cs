@@ -197,12 +197,23 @@ namespace EmpiricalTester.GraphGeneration
             string filename = $"{n}-{m}-{graphNumber}.txt";
             PrepareAlgorithms(n, statics, dynamics);
             var edges = new List<Edge>(m);
+            var edgesChecked = new List<List<Edge>>();
+
+            for (int v = 0; v < n; v++)
+            {
+                edgesChecked.Add(new List<Edge>());
+                for (int w = 0; w < n; w++)
+                    if(v != w)
+                        edgesChecked[v].Add(new Edge(v, w));
+            }
+                
+
 
             for (int i = 0; i < m; i++) // number of edges wanted
             {
                 while (true)
                 {
-                    var edge = RandomEdge(n);
+                    var edge = RandomEdge(n, edgesChecked);
                     var cycles = new List<bool>(statics.Count + dynamics.Count);
 
                     foreach (var graph in statics)
@@ -260,17 +271,18 @@ namespace EmpiricalTester.GraphGeneration
             }
         }
 
-        private Edge RandomEdge(int n)
+        private Edge RandomEdge(int n, List<List<Edge>> edgesChecked)
         {
-            var v = rng.Next(0, n);
-            var w = rng.Next(0, n);
-            while (v == w)
-            {
-                v = rng.Next(0, n);
-                w = rng.Next(0, n);
-            }
+            var v = rng.Next(0, edgesChecked.Count);
+            var w = rng.Next(0, edgesChecked[v].Count);
 
-            return new Edge(v, w);
+            var edge = edgesChecked[v][w];
+            edgesChecked[v].RemoveAt(w);
+
+            if (edgesChecked[v].Count == 0)
+                edgesChecked.RemoveAt(v);
+            
+            return edge;
         }
 
         private void mkdir(string folder)

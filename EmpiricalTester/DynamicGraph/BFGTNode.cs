@@ -1,39 +1,43 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EmpiricalTester.DynamicGraph
 {
     internal class BFGTNode
     {
-        public int Level { get; set; }
-        public int Index { get; set; }        
+        public UInt64 Level { get; set; }
+        public UInt64 Index { get; set; }        
         public int Label { get; set; }
         public bool Visited { get; set; }
-        public int BK => _b * Level;
+        public bool VisitedF { get; set; }
+        public UInt64 BK => _b * Level;
 
         public List<int> Outgoing { get; set; }
         public List<int> Incoming { get; set; }
 
-        private int _b;
+        private UInt64 _b;
 
-        public BFGTNode(int level, int index, int label, int b)
+        public BFGTNode(UInt64 level, UInt64 index, int label, UInt64 b)
         {
             Level = level;
             Index = index;
             Label = label;
             _b = b;
             Visited = false;
-
+            VisitedF = false;
+            
             Outgoing = new List<int>();
             Incoming = new List<int>();
         }
 
-        public BFGTNode(int level, int index, int label, int b, List<int> incoming, List<int> outgoing)
+        public BFGTNode(UInt64 level, UInt64 index, int label, UInt64 b, List<int> incoming, List<int> outgoing)
         {
             Level = level;
             Index = index;
             Label = label;
             _b = b;
             Visited = false;
+            VisitedF = false;
 
             Outgoing = outgoing;
             Incoming = incoming;

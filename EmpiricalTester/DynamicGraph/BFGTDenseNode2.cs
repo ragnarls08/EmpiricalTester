@@ -3,24 +3,35 @@ using C5;
 
 namespace EmpiricalTester.DynamicGraph
 {
-    class BFGTDenseNode
+    class BFGTDenseNode2
     {
         public int Level { get; set; }
         public int InDegree { get; set; }
         public int J { get; set; }
         public int Index { get; set; }
         //with the key of an arc (x, y) equal to the level k(y) of the target vertex
-        public IPriorityQueue<KVP> Outgoing { get; set; }
+        public IPriorityQueue<KVP2> Outgoing { get; set; }
         public Dictionary<int, int> KOut { get; set; }
+         
+        //public Dictionary<int, Dictionary<int, int>> Bound { get; set; }
+        //public Dictionary<int, Dictionary<int, int>> Count { get; set; }
 
-        public Dictionary<int, Dictionary<int, int>> Bound { get; set; }
-        public Dictionary<int, Dictionary<int, int>> Count { get; set; }
+        public Dictionary<int, int>[] Bound { get; set; }
+        public Dictionary<int, int>[] Count { get; set; }
 
-        public void AddOutGoing(BFGTDenseNode y)
+
+
+        public void AddOutGoing(BFGTDenseNode2 y)
         {
-            Outgoing.Add(new KVP(y.Level, y));
+            Outgoing.Add(new KVP2(y.Level, y));
             y.InDegree++;
 
+            if(!Bound[0].ContainsKey(y.Index))
+                Bound[0].Add(y.Index, 1);
+            if(!Count[0].ContainsKey(y.Index))
+                Count[0].Add(y.Index, 0);
+
+            /*
             if (!Bound.ContainsKey(0))
             {
                 Bound.Add(0, new Dictionary<int, int>());
@@ -30,24 +41,33 @@ namespace EmpiricalTester.DynamicGraph
             {
                 Count.Add(0, new Dictionary<int, int>());
                 Count[0].Add(y.Index, 0);
-            }
-                
-        }
-        
+            }*/
 
-        public BFGTDenseNode(int index)
+        }
+
+
+        public BFGTDenseNode2(int index, int maxJ)
         {
             Level = 1;
             InDegree = 0;
             Index = index;
-            
-            Outgoing = new IntervalHeap<KVP>();
+
+            Outgoing = new IntervalHeap<KVP2>();
             KOut = new Dictionary<int, int>();
-            Bound = new Dictionary<int, Dictionary<int, int>>();
-            Count = new Dictionary<int, Dictionary<int, int>>();
+            //Bound = new Dictionary<int, Dictionary<int, int>>();
+            //Count = new Dictionary<int, Dictionary<int, int>>();
+
+            Bound = new Dictionary<int, int>[maxJ];
+            Count = new Dictionary<int, int>[maxJ];
+
+            for (int i = 0; i < maxJ; i++)
+            {
+                Bound[i] = new Dictionary<int, int>();
+                Count[i] = new Dictionary<int, int>();
+            }
         }
 
-        public BFGTDenseNode(BFGTDenseNode node)
+        public BFGTDenseNode2(BFGTDenseNode2 node)
         {
             Level = node.Level;
             InDegree = node.InDegree;
@@ -59,12 +79,14 @@ namespace EmpiricalTester.DynamicGraph
                 KOut.Add(i.Key, i.Value);
             }
 
-            Outgoing = new IntervalHeap<KVP>();
+            Outgoing = new IntervalHeap<KVP2>();
             foreach (var kvp in node.Outgoing)
             {
-                Outgoing.Add(new KVP(kvp.Key, kvp.Value));
+                Outgoing.Add(new KVP2(kvp.Key, kvp.Value));
             }
 
+            
+            /*
             Bound = new Dictionary<int, Dictionary<int, int>>();
             foreach (var i in node.Bound)
             {
@@ -82,7 +104,7 @@ namespace EmpiricalTester.DynamicGraph
                 {
                     Count[i.Key].Add(i1.Key, i1.Value);
                 }
-            }
+            }*/
         }
 
     }
